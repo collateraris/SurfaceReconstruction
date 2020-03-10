@@ -30,3 +30,7 @@
 *.exe
 *.out
 *.app
+
+/SurfaceReconstruction/Debug/
+/SurfaceReconstruction/SurfaceReconstruction/Debug/
+/SurfaceReconstruction/.vs/
