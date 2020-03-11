@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <list>
 
 namespace Engine::Algorithm
 {
@@ -178,6 +179,27 @@ namespace Engine::Algorithm
 		};
 
 		virtual bool IsContainPoint(std::shared_ptr<SPoint3D> _point) override;
+	};
+
+	struct SMarchingCube
+	{
+		SMarchingCube() = delete;
+
+		SMarchingCube(double _startX, double _startY, double _startZ, double _cubeSizeX, double _cubeSizeY, double _cubeSizeZ);
+
+		void FillMeshSubSpace(std::shared_ptr<SPoint3D> _point);
+
+	private:
+
+		double startX;
+		double startY;
+		double startZ;
+
+		double cubeSizeX;
+		double cubeSizeY;
+		double cubeSizeZ;
+
+		std::list<std::shared_ptr<SVertexCubeField>> mpVertices;
 	};
 
 }
