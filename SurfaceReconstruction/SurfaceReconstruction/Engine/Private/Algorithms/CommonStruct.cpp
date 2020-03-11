@@ -114,12 +114,19 @@ SMarchingCube::SMarchingCube(double _startX, double _startY, double _startZ, dou
 
 void SMarchingCube::FillMeshSubSpace(std::shared_ptr<SPoint3D> _point)
 {
+	if (bAllMeshFound)
+	{
+		return;
+	}
+
 	for (auto& pV : mpVertices)
 	{
 		if (!pV->IsMesh() && pV->IsContainPoint(_point))
 		{
 			pV->IncludeInMesh();
-			break;
+			return;
 		}
 	}
+
+	bAllMeshFound = true;
 }

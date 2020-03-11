@@ -199,6 +199,8 @@ namespace Engine::Algorithm
 		double cubeSizeY;
 		double cubeSizeZ;
 
+		bool bAllMeshFound = false;
+
 		std::list<std::shared_ptr<SVertexCubeField>> mpVertices;
 	};
 
