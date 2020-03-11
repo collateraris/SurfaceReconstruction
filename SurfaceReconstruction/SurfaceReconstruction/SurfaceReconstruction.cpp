@@ -1,6 +1,7 @@
 ﻿#include <iostream>
 
 #include "Algorithms/CommonStruct.h"
+#include "Algorithms/BinaryTree.h"
 
 int main()
 {

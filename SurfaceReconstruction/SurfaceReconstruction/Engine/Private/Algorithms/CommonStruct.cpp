@@ -102,6 +102,8 @@ SMarchingCube::SMarchingCube(double _startX, double _startY, double _startZ, dou
 	double cubeHalfSizeY = cubeSizeY * 0.5;
 	double cubeHalfSizeZ = cubeSizeZ * 0.5;
 
+	bAllMeshFound = false;
+
 	mpVertices.push_back(std::make_shared<SVertexCubeField_0>(startX, startY, startZ, cubeHalfSizeX, cubeHalfSizeY, cubeHalfSizeZ));
 	mpVertices.push_back(std::make_shared<SVertexCubeField_1>(startX, startY + cubeSizeY, startZ, cubeHalfSizeX, cubeHalfSizeY, cubeHalfSizeZ));
 	mpVertices.push_back(std::make_shared<SVertexCubeField_2>(startX + cubeSizeX, startY + cubeSizeY, startZ, cubeHalfSizeX, cubeHalfSizeY, cubeHalfSizeZ));

@@ -151,10 +151,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Engine\Private\Algorithms\BinaryTree.cpp" />
     <ClCompile Include="Engine\Private\Algorithms\CommonStruct.cpp" />
     <ClCompile Include="SurfaceReconstruction.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Engine\Public\Algorithms\BinaryTree.h" />
     <ClInclude Include="Engine\Public\Algorithms\CommonStruct.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
