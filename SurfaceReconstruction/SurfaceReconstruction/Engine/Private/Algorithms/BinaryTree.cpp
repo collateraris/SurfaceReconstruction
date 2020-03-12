@@ -27,35 +27,6 @@ void SBSTNodeBase::Find(double axisKey, std::shared_ptr<SPoint3D> _point)
 	
 }
 
-void SBSTNodeBase::LeftNodeProc(double axisKey, std::shared_ptr<SPoint3D> _point)
-{
-	if (leftChild.get() == nullptr)
-	{
-		SNodeData leftData;
-		leftData = mData;
-		leftData.deltaNode = mData.deltaNode >> 1;
-		leftData.chunkIndex = mData.chunkIndex - leftData.deltaNode;
-		leftData.chunkValue = mData.startChunkValue + (leftData.chunkIndex - 1) * mData.deltaChunkValue;
-		leftData.nextChunkValue = leftData.chunkValue + mData.deltaChunkValue;
-		leftChild = std::make_shared<SBSTNodeBase>(leftData);
-	}
-	leftChild->Find(axisKey, _point);
-}
-
-void SBSTNodeBase::RightNodeProc(double axisKey, std::shared_ptr<SPoint3D> _point)
-{
-	if (rightChild.get() == nullptr)
-	{
-		SNodeData rightData;
-		rightData = mData;
-		rightData.deltaNode = mData.deltaNode - (mData.deltaNode >> 1);
-		rightData.chunkIndex = mData.chunkIndex + rightData.deltaNode;
-		rightData.chunkValue = mData.startChunkValue + (rightData.chunkIndex - 1) * mData.deltaChunkValue;
-		rightData.nextChunkValue = rightData.chunkValue + mData.deltaChunkValue;
-		rightChild = std::make_shared<SBSTNodeBase>(rightData);
-	}
-	rightChild->Find(axisKey, _point);
-}
 
 void SBSTNodeOx::LeftNodeProc(double axisKey, std::shared_ptr<SPoint3D> _point)
 {
@@ -63,8 +34,8 @@ void SBSTNodeOx::LeftNodeProc(double axisKey, std::shared_ptr<SPoint3D> _point)
 	{
 		SNodeData leftData;
 		leftData = mData;
+		leftData.chunkIndex = mData.chunkIndex - mData.deltaNode;
 		leftData.deltaNode = mData.deltaNode >> 1;
-		leftData.chunkIndex = mData.chunkIndex - leftData.deltaNode;
 		leftData.chunkValue = mData.startChunkValue + (leftData.chunkIndex - 1) * mData.deltaChunkValue;
 		leftData.nextChunkValue = leftData.chunkValue + mData.deltaChunkValue;
 		leftData.startX = leftData.chunkValue;
@@ -79,8 +50,8 @@ void SBSTNodeOx::RightNodeProc(double axisKey, std::shared_ptr<SPoint3D> _point)
 	{
 		SNodeData rightData;
 		rightData = mData;
+		rightData.chunkIndex = mData.chunkIndex + mData.deltaNode;
 		rightData.deltaNode = mData.deltaNode - (mData.deltaNode >> 1);
-		rightData.chunkIndex = mData.chunkIndex + rightData.deltaNode;
 		rightData.chunkValue = mData.startChunkValue + (rightData.chunkIndex - 1) * mData.deltaChunkValue;
 		rightData.nextChunkValue = rightData.chunkValue + mData.deltaChunkValue;
 		rightData.startX = rightData.chunkValue;
@@ -114,8 +85,8 @@ void SBSTNodeOy::LeftNodeProc(double axisKey, std::shared_ptr<SPoint3D> _point)
 	{
 		SNodeData leftData;
 		leftData = mData;
+		leftData.chunkIndex = mData.chunkIndex - mData.deltaNode;
 		leftData.deltaNode = mData.deltaNode >> 1;
-		leftData.chunkIndex = mData.chunkIndex - leftData.deltaNode;
 		leftData.chunkValue = mData.startChunkValue + (leftData.chunkIndex - 1) * mData.deltaChunkValue;
 		leftData.nextChunkValue = leftData.chunkValue + mData.deltaChunkValue;
 		leftData.startY = leftData.chunkValue;
@@ -130,8 +101,8 @@ void SBSTNodeOy::RightNodeProc(double axisKey, std::shared_ptr<SPoint3D> _point)
 	{
 		SNodeData rightData;
 		rightData = mData;
+		rightData.chunkIndex = mData.chunkIndex + mData.deltaNode;
 		rightData.deltaNode = mData.deltaNode - (mData.deltaNode >> 1);
-		rightData.chunkIndex = mData.chunkIndex + rightData.deltaNode;
 		rightData.chunkValue = mData.startChunkValue + (rightData.chunkIndex - 1) * mData.deltaChunkValue;
 		rightData.nextChunkValue = rightData.chunkValue + mData.deltaChunkValue;
 		rightData.startY = rightData.chunkValue;
@@ -165,8 +136,8 @@ void SBSTNodeOz::LeftNodeProc(double axisKey, std::shared_ptr<SPoint3D> _point)
 	{
 		SNodeData leftData;
 		leftData = mData;
+		leftData.chunkIndex = mData.chunkIndex - mData.deltaNode;
 		leftData.deltaNode = mData.deltaNode >> 1;
-		leftData.chunkIndex = mData.chunkIndex - leftData.deltaNode;
 		leftData.chunkValue = mData.startChunkValue + (leftData.chunkIndex - 1) * mData.deltaChunkValue;
 		leftData.nextChunkValue = leftData.chunkValue + mData.deltaChunkValue;
 		leftData.startZ = leftData.chunkValue;
@@ -181,8 +152,8 @@ void SBSTNodeOz::RightNodeProc(double axisKey, std::shared_ptr<SPoint3D> _point)
 	{
 		SNodeData rightData;
 		rightData = mData;
+		rightData.chunkIndex = mData.chunkIndex + mData.deltaNode;
 		rightData.deltaNode = mData.deltaNode - (mData.deltaNode >> 1);
-		rightData.chunkIndex = mData.chunkIndex + rightData.deltaNode;
 		rightData.chunkValue = mData.startChunkValue + (rightData.chunkIndex - 1) * mData.deltaChunkValue;
 		rightData.nextChunkValue = rightData.chunkValue + mData.deltaChunkValue;
 		rightData.startZ = rightData.chunkValue;
@@ -209,7 +180,8 @@ CBSTforSR::CBSTforSR(SNodeData data)
 	rootData.startChunkValue = data.minOx;
 	rootData.chunkValue = rootData.startChunkValue + (rootData.chunkIndex - 1) * rootData.deltaChunkValue;
 	rootData.nextChunkValue = rootData.chunkValue + rootData.deltaChunkValue;
-	rootNode = std::make_shared<SBSTNodeOx>(data);
+
+	rootNode = std::make_shared<SBSTNodeOx>(rootData);
 }
 
 void CBSTforSR::Find(std::shared_ptr<SPoint3D> _point)

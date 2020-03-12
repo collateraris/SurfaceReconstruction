@@ -33,17 +33,18 @@ namespace Engine::Algorithm
 
 	struct SBSTNodeBase
 	{
+		SBSTNodeBase() {};
 		SBSTNodeBase(SNodeData _data);
 
 		virtual void Find(double axisKey, std::shared_ptr<SPoint3D> _point);
 
 	protected:
-		virtual void LeftNodeProc(double axisKey, std::shared_ptr<SPoint3D> _point);
-		virtual void RightNodeProc(double axisKey, std::shared_ptr<SPoint3D> _point);
+		virtual void LeftNodeProc(double axisKey, std::shared_ptr<SPoint3D> _point) {};
+		virtual void RightNodeProc(double axisKey, std::shared_ptr<SPoint3D> _point) {};
 
 		virtual void Perform(std::shared_ptr<SPoint3D> _point) {};
 
-		const int END_DELTA_NODE = 1;
+		const int END_DELTA_NODE = 0;
 
 		SNodeData mData;
 
@@ -56,6 +57,13 @@ namespace Engine::Algorithm
 	// tree operation for oX axis
 	struct SBSTNodeOx : public SBSTNodeBase
 	{
+		SBSTNodeOx() {};
+
+		SBSTNodeOx(SNodeData data)
+		{
+			mData = std::move(data);
+		}
+
 		protected:
 			virtual void LeftNodeProc(double axisKey, std::shared_ptr<SPoint3D> _point) override;
 			virtual void RightNodeProc(double axisKey, std::shared_ptr<SPoint3D> _point) override;
@@ -69,6 +77,11 @@ namespace Engine::Algorithm
 	// tree operation for oY axis
 	struct SBSTNodeOy : public SBSTNodeBase
 	{
+		SBSTNodeOy() {};
+		SBSTNodeOy(SNodeData data)
+		{
+			mData = std::move(data);
+		}
 	protected:
 		virtual void LeftNodeProc(double axisKey, std::shared_ptr<SPoint3D> _point) override;
 		virtual void RightNodeProc(double axisKey, std::shared_ptr<SPoint3D> _point) override;
@@ -82,6 +95,11 @@ namespace Engine::Algorithm
 	// and signed mesh subspace
 	struct SBSTNodeOz : public SBSTNodeBase
 	{
+		SBSTNodeOz() {};
+		SBSTNodeOz(SNodeData data)
+		{
+			mData = std::move(data);
+		}
 	protected:
 		virtual void LeftNodeProc(double axisKey, std::shared_ptr<SPoint3D> _point) override;
 		virtual void RightNodeProc(double axisKey, std::shared_ptr<SPoint3D> _point) override;
