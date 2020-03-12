@@ -24,12 +24,18 @@
     <ClCompile Include="Engine\Private\Algorithms\BinaryTree.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\Private\File\ReadPoints.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Public\Algorithms\CommonStruct.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Public\Algorithms\BinaryTree.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Public\File\ReadPoints.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>

@@ -2,11 +2,17 @@
 
 #include "Algorithms/CommonStruct.h"
 #include "Algorithms/BinaryTree.h"
+#include "File/ReadPoints.h"
 
 using namespace Engine::Algorithm;
+using namespace Engine::File;
 
 int main()
 {
+    std::vector<std::shared_ptr<Engine::Algorithm::SPoint3D>> _points;
+
+    CReadPoints::ParseFromText("object.pts", _points);
+
     SPoint3D p1(-0.15, -0.5, 0.44);
     SPoint3D p2(0.35, 0.01, 0.37);
     SPoint3D p3(0.01, 0.364, -0.9);
