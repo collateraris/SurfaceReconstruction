@@ -4,6 +4,8 @@
 #include "Algorithms/BinaryTree.h"
 #include "File/ReadPoints.h"
 
+#include <algorithm>
+
 using namespace Engine::Algorithm;
 using namespace Engine::File;
 
@@ -13,24 +15,21 @@ int main()
 
     CReadPoints::ParseFromText("object.pts", _points);
 
-    SPoint3D p1(-0.15, -0.5, 0.44);
-    SPoint3D p2(0.35, 0.01, 0.37);
-    SPoint3D p3(0.01, 0.364, -0.9);
-
     SNodeData data;
-    data.minOx = -.15;
-    data.minOy = -0.5;
-    data.minOz = -0.9;
+    data.minOx = -10.;
+    data.minOy = -10.;
+    data.minOz = -10.;
     data.chunkNumber = 64;
-    data.cubeSizeX = (0.35 + 0.15) / data.chunkNumber;
-    data.cubeSizeY = (0.364 + 0.5) / data.chunkNumber;
-    data.cubeSizeZ = (0.44 + 0.9) / data.chunkNumber;
+    data.cubeSizeX = (20.) / data.chunkNumber;
+    data.cubeSizeY = (20.) / data.chunkNumber;
+    data.cubeSizeZ = (20.) / data.chunkNumber;
 
     SBSTContainer bst(data);
-    bst.Find(std::make_shared<SPoint3D>(p1));
-    bst.Find(std::make_shared<SPoint3D>(p2));
-    bst.Find(std::make_shared<SPoint3D>(p3));
-    bst.Find(std::make_shared<SPoint3D>(p1));
+    
+    for (auto it = _points.begin(); it != _points.end(); ++it)
+    {
+        bst.Find(*it);
+    }
 
 }
 

@@ -17,8 +17,6 @@ void CReadPoints::ParseFromText(const char* filename, std::vector<std::shared_pt
 	if (in.fail()) return;
 	std::string line;
 	double num[3];
-	const int MINUS_ASHII = 45;
-
 
 	while (!in.eof()) {
 		std::getline(in, line);
