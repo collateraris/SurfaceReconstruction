@@ -13,14 +13,14 @@ int main()
 
     SNodeData data;
     data.minOx = -.15;
-    data.minOy = 0.01;
+    data.minOy = -0.5;
     data.minOz = -0.9;
-    data.chunkNumber = 2;
-    data.cubeSizeX = (0.35 + 0.15) * 0.1;
-    data.cubeSizeY = (0.364 + 0.5) * 0.1;
-    data.cubeSizeZ = (0.44 + 0.9) * 0.1;
+    data.chunkNumber = 64;
+    data.cubeSizeX = (0.35 + 0.15) / data.chunkNumber;
+    data.cubeSizeY = (0.364 + 0.5) / data.chunkNumber;
+    data.cubeSizeZ = (0.44 + 0.9) / data.chunkNumber;
 
-    CBSTforSR bst(data);
+    SBSTContainer bst(data);
     bst.Find(std::make_shared<SPoint3D>(p1));
     bst.Find(std::make_shared<SPoint3D>(p2));
     bst.Find(std::make_shared<SPoint3D>(p3));

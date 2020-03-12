@@ -111,7 +111,7 @@ SMarchingCube::SMarchingCube(double _startX, double _startY, double _startZ, dou
 	mpVertices.push_back(std::make_shared<SVertexCubeField_4>(startX, startY, startZ + cubeSizeZ, cubeHalfSizeX, cubeHalfSizeY, cubeHalfSizeZ));
 	mpVertices.push_back(std::make_shared<SVertexCubeField_5>(startX, startY + cubeSizeY, startZ + cubeSizeZ, cubeHalfSizeX, cubeHalfSizeY, cubeHalfSizeZ));
 	mpVertices.push_back(std::make_shared<SVertexCubeField_6>(startX + cubeSizeX, startY + cubeSizeY, startZ + cubeSizeZ, cubeHalfSizeX, cubeHalfSizeY, cubeHalfSizeZ));
-	mpVertices.push_back(std::make_shared<SVertexCubeField_3>(startX + cubeSizeX, startY, startZ + cubeSizeZ, cubeHalfSizeX, cubeHalfSizeY, cubeHalfSizeZ));
+	mpVertices.push_back(std::make_shared<SVertexCubeField_7>(startX + cubeSizeX, startY, startZ + cubeSizeZ, cubeHalfSizeX, cubeHalfSizeY, cubeHalfSizeZ));
 }
 
 void SMarchingCube::FillMeshSubSpace(std::shared_ptr<SPoint3D> _point)

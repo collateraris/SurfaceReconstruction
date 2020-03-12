@@ -42,15 +42,13 @@ namespace Engine::Algorithm
 
 	struct SBSTChunkBase
 	{
-		SBSTChunkBase() = default;
+		SBSTChunkBase() {};
 
-		void Find(double axisKey, std::shared_ptr<SPoint3D> _point, SNodeData& _data);
+		void CreateLeftNodeData(const SNodeData& fromData, SNodeData& leftData);
 
-		void CreateLeftNodeData(const SNodeData& fromData, SNodeData& toData);
+		void CreateRightNodeData(const SNodeData& fromData, SNodeData& rightData);
 
-		void CreateRightNodeData(const SNodeData& fromData, SNodeData& toData);
-
-		void CreateRootNodeData(const SNodeData& fromData, SNodeData& toData);
+		void CreateRootNodeData(const SNodeData& fromData, SNodeData& rootData);
 	};
 
 	struct SBSTChunkOx;
@@ -59,7 +57,7 @@ namespace Engine::Algorithm
 	{
 		SBSTContainer(SNodeData _data);
 
-		void Find(double axisKey, std::shared_ptr<SPoint3D> _point);
+		void Find(std::shared_ptr<SPoint3D> _point);
 
 	private:
 
