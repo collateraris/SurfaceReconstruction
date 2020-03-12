@@ -32,17 +32,36 @@ namespace Engine::Algorithm
 
 		virtual bool IsMesh() const { return bIsMesh; };
 
-		virtual void IncludeInMesh() { bIsMesh = true; };
+		virtual void MeshStorageData() = 0;
 
-		virtual bool IsContainPoint(std::shared_ptr<SPoint3D> _point) = 0;
+		virtual bool IsContainPoint(const std::shared_ptr<SPoint3D>& _point) = 0;
 
 	protected:
+		virtual void IncludeInMesh() { bIsMesh = true; };
 
 		bool bIsMesh = false;
 
 		double cubeSizeX;
 		double cubeSizeY;
 		double cubeSizeZ;
+	};
+	//struct for storage 1/8 cube
+	// marching cube presents as 8 voxel
+	struct SVertexVoxelUnit
+	{
+		std::shared_ptr<SPoint3D> v0;
+		std::shared_ptr<SPoint3D> v1;
+		std::shared_ptr<SPoint3D> v2;
+		std::shared_ptr<SPoint3D> v3;
+		std::shared_ptr<SPoint3D> v4;
+		std::shared_ptr<SPoint3D> v5;
+		std::shared_ptr<SPoint3D> v6;
+		std::shared_ptr<SPoint3D> v7;
+	};
+
+	struct SStorageVertexCubeField
+	{
+		static std::list<std::shared_ptr<SVertexVoxelUnit>> storageVoxels;
 	};
 
 	struct SVertexCubeField_0 : public SVertexCubeField
@@ -59,7 +78,9 @@ namespace Engine::Algorithm
 			cubeSizeZ = _cubeSizeZ;
 		};
 
-		virtual bool IsContainPoint(std::shared_ptr<SPoint3D> _point) override;
+		virtual bool IsContainPoint(const std::shared_ptr<SPoint3D>& _point) override;
+
+		virtual void MeshStorageData() override;
 	};
 
 	struct SVertexCubeField_1 : public SVertexCubeField
@@ -76,7 +97,9 @@ namespace Engine::Algorithm
 			cubeSizeZ = _cubeSizeZ;
 		};
 
-		virtual bool IsContainPoint(std::shared_ptr<SPoint3D> _point) override;
+		virtual bool IsContainPoint(const std::shared_ptr<SPoint3D>& _point) override;
+
+		virtual void MeshStorageData() override;
 	};
 
 	struct SVertexCubeField_2 : public SVertexCubeField
@@ -93,7 +116,9 @@ namespace Engine::Algorithm
 			cubeSizeZ = _cubeSizeZ;
 		};
 
-		virtual bool IsContainPoint(std::shared_ptr<SPoint3D> _point) override;
+		virtual bool IsContainPoint(const std::shared_ptr<SPoint3D>& _point) override;
+
+		virtual void MeshStorageData() override;
 	};
 
 	struct SVertexCubeField_3 : public SVertexCubeField
@@ -110,7 +135,9 @@ namespace Engine::Algorithm
 			cubeSizeZ = _cubeSizeZ;
 		};
 
-		virtual bool IsContainPoint(std::shared_ptr<SPoint3D> _point) override;
+		virtual bool IsContainPoint(const std::shared_ptr<SPoint3D>& _point) override;
+
+		virtual void MeshStorageData() override;
 	};
 
 	struct SVertexCubeField_4 : public SVertexCubeField
@@ -127,7 +154,10 @@ namespace Engine::Algorithm
 			cubeSizeZ = _cubeSizeZ;
 		};
 
-		virtual bool IsContainPoint(std::shared_ptr<SPoint3D> _point) override;
+		virtual bool IsContainPoint(const std::shared_ptr<SPoint3D>& _point) override;
+
+		virtual void MeshStorageData() override;
+
 	};
 
 	struct SVertexCubeField_5 : public SVertexCubeField
@@ -144,7 +174,10 @@ namespace Engine::Algorithm
 			cubeSizeZ = _cubeSizeZ;
 		};
 
-		virtual bool IsContainPoint(std::shared_ptr<SPoint3D> _point) override;
+		virtual bool IsContainPoint(const std::shared_ptr<SPoint3D>& _point) override;
+
+		virtual void MeshStorageData() override;
+
 	};
 
 	struct SVertexCubeField_6 : public SVertexCubeField
@@ -161,7 +194,10 @@ namespace Engine::Algorithm
 			cubeSizeZ = _cubeSizeZ;
 		};
 
-		virtual bool IsContainPoint(std::shared_ptr<SPoint3D> _point) override;
+		virtual bool IsContainPoint(const std::shared_ptr<SPoint3D>& _point) override;
+
+		virtual void MeshStorageData() override;
+
 	};
 
 	struct SVertexCubeField_7 : public SVertexCubeField
@@ -178,7 +214,10 @@ namespace Engine::Algorithm
 			cubeSizeZ = _cubeSizeZ;
 		};
 
-		virtual bool IsContainPoint(std::shared_ptr<SPoint3D> _point) override;
+		virtual bool IsContainPoint(const std::shared_ptr<SPoint3D>& _point) override;
+
+		virtual void MeshStorageData() override;
+
 	};
 
 	struct SMarchingCube
@@ -187,7 +226,7 @@ namespace Engine::Algorithm
 
 		SMarchingCube(double _startX, double _startY, double _startZ, double _cubeSizeX, double _cubeSizeY, double _cubeSizeZ);
 
-		void FillMeshSubSpace(std::shared_ptr<SPoint3D> _point);
+		void FillMeshSubSpace(const std::shared_ptr<SPoint3D>& _point);
 
 	private:
 

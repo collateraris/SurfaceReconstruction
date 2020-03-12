@@ -57,7 +57,7 @@ namespace Engine::Algorithm
 	{
 		SBSTContainer(SNodeData _data);
 
-		void Find(std::shared_ptr<SPoint3D> _point);
+		void Find(const std::shared_ptr<SPoint3D>& _point);
 
 	private:
 
@@ -74,7 +74,7 @@ namespace Engine::Algorithm
 	{
 		SBSTChunkOx(SNodeData _data);
 
-		void Find(double axisKey, std::shared_ptr<SPoint3D> _point);
+		void Find(double axisKey, const std::shared_ptr<SPoint3D>& _point);
 
 		const SNodeData& GetData()
 		{
@@ -95,7 +95,7 @@ namespace Engine::Algorithm
 	{
 		SBSTChunkOy(SNodeData _data);
 
-		void Find(double axisKey, std::shared_ptr<SPoint3D> _point);
+		void Find(double axisKey,const std::shared_ptr<SPoint3D>& _point);
 
 		const SNodeData& GetData()
 		{
@@ -115,7 +115,7 @@ namespace Engine::Algorithm
 	{
 		SBSTChunkOz(SNodeData _data);
 
-		void Perform(std::shared_ptr<SPoint3D> _point);
+		void Perform(const std::shared_ptr<SPoint3D>& _point);
 
 		const SNodeData& GetData()
 		{

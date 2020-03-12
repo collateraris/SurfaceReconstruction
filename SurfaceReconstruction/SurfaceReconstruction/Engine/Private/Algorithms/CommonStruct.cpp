@@ -2,7 +2,7 @@
 
 using namespace Engine::Algorithm;
 
-bool SVertexCubeField_0::IsContainPoint(std::shared_ptr<SPoint3D> _point)
+bool SVertexCubeField_0::IsContainPoint(const std::shared_ptr<SPoint3D>& _point)
 {
 	if ( x <= _point->GetX() && _point->GetX() < (x + cubeSizeX)
 	  && y <= _point->GetY() && _point->GetY() < (y + cubeSizeY)
@@ -13,7 +13,15 @@ bool SVertexCubeField_0::IsContainPoint(std::shared_ptr<SPoint3D> _point)
 	return false;
 }
 
-bool SVertexCubeField_1::IsContainPoint(std::shared_ptr<SPoint3D> _point)
+void SVertexCubeField_0::MeshStorageData()
+{
+	IncludeInMesh();
+	SVertexVoxelUnit unit;
+	unit.v0 = std::make_shared<SPoint3D>(x, y, z);
+	unit.v1 = std::make_shared<SPoint3D>(x, y + cubeSizeY, z);
+}
+
+bool SVertexCubeField_1::IsContainPoint(const std::shared_ptr<SPoint3D>& _point)
 {
 	if (x <= _point->GetX() && _point->GetX() < (x + cubeSizeX)
 		&& y >= _point->GetY() && _point->GetY() > (y - cubeSizeY)
@@ -24,7 +32,12 @@ bool SVertexCubeField_1::IsContainPoint(std::shared_ptr<SPoint3D> _point)
 	return false;
 }
 
-bool SVertexCubeField_2::IsContainPoint(std::shared_ptr<SPoint3D> _point)
+void SVertexCubeField_1::MeshStorageData()
+{
+	IncludeInMesh();
+}
+
+bool SVertexCubeField_2::IsContainPoint(const std::shared_ptr<SPoint3D>& _point)
 {
 	if (x >= _point->GetX() && _point->GetX() > (x - cubeSizeX)
 		&& y >= _point->GetY() && _point->GetY() > (y - cubeSizeY)
@@ -35,7 +48,12 @@ bool SVertexCubeField_2::IsContainPoint(std::shared_ptr<SPoint3D> _point)
 	return false;
 }
 
-bool SVertexCubeField_3::IsContainPoint(std::shared_ptr<SPoint3D> _point)
+void SVertexCubeField_2::MeshStorageData()
+{
+	IncludeInMesh();
+}
+
+bool SVertexCubeField_3::IsContainPoint(const std::shared_ptr<SPoint3D>& _point)
 {
 	if (x >= _point->GetX() && _point->GetX() > (x - cubeSizeX)
 		&& y <= _point->GetY() && _point->GetY() < (y + cubeSizeY)
@@ -46,7 +64,12 @@ bool SVertexCubeField_3::IsContainPoint(std::shared_ptr<SPoint3D> _point)
 	return false;
 }
 
-bool SVertexCubeField_4::IsContainPoint(std::shared_ptr<SPoint3D> _point)
+void SVertexCubeField_3::MeshStorageData()
+{
+	IncludeInMesh();
+}
+
+bool SVertexCubeField_4::IsContainPoint(const std::shared_ptr<SPoint3D>& _point)
 {
 	if (x <= _point->GetX() && _point->GetX() < (x + cubeSizeX)
 		&& y <= _point->GetY() && _point->GetY() < (y + cubeSizeY)
@@ -57,7 +80,12 @@ bool SVertexCubeField_4::IsContainPoint(std::shared_ptr<SPoint3D> _point)
 	return false;
 }
 
-bool SVertexCubeField_5::IsContainPoint(std::shared_ptr<SPoint3D> _point)
+void SVertexCubeField_4::MeshStorageData()
+{
+	IncludeInMesh();
+}
+
+bool SVertexCubeField_5::IsContainPoint(const std::shared_ptr<SPoint3D>& _point)
 {
 	if (x <= _point->GetX() && _point->GetX() < (x + cubeSizeX)
 		&& y >= _point->GetY() && _point->GetY() > (y - cubeSizeY)
@@ -68,7 +96,12 @@ bool SVertexCubeField_5::IsContainPoint(std::shared_ptr<SPoint3D> _point)
 	return false;
 }
 
-bool SVertexCubeField_6::IsContainPoint(std::shared_ptr<SPoint3D> _point)
+void SVertexCubeField_5::MeshStorageData()
+{
+	IncludeInMesh();
+}
+
+bool SVertexCubeField_6::IsContainPoint(const std::shared_ptr<SPoint3D>& _point)
 {
 	if (x >= _point->GetX() && _point->GetX() > (x - cubeSizeX)
 		&& y >= _point->GetY() && _point->GetY() > (y - cubeSizeY)
@@ -79,7 +112,12 @@ bool SVertexCubeField_6::IsContainPoint(std::shared_ptr<SPoint3D> _point)
 	return false;
 }
 
-bool SVertexCubeField_7::IsContainPoint(std::shared_ptr<SPoint3D> _point)
+void SVertexCubeField_6::MeshStorageData()
+{
+	IncludeInMesh();
+}
+
+bool SVertexCubeField_7::IsContainPoint(const std::shared_ptr<SPoint3D>& _point)
 {
 	if (x >= _point->GetX() && _point->GetX() > (x - cubeSizeX)
 		&& y <= _point->GetY() && _point->GetY() < (y + cubeSizeY)
@@ -88,6 +126,11 @@ bool SVertexCubeField_7::IsContainPoint(std::shared_ptr<SPoint3D> _point)
 		return true;
 	}
 	return false;
+}
+
+void SVertexCubeField_7::MeshStorageData()
+{
+	IncludeInMesh();
 }
 
 SMarchingCube::SMarchingCube(double _startX, double _startY, double _startZ, double _cubeSizeX, double _cubeSizeY, double _cubeSizeZ)
@@ -114,7 +157,7 @@ SMarchingCube::SMarchingCube(double _startX, double _startY, double _startZ, dou
 	mpVertices.push_back(std::make_shared<SVertexCubeField_7>(startX + cubeSizeX, startY, startZ + cubeSizeZ, cubeHalfSizeX, cubeHalfSizeY, cubeHalfSizeZ));
 }
 
-void SMarchingCube::FillMeshSubSpace(std::shared_ptr<SPoint3D> _point)
+void SMarchingCube::FillMeshSubSpace(const std::shared_ptr<SPoint3D>& _point)
 {
 	if (bAllMeshFound)
 	{
@@ -125,7 +168,7 @@ void SMarchingCube::FillMeshSubSpace(std::shared_ptr<SPoint3D> _point)
 	{
 		if (!pV->IsMesh() && pV->IsContainPoint(_point))
 		{
-			pV->IncludeInMesh();
+			pV->MeshStorageData();
 			return;
 		}
 	}

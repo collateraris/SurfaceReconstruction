@@ -59,7 +59,7 @@ SBSTContainer::SBSTContainer(SNodeData _data)
 	mData.rootNodeIndex = rootData.chunkIndex;
 }
 
-void SBSTContainer::Find(std::shared_ptr<SPoint3D> _point)
+void SBSTContainer::Find(const std::shared_ptr<SPoint3D>& _point)
 {
 	int depthTree = mData.depthTree;
 	int searchIndex = mData.rootNodeIndex;
@@ -125,7 +125,7 @@ SBSTChunkOx::SBSTChunkOx(SNodeData _data)
 	mData.rootNodeIndex = rootData.chunkIndex;
 }
 
-void SBSTChunkOx::Find(double axisKey, std::shared_ptr<SPoint3D> _point)
+void SBSTChunkOx::Find(double axisKey,const std::shared_ptr<SPoint3D>& _point)
 {
 	int depthTree = mData.depthTree;
 	int searchIndex = mData.rootNodeIndex;
@@ -189,7 +189,7 @@ SBSTChunkOy::SBSTChunkOy(SNodeData _data)
 	mData.rootNodeIndex = rootData.chunkIndex;
 }
 
-void SBSTChunkOy::Find(double axisKey, std::shared_ptr<SPoint3D> _point)
+void SBSTChunkOy::Find(double axisKey, const std::shared_ptr<SPoint3D>& _point)
 {
 	int depthTree = mData.depthTree;
 	int searchIndex = mData.rootNodeIndex;
@@ -239,7 +239,7 @@ SBSTChunkOz::SBSTChunkOz(SNodeData _data)
 	cubes = std::make_shared<SMarchingCube>(mData.startX, mData.startY, mData.startZ, mData.cubeSizeX, mData.cubeSizeY, mData.cubeSizeZ);
 }
 
-void SBSTChunkOz::Perform(std::shared_ptr<SPoint3D> _point)
+void SBSTChunkOz::Perform(const std::shared_ptr<SPoint3D>& _point)
 {
 	cubes->FillMeshSubSpace(_point);
 }
