@@ -1,190 +1,152 @@
 #include "Algorithms/BinaryTree.h"
 
+#include <cassert>
+
 using namespace Engine::Algorithm;
 
-SBSTNodeBase::SBSTNodeBase(SNodeData _data)
-{
-	mData = _data;
-}
 
-void SBSTNodeBase::Find(double axisKey, std::shared_ptr<SPoint3D> _point)
+
+SBSTContainer::SBSTContainer(SNodeData _data)
 {
-	if (mData.chunkValue <= axisKey && axisKey < mData.nextChunkValue)
-	{
-		Perform(_point);
-	}
-	else if (mData.deltaNode > END_DELTA_NODE)
-	{
-		if (axisKey < mData.chunkValue)
-		{
-			LeftNodeProc(axisKey, _point);
-		}
-		else if (mData.nextChunkValue <= axisKey)
-		{
-			RightNodeProc(axisKey, _point);
-		}
-	}
+	mData = std::move(_data);
+
+	chunksOx.resize(mData.chunkNumber);
+
+	base = std::make_shared<SBSTChunkBase>();
+	//start (root) is last pos
+	SNodeData rootData;
+	base->CreateRootNodeData(mData, rootData);
+
+	chunksOx[mData.chunkNumber] = std::make_shared<SBSTChunkOx>(rootData);
 	
+	mData.depthTree = log2(mData.chunkNumber) + 1;
+	mData.rightNodeIndex = rootData.chunkIndex;
 }
 
-
-void SBSTNodeOx::LeftNodeProc(double axisKey, std::shared_ptr<SPoint3D> _point)
+void SBSTContainer::Find(double axisKey, std::shared_ptr<SPoint3D> _point)
 {
-	if (leftChild.get() == nullptr)
+	int depthTree = mData.depthTree;
+	int searchIndex = mData.rootNodeIndex;
+
+	SNodeData leftData;
+	SNodeData rightData;
+
+	for (int i = 0; i < depthTree; ++i)
 	{
-		SNodeData leftData;
-		leftData = mData;
-		leftData.chunkIndex = mData.chunkIndex - mData.deltaNode;
-		leftData.deltaNode = mData.deltaNode >> 1;
-		leftData.chunkValue = mData.startChunkValue + (leftData.chunkIndex - 1) * mData.deltaChunkValue;
-		leftData.nextChunkValue = leftData.chunkValue + mData.deltaChunkValue;
-		leftData.startX = leftData.chunkValue;
-		leftChild = std::make_shared<SBSTNodeOx>(leftData);
+		assert(chunksOx[searchIndex].get() == nullptr);
+
+		const SNodeData& data = chunksOx[searchIndex]->GetData();
+
+		if (data.chunkValue <= axisKey && axisKey < data.nextChunkValue)
+		{
+			chunksOx[searchIndex]->Find(_point->GetY(), _point);
+			break;
+		}
+
+		if (axisKey < data.chunkValue)
+		{
+			searchIndex = data.leftNodeIndex;
+			if (chunksOx[searchIndex].get() == nullptr)
+			{
+				base->CreateLeftNodeData(data, leftData);
+				chunksOx[searchIndex] = std::make_shared<SBSTChunkOx>(leftData);
+			}
+		}
+		else if (data.nextChunkValue <= axisKey)
+		{
+			searchIndex = data.rightNodeIndex;
+			if (chunksOx[searchIndex].get() == nullptr)
+			{
+				base->CreateRightNodeData(data, rightData);
+				chunksOx[searchIndex] = std::make_shared<SBSTChunkOx>(rightData);
+			}
+		}
 	}
-	leftChild->Find(axisKey, _point);
 }
 
-void SBSTNodeOx::RightNodeProc(double axisKey, std::shared_ptr<SPoint3D> _point)
+void SBSTChunkOx::Find(double axisKey, std::shared_ptr<SPoint3D> _point)
 {
-	if (rightChild.get() == nullptr)
+	int depthTree = mData.depthTree;
+	int searchIndex = mData.rootNodeIndex;
+
+	SNodeData leftData;
+	SNodeData rightData;
+
+	for (int i = 0; i < depthTree; ++i)
 	{
-		SNodeData rightData;
-		rightData = mData;
-		rightData.chunkIndex = mData.chunkIndex + mData.deltaNode;
-		rightData.deltaNode = mData.deltaNode - (mData.deltaNode >> 1);
-		rightData.chunkValue = mData.startChunkValue + (rightData.chunkIndex - 1) * mData.deltaChunkValue;
-		rightData.nextChunkValue = rightData.chunkValue + mData.deltaChunkValue;
-		rightData.startX = rightData.chunkValue;
-		rightChild = std::make_shared<SBSTNodeOx>(rightData);
+		assert(chunksOy[searchIndex].get() == nullptr);
+
+		const SNodeData& data = chunksOy[searchIndex]->GetData();
+
+		if (data.chunkValue <= axisKey && axisKey < data.nextChunkValue)
+		{
+			chunksOy[searchIndex]->Find(_point->GetZ(), _point);
+			break;
+		}
+
+		if (axisKey < data.chunkValue)
+		{
+			searchIndex = data.leftNodeIndex;
+			if (chunksOy[searchIndex].get() == nullptr)
+			{
+				base->CreateLeftNodeData(data, leftData);
+				chunksOy[searchIndex] = std::make_shared<SBSTChunkOx>(leftData);
+			}
+		}
+		else if (data.nextChunkValue <= axisKey)
+		{
+			searchIndex = data.rightNodeIndex;
+			if (chunksOy[searchIndex].get() == nullptr)
+			{
+				base->CreateRightNodeData(data, rightData);
+				chunksOy[searchIndex] = std::make_shared<SBSTChunkOx>(rightData);
+			}
+		}
 	}
-	rightChild->Find(axisKey, _point);
 }
 
-void SBSTNodeOx::Perform(std::shared_ptr<SPoint3D> _point)
+void SBSTChunkOy::Find(double axisKey, std::shared_ptr<SPoint3D> _point)
 {
-	if (sheet.get() == nullptr)
+	int depthTree = mData.depthTree;
+	int searchIndex = mData.rootNodeIndex;
+
+	SNodeData leftData;
+	SNodeData rightData;
+
+	for (int i = 0; i < depthTree; ++i)
 	{
-		// example, if chunk number is 100. => chunckIndex for BST 100 / 2 = 50;
-		//=> deltaNode 50/ 2 = 25 
-		SNodeData sheetData = mData;
-		sheetData.chunkIndex = mData.chunkNumber >> 1;
-		sheetData.deltaNode = sheetData.chunkIndex >> 1;
-		sheetData.deltaChunkValue = mData.cubeSizeY;
-		sheetData.startChunkValue = mData.minOy;
-		sheetData.chunkValue = sheetData.startChunkValue + (sheetData.chunkIndex - 1) * sheetData.deltaChunkValue;
-		sheetData.nextChunkValue = sheetData.chunkValue + sheetData.deltaChunkValue;
-		sheetData.startY = sheetData.chunkValue;
-		sheet = std::make_shared<SBSTNodeOy>(sheetData);
+		assert(chunksOz[searchIndex].get() == nullptr);
+
+		const SNodeData& data = chunksOz[searchIndex]->GetData();
+
+		if (data.chunkValue <= axisKey && axisKey < data.nextChunkValue)
+		{
+			chunksOz[searchIndex]->Perform(_point);
+			break;
+		}
+
+		if (axisKey < data.chunkValue)
+		{
+			searchIndex = data.leftNodeIndex;
+			if (chunksOz[searchIndex].get() == nullptr)
+			{
+				base->CreateLeftNodeData(data, leftData);
+				chunksOz[searchIndex] = std::make_shared<SBSTChunkOx>(leftData);
+			}
+		}
+		else if (data.nextChunkValue <= axisKey)
+		{
+			searchIndex = data.rightNodeIndex;
+			if (chunksOz[searchIndex].get() == nullptr)
+			{
+				base->CreateRightNodeData(data, rightData);
+				chunksOz[searchIndex] = std::make_shared<SBSTChunkOx>(rightData);
+			}
+		}
 	}
-	sheet->Find(_point->GetY(), _point);
 }
 
-void SBSTNodeOy::LeftNodeProc(double axisKey, std::shared_ptr<SPoint3D> _point)
+void SBSTChunkOz::Perform(std::shared_ptr<SPoint3D> _point)
 {
-	if (leftChild.get() == nullptr)
-	{
-		SNodeData leftData;
-		leftData = mData;
-		leftData.chunkIndex = mData.chunkIndex - mData.deltaNode;
-		leftData.deltaNode = mData.deltaNode >> 1;
-		leftData.chunkValue = mData.startChunkValue + (leftData.chunkIndex - 1) * mData.deltaChunkValue;
-		leftData.nextChunkValue = leftData.chunkValue + mData.deltaChunkValue;
-		leftData.startY = leftData.chunkValue;
-		leftChild = std::make_shared<SBSTNodeOy>(leftData);
-	}
-	leftChild->Find(axisKey, _point);
-}
-
-void SBSTNodeOy::RightNodeProc(double axisKey, std::shared_ptr<SPoint3D> _point)
-{
-	if (rightChild.get() == nullptr)
-	{
-		SNodeData rightData;
-		rightData = mData;
-		rightData.chunkIndex = mData.chunkIndex + mData.deltaNode;
-		rightData.deltaNode = mData.deltaNode - (mData.deltaNode >> 1);
-		rightData.chunkValue = mData.startChunkValue + (rightData.chunkIndex - 1) * mData.deltaChunkValue;
-		rightData.nextChunkValue = rightData.chunkValue + mData.deltaChunkValue;
-		rightData.startY = rightData.chunkValue;
-		rightChild = std::make_shared<SBSTNodeOy>(rightData);
-	}
-	rightChild->Find(axisKey, _point);
-}
-
-void SBSTNodeOy::Perform(std::shared_ptr<SPoint3D> _point)
-{
-	if (sheet.get() == nullptr)
-	{
-		// example, if chunk number is 100. => chunckIndex for BST 100 / 2 = 50;
-		//=> deltaNode 50/ 2 = 25 
-		SNodeData sheetData = mData;
-		sheetData.chunkIndex = mData.chunkNumber >> 1;
-		sheetData.deltaNode = sheetData.chunkIndex >> 1;
-		sheetData.deltaChunkValue = mData.cubeSizeZ;
-		sheetData.startChunkValue = mData.minOz;
-		sheetData.chunkValue = sheetData.startChunkValue + (sheetData.chunkIndex - 1) * sheetData.deltaChunkValue;
-		sheetData.nextChunkValue = sheetData.chunkValue + sheetData.deltaChunkValue;
-		sheetData.startZ = sheetData.chunkValue;
-		sheet = std::make_shared<SBSTNodeOz>(sheetData);
-	}
-	sheet->Find(_point->GetZ(), _point);
-}
-
-void SBSTNodeOz::LeftNodeProc(double axisKey, std::shared_ptr<SPoint3D> _point)
-{
-	if (leftChild.get() == nullptr)
-	{
-		SNodeData leftData;
-		leftData = mData;
-		leftData.chunkIndex = mData.chunkIndex - mData.deltaNode;
-		leftData.deltaNode = mData.deltaNode >> 1;
-		leftData.chunkValue = mData.startChunkValue + (leftData.chunkIndex - 1) * mData.deltaChunkValue;
-		leftData.nextChunkValue = leftData.chunkValue + mData.deltaChunkValue;
-		leftData.startZ = leftData.chunkValue;
-		leftChild = std::make_shared<SBSTNodeOy>(leftData);
-	}
-	leftChild->Find(axisKey, _point);
-}
-
-void SBSTNodeOz::RightNodeProc(double axisKey, std::shared_ptr<SPoint3D> _point)
-{
-	if (rightChild.get() == nullptr)
-	{
-		SNodeData rightData;
-		rightData = mData;
-		rightData.chunkIndex = mData.chunkIndex + mData.deltaNode;
-		rightData.deltaNode = mData.deltaNode - (mData.deltaNode >> 1);
-		rightData.chunkValue = mData.startChunkValue + (rightData.chunkIndex - 1) * mData.deltaChunkValue;
-		rightData.nextChunkValue = rightData.chunkValue + mData.deltaChunkValue;
-		rightData.startZ = rightData.chunkValue;
-		rightChild = std::make_shared<SBSTNodeOy>(rightData);
-	}
-	rightChild->Find(axisKey, _point);
-}
-
-void SBSTNodeOz::Perform(std::shared_ptr<SPoint3D> _point)
-{
-	if (sheet.get() == nullptr)
-	{
-		sheet = std::make_shared<SMarchingCube>(mData.startX, mData.startY, mData.startZ, mData.cubeSizeX, mData.cubeSizeY, mData.cubeSizeZ);
-	}
-	sheet->FillMeshSubSpace(_point);
-}
-
-CBSTforSR::CBSTforSR(SNodeData data)
-{
-	SNodeData rootData = data;
-	rootData.chunkIndex = data.chunkNumber >> 1;
-	rootData.deltaNode = rootData.chunkIndex >> 1;
-	rootData.deltaChunkValue = data.cubeSizeX;
-	rootData.startChunkValue = data.minOx;
-	rootData.chunkValue = rootData.startChunkValue + (rootData.chunkIndex - 1) * rootData.deltaChunkValue;
-	rootData.nextChunkValue = rootData.chunkValue + rootData.deltaChunkValue;
-
-	rootNode = std::make_shared<SBSTNodeOx>(rootData);
-}
-
-void CBSTforSR::Find(std::shared_ptr<SPoint3D> _point)
-{
-	rootNode->Find(_point->GetX(), _point);
+	cubes->FillMeshSubSpace(_point);
 }

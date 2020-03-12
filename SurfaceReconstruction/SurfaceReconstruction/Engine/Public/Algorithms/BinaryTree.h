@@ -2,6 +2,7 @@
 
 #include "CommonStruct.h"
 #include <memory>
+#include <vector>
 
 namespace Engine::Algorithm
 {
@@ -29,98 +30,106 @@ namespace Engine::Algorithm
 		double cubeSizeX;
 		double cubeSizeY;
 		double cubeSizeZ;
+
+		// navigation
+		int leftNodeIndex = -1;
+		int rightNodeIndex = -1;
+		int rootNodeIndex = -1;
+
+		//
+		int depthTree = -1;
 	};
 
-	struct SBSTNodeBase
+	struct SBSTChunkBase
 	{
-		SBSTNodeBase() {};
-		SBSTNodeBase(SNodeData _data);
+		SBSTChunkBase() = default;
 
-		virtual void Find(double axisKey, std::shared_ptr<SPoint3D> _point);
+		void Find(double axisKey, std::shared_ptr<SPoint3D> _point, SNodeData& _data);
 
-	protected:
-		virtual void LeftNodeProc(double axisKey, std::shared_ptr<SPoint3D> _point) {};
-		virtual void RightNodeProc(double axisKey, std::shared_ptr<SPoint3D> _point) {};
+		void CreateLeftNodeData(const SNodeData& fromData, SNodeData& toData);
 
-		virtual void Perform(std::shared_ptr<SPoint3D> _point) {};
+		void CreateRightNodeData(const SNodeData& fromData, SNodeData& toData);
 
-		const int END_DELTA_NODE = 0;
+		void CreateRootNodeData(const SNodeData& fromData, SNodeData& toData);
+	};
+
+	struct SBSTChunkOx;
+
+	struct SBSTContainer
+	{
+		SBSTContainer(SNodeData _data);
+
+		void Find(double axisKey, std::shared_ptr<SPoint3D> _point);
+
+	private:
+
+		std::vector<std::shared_ptr<SBSTChunkOx>> chunksOx;
 
 		SNodeData mData;
 
-		std::shared_ptr<SBSTNodeBase> leftChild;
-		std::shared_ptr<SBSTNodeBase> rightChild;
+		std::shared_ptr<SBSTChunkBase> base;
 	};
 
-	struct SBSTNodeOy;
+	struct SBSTChunkOy;
 
-	// tree operation for oX axis
-	struct SBSTNodeOx : public SBSTNodeBase
+	struct SBSTChunkOx
 	{
-		SBSTNodeOx() {};
+		SBSTChunkOx(SNodeData _data);
 
-		SBSTNodeOx(SNodeData data)
+		void Find(double axisKey, std::shared_ptr<SPoint3D> _point);
+
+		const SNodeData& GetData()
 		{
-			mData = std::move(data);
+			return mData;
 		}
 
-		protected:
-			virtual void LeftNodeProc(double axisKey, std::shared_ptr<SPoint3D> _point) override;
-			virtual void RightNodeProc(double axisKey, std::shared_ptr<SPoint3D> _point) override;
-			virtual void Perform(std::shared_ptr<SPoint3D> _point) override;
+	private:
+		 std::vector<std::shared_ptr<SBSTChunkOy>> chunksOy;
+		 
+		 SNodeData mData;
 
-			std::shared_ptr<SBSTNodeOy> sheet;
+		 std::shared_ptr<SBSTChunkBase> base;
 	};
 
-	struct SBSTNodeOz;
+	struct SBSTChunkOz;
 
-	// tree operation for oY axis
-	struct SBSTNodeOy : public SBSTNodeBase
+	struct SBSTChunkOy
 	{
-		SBSTNodeOy() {};
-		SBSTNodeOy(SNodeData data)
+		SBSTChunkOy(SNodeData _data);
+
+		void Find(double axisKey, std::shared_ptr<SPoint3D> _point);
+
+		const SNodeData& GetData()
 		{
-			mData = std::move(data);
+			return mData;
 		}
-	protected:
-		virtual void LeftNodeProc(double axisKey, std::shared_ptr<SPoint3D> _point) override;
-		virtual void RightNodeProc(double axisKey, std::shared_ptr<SPoint3D> _point) override;
-		virtual void Perform(std::shared_ptr<SPoint3D> _point) override;
 
-		std::shared_ptr<SBSTNodeOz> sheet;
+	private:
+
+		std::vector<std::shared_ptr<SBSTChunkOz>> chunksOz;
+
+		SNodeData mData;
+
+		std::shared_ptr<SBSTChunkBase> base;
 	};
 
-	// tree operation for oz axis
-	// here we can perform operation with marching cube 
-	// and signed mesh subspace
-	struct SBSTNodeOz : public SBSTNodeBase
+	struct SBSTChunkOz
 	{
-		SBSTNodeOz() {};
-		SBSTNodeOz(SNodeData data)
+		SBSTChunkOz(SNodeData _data);
+
+		void Perform(std::shared_ptr<SPoint3D> _point);
+
+		const SNodeData& GetData()
 		{
-			mData = std::move(data);
+			return mData;
 		}
-	protected:
-		virtual void LeftNodeProc(double axisKey, std::shared_ptr<SPoint3D> _point) override;
-		virtual void RightNodeProc(double axisKey, std::shared_ptr<SPoint3D> _point) override;
-		virtual void Perform(std::shared_ptr<SPoint3D> _point) override;
 
-		std::shared_ptr<SMarchingCube> sheet;
-	};
+	private:
 
-	//binary search tree for surface reconstuction
-	class CBSTforSR
-	{
-		public:
-			CBSTforSR(SNodeData data);
+		std::shared_ptr<SMarchingCube> cubes;
 
-			void Find(std::shared_ptr<SPoint3D> _point);
+		SNodeData mData;
 
-		protected:
-
-			std::shared_ptr<SBSTNodeOx> rootNode;
-
-		private:
-			CBSTforSR() = delete;
+		std::shared_ptr<SBSTChunkBase> base;
 	};
 }

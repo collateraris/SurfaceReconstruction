@@ -15,7 +15,7 @@ int main()
     data.minOx = -.15;
     data.minOy = 0.01;
     data.minOz = -0.9;
-    data.chunkNumber = 16;
+    data.chunkNumber = 2;
     data.cubeSizeX = (0.35 + 0.15) * 0.1;
     data.cubeSizeY = (0.364 + 0.5) * 0.1;
     data.cubeSizeZ = (0.44 + 0.9) * 0.1;
