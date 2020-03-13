@@ -20,7 +20,7 @@ int main()
     data.minOx = -10.;
     data.minOy = -10.;
     data.minOz = -10.;
-    data.chunkNumber = 128;
+    data.chunkNumber = 512;
     data.cubeSizeX = (20.) / data.chunkNumber;
     data.cubeSizeY = (20.) / data.chunkNumber;
     data.cubeSizeZ = (20.) / data.chunkNumber;
@@ -35,5 +35,7 @@ int main()
     auto end = std::chrono::steady_clock::now();
     std::chrono::duration<double> elapsed_seconds = end - start;
     std::cout << "elapsed time: " << elapsed_seconds.count() << "s\n";
+    std::cout << CCommonStruct::GetSizeVoxelList() << std::endl;
+    CCommonStruct::PrintVoxelsInObj("object.obj");
 }
 

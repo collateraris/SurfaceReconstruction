@@ -117,7 +117,7 @@ SBSTChunkOx::SBSTChunkOx(SNodeData _data)
 	data.deltaChunkValue = mData.cubeSizeY;
 	data.startChunkValue = mData.minOy;
 	base->CreateRootNodeData(data, rootData);
-	rootData.startX = rootData.chunkValue;
+	rootData.startY = rootData.chunkValue;
 	rootData.depthTree = mData.depthTree;
 
 	chunksOy[mData.chunkNumber] = std::make_shared<SBSTChunkOy>(rootData);
@@ -181,7 +181,7 @@ SBSTChunkOy::SBSTChunkOy(SNodeData _data)
 	data.deltaChunkValue = mData.cubeSizeZ;
 	data.startChunkValue = mData.minOz;
 	base->CreateRootNodeData(data, rootData);
-	rootData.startX = rootData.chunkValue;
+	rootData.startZ = rootData.chunkValue;
 	rootData.depthTree = mData.depthTree;
 
 	chunksOz[mData.chunkNumber] = std::make_shared<SBSTChunkOz>(rootData);

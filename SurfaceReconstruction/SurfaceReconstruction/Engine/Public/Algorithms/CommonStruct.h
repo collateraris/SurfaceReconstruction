@@ -2,9 +2,18 @@
 
 #include <memory>
 #include <list>
+#include <vector>
 
 namespace Engine::Algorithm
 {
+	class CCommonStruct
+	{
+	public:
+		static int GetSizeVoxelList();
+
+		static void PrintVoxelsInObj(const char* filename);
+	};
+
 	struct SPoint3D
 	{
 		SPoint3D() {};
@@ -49,19 +58,7 @@ namespace Engine::Algorithm
 	// marching cube presents as 8 voxel
 	struct SVertexVoxelUnit
 	{
-		std::shared_ptr<SPoint3D> v0;
-		std::shared_ptr<SPoint3D> v1;
-		std::shared_ptr<SPoint3D> v2;
-		std::shared_ptr<SPoint3D> v3;
-		std::shared_ptr<SPoint3D> v4;
-		std::shared_ptr<SPoint3D> v5;
-		std::shared_ptr<SPoint3D> v6;
-		std::shared_ptr<SPoint3D> v7;
-	};
-
-	struct SStorageVertexCubeField
-	{
-		static std::list<std::shared_ptr<SVertexVoxelUnit>> storageVoxels;
+		std::vector<std::shared_ptr<SPoint3D>> vertices;
 	};
 
 	struct SVertexCubeField_0 : public SVertexCubeField
