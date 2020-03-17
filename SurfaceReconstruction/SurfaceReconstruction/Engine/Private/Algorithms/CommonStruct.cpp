@@ -5,7 +5,7 @@
 
 using namespace Engine::Algorithm;
 
-std::list<std::shared_ptr<SVertexVoxelUnit>> g_storageVoxels;
+std::list<SVertexVoxelUnit> g_storageVoxels;
 
 int CCommonStruct::GetSizeVoxelList()
 {
@@ -23,11 +23,11 @@ void CCommonStruct::PrintVoxelsInObj(const char* filename)
 		unsigned int offset = 0;
 		for (auto& it : g_storageVoxels)
 		{
-			for (auto& v : it->vertices)
+			for (auto& v : it.vertices)
 			{
-				out << "v " << v->GetX()
-					<< " "  << v->GetY()
-					<< " "  << v->GetZ()
+				out << "v " << v.GetX()
+					<< " "  << v.GetY()
+					<< " "  << v.GetZ()
 					<< std::endl;
 			}
 
@@ -78,11 +78,11 @@ void CCommonStruct::PrintVoxelsInObj(const char* filename)
 	}
 }
 
-bool SVertexCubeField_0::IsContainPoint(const std::shared_ptr<SPoint3D>& _point)
+bool SVertexCubeField_0::IsContainPoint(const SPoint3D& _point)
 {
-	if ( x <= _point->GetX() && _point->GetX() < (x + cubeSizeX)
-	  && y <= _point->GetY() && _point->GetY() < (y + cubeSizeY)
-	  && z <= _point->GetZ() &&	_point->GetZ() < (z + cubeSizeZ))
+	if ( x <= _point.GetX() && _point.GetX() < (x + cubeSizeX)
+	  && y <= _point.GetY() && _point.GetY() < (y + cubeSizeY)
+	  && z <= _point.GetZ() &&	_point.GetZ() < (z + cubeSizeZ))
 	{
 		return true;
 	}
@@ -93,22 +93,22 @@ void SVertexCubeField_0::MeshStorageData()
 {
 	IncludeInMesh();
 	SVertexVoxelUnit unit;
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x, y, z));
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x, y + cubeSizeY, z));
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x + cubeSizeX, y + cubeSizeY, z));
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x + cubeSizeX, y, z));
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x, y, z + cubeSizeZ));
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x, y + cubeSizeY, z + cubeSizeZ));
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x + cubeSizeX, y + cubeSizeY, z + cubeSizeZ));
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x + cubeSizeX, y, z + cubeSizeZ));
-	g_storageVoxels.push_back(std::make_shared<SVertexVoxelUnit>(unit));
+	unit.vertices.push_back(std::move(SPoint3D(x, y, z)));
+	unit.vertices.push_back(std::move(SPoint3D(x, y + cubeSizeY, z)));
+	unit.vertices.push_back(std::move(SPoint3D(x + cubeSizeX, y + cubeSizeY, z)));
+	unit.vertices.push_back(std::move(SPoint3D(x + cubeSizeX, y, z)));
+	unit.vertices.push_back(std::move(SPoint3D(x, y, z + cubeSizeZ)));
+	unit.vertices.push_back(std::move(SPoint3D(x, y + cubeSizeY, z + cubeSizeZ)));
+	unit.vertices.push_back(std::move(SPoint3D(x + cubeSizeX, y + cubeSizeY, z + cubeSizeZ)));
+	unit.vertices.push_back(std::move(SPoint3D(x + cubeSizeX, y, z + cubeSizeZ)));
+	g_storageVoxels.push_back(std::move(unit));
 }
 
-bool SVertexCubeField_1::IsContainPoint(const std::shared_ptr<SPoint3D>& _point)
+bool SVertexCubeField_1::IsContainPoint(const SPoint3D& _point)
 {
-	if (x <= _point->GetX() && _point->GetX() < (x + cubeSizeX)
-		&& y >= _point->GetY() && _point->GetY() > (y - cubeSizeY)
-		&& z <= _point->GetZ() && _point->GetZ() < (z + cubeSizeZ))
+	if (x <= _point.GetX() && _point.GetX() < (x + cubeSizeX)
+		&& y >= _point.GetY() && _point.GetY() > (y - cubeSizeY)
+		&& z <= _point.GetZ() && _point.GetZ() < (z + cubeSizeZ))
 	{
 		return true;
 	}
@@ -119,22 +119,22 @@ void SVertexCubeField_1::MeshStorageData()
 {
 	IncludeInMesh();
 	SVertexVoxelUnit unit;
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x, y - cubeSizeY, z));
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x, y, z));
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x + cubeSizeX, y, z));
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x + cubeSizeX, y - cubeSizeY, z));
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x, y - cubeSizeY, z + cubeSizeZ));
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x, y, z + cubeSizeZ));
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x + cubeSizeX, y, z + cubeSizeZ));
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x + cubeSizeX, y - cubeSizeY, z + cubeSizeZ));
-	g_storageVoxels.push_back(std::make_shared<SVertexVoxelUnit>(unit));
+	unit.vertices.push_back(std::move(SPoint3D(x, y - cubeSizeY, z)));
+	unit.vertices.push_back(std::move(SPoint3D(x, y, z)));
+	unit.vertices.push_back(std::move(SPoint3D(x + cubeSizeX, y, z)));
+	unit.vertices.push_back(std::move(SPoint3D(x + cubeSizeX, y - cubeSizeY, z)));
+	unit.vertices.push_back(std::move(SPoint3D(x, y - cubeSizeY, z + cubeSizeZ)));
+	unit.vertices.push_back(std::move(SPoint3D(x, y, z + cubeSizeZ)));
+	unit.vertices.push_back(std::move(SPoint3D(x + cubeSizeX, y, z + cubeSizeZ)));
+	unit.vertices.push_back(std::move(SPoint3D(x + cubeSizeX, y - cubeSizeY, z + cubeSizeZ)));
+	g_storageVoxels.push_back(std::move(unit));
 }
 
-bool SVertexCubeField_2::IsContainPoint(const std::shared_ptr<SPoint3D>& _point)
+bool SVertexCubeField_2::IsContainPoint(const SPoint3D& _point)
 {
-	if (x >= _point->GetX() && _point->GetX() > (x - cubeSizeX)
-		&& y >= _point->GetY() && _point->GetY() > (y - cubeSizeY)
-		&& z <= _point->GetZ() && _point->GetZ() < (z + cubeSizeZ))
+	if (x >= _point.GetX() && _point.GetX() > (x - cubeSizeX)
+		&& y >= _point.GetY() && _point.GetY() > (y - cubeSizeY)
+		&& z <= _point.GetZ() && _point.GetZ() < (z + cubeSizeZ))
 	{
 		return true;
 	}
@@ -145,22 +145,22 @@ void SVertexCubeField_2::MeshStorageData()
 {
 	IncludeInMesh();
 	SVertexVoxelUnit unit;
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x - cubeSizeX, y - cubeSizeY, z));
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x - cubeSizeX, y, z));
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x, y , z));
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x , y - cubeSizeY, z));
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x- cubeSizeX, y - cubeSizeY, z + cubeSizeZ));
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x - cubeSizeX, y, z + cubeSizeZ));
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x , y , z + cubeSizeZ));
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x, y - cubeSizeY, z + cubeSizeZ));
-	g_storageVoxels.push_back(std::make_shared<SVertexVoxelUnit>(unit));
+	unit.vertices.push_back(std::move(SPoint3D(x - cubeSizeX, y - cubeSizeY, z)));
+	unit.vertices.push_back(std::move(SPoint3D(x - cubeSizeX, y, z)));
+	unit.vertices.push_back(std::move(SPoint3D(x, y , z)));
+	unit.vertices.push_back(std::move(SPoint3D(x , y - cubeSizeY, z)));
+	unit.vertices.push_back(std::move(SPoint3D(x- cubeSizeX, y - cubeSizeY, z + cubeSizeZ)));
+	unit.vertices.push_back(std::move(SPoint3D(x - cubeSizeX, y, z + cubeSizeZ)));
+	unit.vertices.push_back(std::move(SPoint3D(x , y , z + cubeSizeZ)));
+	unit.vertices.push_back(std::move(SPoint3D(x, y - cubeSizeY, z + cubeSizeZ)));
+	g_storageVoxels.push_back(std::move(unit));
 }
 
-bool SVertexCubeField_3::IsContainPoint(const std::shared_ptr<SPoint3D>& _point)
+bool SVertexCubeField_3::IsContainPoint(const SPoint3D& _point)
 {
-	if (x >= _point->GetX() && _point->GetX() > (x - cubeSizeX)
-		&& y <= _point->GetY() && _point->GetY() < (y + cubeSizeY)
-		&& z <= _point->GetZ() && _point->GetZ() < (z + cubeSizeZ))
+	if (x >= _point.GetX() && _point.GetX() > (x - cubeSizeX)
+		&& y <= _point.GetY() && _point.GetY() < (y + cubeSizeY)
+		&& z <= _point.GetZ() && _point.GetZ() < (z + cubeSizeZ))
 	{
 		return true;
 	}
@@ -171,22 +171,22 @@ void SVertexCubeField_3::MeshStorageData()
 {
 	IncludeInMesh();
 	SVertexVoxelUnit unit;
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x - cubeSizeX, y, z));
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x - cubeSizeX, y + cubeSizeY, z));
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x , y + cubeSizeY, z));
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x , y, z));
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x - cubeSizeX, y, z + cubeSizeZ));
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x - cubeSizeX, y + cubeSizeY, z + cubeSizeZ));
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x, y + cubeSizeY, z + cubeSizeZ));
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x, y, z + cubeSizeZ));
-	g_storageVoxels.push_back(std::make_shared<SVertexVoxelUnit>(unit));
+	unit.vertices.push_back(std::move(SPoint3D(x - cubeSizeX, y, z)));
+	unit.vertices.push_back(std::move(SPoint3D(x - cubeSizeX, y + cubeSizeY, z)));
+	unit.vertices.push_back(std::move(SPoint3D(x , y + cubeSizeY, z)));
+	unit.vertices.push_back(std::move(SPoint3D(x , y, z)));
+	unit.vertices.push_back(std::move(SPoint3D(x - cubeSizeX, y, z + cubeSizeZ)));
+	unit.vertices.push_back(std::move(SPoint3D(x - cubeSizeX, y + cubeSizeY, z + cubeSizeZ)));
+	unit.vertices.push_back(std::move(SPoint3D(x, y + cubeSizeY, z + cubeSizeZ)));
+	unit.vertices.push_back(std::move(SPoint3D(x, y, z + cubeSizeZ)));
+	g_storageVoxels.push_back(std::move(unit));
 }
 
-bool SVertexCubeField_4::IsContainPoint(const std::shared_ptr<SPoint3D>& _point)
+bool SVertexCubeField_4::IsContainPoint(const SPoint3D& _point)
 {
-	if (x <= _point->GetX() && _point->GetX() < (x + cubeSizeX)
-		&& y <= _point->GetY() && _point->GetY() < (y + cubeSizeY)
-		&& z >= _point->GetZ() && _point->GetZ() > (z - cubeSizeZ))
+	if (x <= _point.GetX() && _point.GetX() < (x + cubeSizeX)
+		&& y <= _point.GetY() && _point.GetY() < (y + cubeSizeY)
+		&& z >= _point.GetZ() && _point.GetZ() > (z - cubeSizeZ))
 	{
 		return true;
 	}
@@ -198,11 +198,11 @@ void SVertexCubeField_4::MeshStorageData()
 	IncludeInMesh();
 }
 
-bool SVertexCubeField_5::IsContainPoint(const std::shared_ptr<SPoint3D>& _point)
+bool SVertexCubeField_5::IsContainPoint(const SPoint3D& _point)
 {
-	if (x <= _point->GetX() && _point->GetX() < (x + cubeSizeX)
-		&& y >= _point->GetY() && _point->GetY() > (y - cubeSizeY)
-		&& z >= _point->GetZ() && _point->GetZ() > (z - cubeSizeZ))
+	if (x <= _point.GetX() && _point.GetX() < (x + cubeSizeX)
+		&& y >= _point.GetY() && _point.GetY() > (y - cubeSizeY)
+		&& z >= _point.GetZ() && _point.GetZ() > (z - cubeSizeZ))
 	{
 		return true;
 	}
@@ -213,22 +213,22 @@ void SVertexCubeField_5::MeshStorageData()
 {
 	IncludeInMesh();
 	SVertexVoxelUnit unit;
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x, y - cubeSizeY, z - cubeSizeZ));
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x, y , z - cubeSizeZ));
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x + cubeSizeX, y, z - cubeSizeZ));
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x + cubeSizeX, y - cubeSizeY, z - cubeSizeZ));
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x, y - cubeSizeY, z));
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x, y , z));
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x + cubeSizeX, y, z));
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x + cubeSizeX, y - cubeSizeY, z));
-	g_storageVoxels.push_back(std::make_shared<SVertexVoxelUnit>(unit));
+	unit.vertices.push_back(std::move(SPoint3D(x, y - cubeSizeY, z - cubeSizeZ)));
+	unit.vertices.push_back(std::move(SPoint3D(x, y , z - cubeSizeZ)));
+	unit.vertices.push_back(std::move(SPoint3D(x + cubeSizeX, y, z - cubeSizeZ)));
+	unit.vertices.push_back(std::move(SPoint3D(x + cubeSizeX, y - cubeSizeY, z - cubeSizeZ)));
+	unit.vertices.push_back(std::move(SPoint3D(x, y - cubeSizeY, z)));
+	unit.vertices.push_back(std::move(SPoint3D(x, y , z)));
+	unit.vertices.push_back(std::move(SPoint3D(x + cubeSizeX, y, z)));
+	unit.vertices.push_back(std::move(SPoint3D(x + cubeSizeX, y - cubeSizeY, z)));
+	g_storageVoxels.push_back(std::move(unit));
 }
 
-bool SVertexCubeField_6::IsContainPoint(const std::shared_ptr<SPoint3D>& _point)
+bool SVertexCubeField_6::IsContainPoint(const SPoint3D& _point)
 {
-	if (x >= _point->GetX() && _point->GetX() > (x - cubeSizeX)
-		&& y >= _point->GetY() && _point->GetY() > (y - cubeSizeY)
-		&& z >= _point->GetZ() && _point->GetZ() > (z - cubeSizeZ))
+	if (x >= _point.GetX() && _point.GetX() > (x - cubeSizeX)
+		&& y >= _point.GetY() && _point.GetY() > (y - cubeSizeY)
+		&& z >= _point.GetZ() && _point.GetZ() > (z - cubeSizeZ))
 	{
 		return true;
 	}
@@ -239,22 +239,22 @@ void SVertexCubeField_6::MeshStorageData()
 {
 	IncludeInMesh();
 	SVertexVoxelUnit unit;
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x - cubeSizeX, y - cubeSizeY, z - cubeSizeZ));
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x - cubeSizeX, y, z - cubeSizeZ));
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x, y, z - cubeSizeZ));
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x, y - cubeSizeY, z - cubeSizeZ));
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x - cubeSizeX, y - cubeSizeY, z));
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x - cubeSizeX, y, z));
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x , y , z ));
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x, y - cubeSizeY, z));
-	g_storageVoxels.push_back(std::make_shared<SVertexVoxelUnit>(unit));
+	unit.vertices.push_back(std::move(SPoint3D(x - cubeSizeX, y - cubeSizeY, z - cubeSizeZ)));
+	unit.vertices.push_back(std::move(SPoint3D(x - cubeSizeX, y, z - cubeSizeZ)));
+	unit.vertices.push_back(std::move(SPoint3D(x, y, z - cubeSizeZ)));
+	unit.vertices.push_back(std::move(SPoint3D(x, y - cubeSizeY, z - cubeSizeZ)));
+	unit.vertices.push_back(std::move(SPoint3D(x - cubeSizeX, y - cubeSizeY, z)));
+	unit.vertices.push_back(std::move(SPoint3D(x - cubeSizeX, y, z)));
+	unit.vertices.push_back(std::move(SPoint3D(x , y , z )));
+	unit.vertices.push_back(std::move(SPoint3D(x, y - cubeSizeY, z)));
+	g_storageVoxels.push_back(std::move(unit));
 }
 
-bool SVertexCubeField_7::IsContainPoint(const std::shared_ptr<SPoint3D>& _point)
+bool SVertexCubeField_7::IsContainPoint(const SPoint3D& _point)
 {
-	if (x >= _point->GetX() && _point->GetX() > (x - cubeSizeX)
-		&& y <= _point->GetY() && _point->GetY() < (y + cubeSizeY)
-		&& z >= _point->GetZ() && _point->GetZ() > (z - cubeSizeZ))
+	if (x >= _point.GetX() && _point.GetX() > (x - cubeSizeX)
+		&& y <= _point.GetY() && _point.GetY() < (y + cubeSizeY)
+		&& z >= _point.GetZ() && _point.GetZ() > (z - cubeSizeZ))
 	{
 		return true;
 	}
@@ -265,15 +265,15 @@ void SVertexCubeField_7::MeshStorageData()
 {
 	IncludeInMesh();
 	SVertexVoxelUnit unit;
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x - cubeSizeX, y, z- cubeSizeZ));
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x - cubeSizeX, y + cubeSizeY, z - cubeSizeZ));
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x , y + cubeSizeY, z - cubeSizeZ));
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x , y, z - cubeSizeZ));
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x - cubeSizeX, y, z));
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x - cubeSizeX, y + cubeSizeY, z));
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x, y + cubeSizeY, z));
-	unit.vertices.push_back(std::make_shared<SPoint3D>(x , y, z ));
-	g_storageVoxels.push_back(std::make_shared<SVertexVoxelUnit>(unit));
+	unit.vertices.push_back(std::move(SPoint3D(x - cubeSizeX, y, z- cubeSizeZ)));
+	unit.vertices.push_back(std::move(SPoint3D(x - cubeSizeX, y + cubeSizeY, z - cubeSizeZ)));
+	unit.vertices.push_back(std::move(SPoint3D(x , y + cubeSizeY, z - cubeSizeZ)));
+	unit.vertices.push_back(std::move(SPoint3D(x , y, z - cubeSizeZ)));
+	unit.vertices.push_back(std::move(SPoint3D(x - cubeSizeX, y, z)));
+	unit.vertices.push_back(std::move(SPoint3D(x - cubeSizeX, y + cubeSizeY, z)));
+	unit.vertices.push_back(std::move(SPoint3D(x, y + cubeSizeY, z)));
+	unit.vertices.push_back(std::move(SPoint3D(x , y, z )));
+	g_storageVoxels.push_back(std::move(unit));
 }
 
 SMarchingCube::SMarchingCube(int32_t _startX, int32_t _startY, int32_t _startZ, int32_t _cubeSizeX, int32_t _cubeSizeY, int32_t _cubeSizeZ)
@@ -290,31 +290,70 @@ SMarchingCube::SMarchingCube(int32_t _startX, int32_t _startY, int32_t _startZ, 
 
 	bAllMeshFound = false;
 
-	mpVertices.push_back(std::make_shared<SVertexCubeField_0>(startX, startY, startZ, cubeHalfSizeX, cubeHalfSizeY, cubeHalfSizeZ));
-	mpVertices.push_back(std::make_shared<SVertexCubeField_1>(startX, startY + cubeSizeY, startZ, cubeHalfSizeX, cubeHalfSizeY, cubeHalfSizeZ));
-	mpVertices.push_back(std::make_shared<SVertexCubeField_2>(startX + cubeSizeX, startY + cubeSizeY, startZ, cubeHalfSizeX, cubeHalfSizeY, cubeHalfSizeZ));
-	mpVertices.push_back(std::make_shared<SVertexCubeField_3>(startX + cubeSizeX, startY, startZ, cubeHalfSizeX, cubeHalfSizeY, cubeHalfSizeZ));
-	mpVertices.push_back(std::make_shared<SVertexCubeField_4>(startX, startY, startZ + cubeSizeZ, cubeHalfSizeX, cubeHalfSizeY, cubeHalfSizeZ));
-	mpVertices.push_back(std::make_shared<SVertexCubeField_5>(startX, startY + cubeSizeY, startZ + cubeSizeZ, cubeHalfSizeX, cubeHalfSizeY, cubeHalfSizeZ));
-	mpVertices.push_back(std::make_shared<SVertexCubeField_6>(startX + cubeSizeX, startY + cubeSizeY, startZ + cubeSizeZ, cubeHalfSizeX, cubeHalfSizeY, cubeHalfSizeZ));
-	mpVertices.push_back(std::make_shared<SVertexCubeField_7>(startX + cubeSizeX, startY, startZ + cubeSizeZ, cubeHalfSizeX, cubeHalfSizeY, cubeHalfSizeZ));
+	mV0 = std::move(SVertexCubeField_0(startX, startY, startZ, cubeHalfSizeX, cubeHalfSizeY, cubeHalfSizeZ));
+	mV1 = std::move(SVertexCubeField_1(startX, startY + cubeSizeY, startZ, cubeHalfSizeX, cubeHalfSizeY, cubeHalfSizeZ));
+	mV2 = std::move(SVertexCubeField_2(startX + cubeSizeX, startY + cubeSizeY, startZ, cubeHalfSizeX, cubeHalfSizeY, cubeHalfSizeZ));
+	mV3 = std::move(SVertexCubeField_3(startX + cubeSizeX, startY, startZ, cubeHalfSizeX, cubeHalfSizeY, cubeHalfSizeZ));
+	mV4 = std::move(SVertexCubeField_4(startX, startY, startZ + cubeSizeZ, cubeHalfSizeX, cubeHalfSizeY, cubeHalfSizeZ));
+	mV5 = std::move(SVertexCubeField_5(startX, startY + cubeSizeY, startZ + cubeSizeZ, cubeHalfSizeX, cubeHalfSizeY, cubeHalfSizeZ));
+	mV6 = std::move(SVertexCubeField_6(startX + cubeSizeX, startY + cubeSizeY, startZ + cubeSizeZ, cubeHalfSizeX, cubeHalfSizeY, cubeHalfSizeZ));
+	mV7 = std::move(SVertexCubeField_7(startX + cubeSizeX, startY, startZ + cubeSizeZ, cubeHalfSizeX, cubeHalfSizeY, cubeHalfSizeZ));
 }
 
-void SMarchingCube::FillMeshSubSpace(const std::shared_ptr<SPoint3D>& _point)
+void SMarchingCube::FillMeshSubSpace(const SPoint3D& _point)
 {
 	if (bAllMeshFound)
 	{
 		return;
 	}
 
-	for (auto& pV : mpVertices)
+	if (!mV0.IsMesh() && mV0.IsContainPoint(_point))
 	{
-		if (!pV->IsMesh() && pV->IsContainPoint(_point))
-		{
-			pV->MeshStorageData();
-			return;
-		}
+		mV0.MeshStorageData();
+		return;
 	}
 
+	if (!mV1.IsMesh() && mV1.IsContainPoint(_point))
+	{
+		mV1.MeshStorageData();
+		return;
+	}
+
+	if (!mV2.IsMesh() && mV2.IsContainPoint(_point))
+	{
+		mV2.MeshStorageData();
+		return;
+	}
+
+	if (!mV3.IsMesh() && mV3.IsContainPoint(_point))
+	{
+		mV3.MeshStorageData();
+		return;
+	}
+
+
+	if (!mV4.IsMesh() && mV4.IsContainPoint(_point))
+	{
+		mV4.MeshStorageData();
+		return;
+	}
+
+	if (!mV5.IsMesh() && mV5.IsContainPoint(_point))
+	{
+		mV5.MeshStorageData();
+		return;
+	}
+
+	if (!mV6.IsMesh() && mV6.IsContainPoint(_point))
+	{
+		mV6.MeshStorageData();
+		return;
+	}
+
+	if (!mV7.IsMesh() && mV7.IsContainPoint(_point))
+	{
+		mV7.MeshStorageData();
+		return;
+	}
 	bAllMeshFound = true;
 }

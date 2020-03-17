@@ -41,9 +41,9 @@ namespace Engine::Algorithm
 
 		virtual bool IsMesh() const { return bIsMesh; };
 
-		virtual void MeshStorageData() = 0;
+		virtual void MeshStorageData() {};
 
-		virtual bool IsContainPoint(const std::shared_ptr<SPoint3D>& _point) = 0;
+		virtual bool IsContainPoint(const SPoint3D& _point) { return false;};
 
 	protected:
 		virtual void IncludeInMesh() { bIsMesh = true; };
@@ -58,12 +58,12 @@ namespace Engine::Algorithm
 	// marching cube presents as 8 voxel
 	struct SVertexVoxelUnit
 	{
-		std::vector<std::shared_ptr<SPoint3D>> vertices;
+		std::vector<SPoint3D> vertices;
 	};
 
 	struct SVertexCubeField_0 : public SVertexCubeField
 	{
-		SVertexCubeField_0() = delete;
+		SVertexCubeField_0() = default;
 
 		SVertexCubeField_0(int32_t _x, int32_t _y, int32_t _z, int32_t _cubeSizeX, int32_t _cubeSizeY, int32_t _cubeSizeZ)
 		{
@@ -75,14 +75,14 @@ namespace Engine::Algorithm
 			cubeSizeZ = _cubeSizeZ;
 		};
 
-		virtual bool IsContainPoint(const std::shared_ptr<SPoint3D>& _point) override;
+		virtual bool IsContainPoint(const SPoint3D& _point) override;
 
 		virtual void MeshStorageData() override;
 	};
 
 	struct SVertexCubeField_1 : public SVertexCubeField
 	{
-		SVertexCubeField_1() = delete;
+		SVertexCubeField_1() = default;
 
 		SVertexCubeField_1(int32_t _x, int32_t _y, int32_t _z, int32_t _cubeSizeX, int32_t _cubeSizeY, int32_t _cubeSizeZ)
 		{
@@ -94,14 +94,14 @@ namespace Engine::Algorithm
 			cubeSizeZ = _cubeSizeZ;
 		};
 
-		virtual bool IsContainPoint(const std::shared_ptr<SPoint3D>& _point) override;
+		virtual bool IsContainPoint(const SPoint3D& _point) override;
 
 		virtual void MeshStorageData() override;
 	};
 
 	struct SVertexCubeField_2 : public SVertexCubeField
 	{
-		SVertexCubeField_2() = delete;
+		SVertexCubeField_2() = default;
 
 		SVertexCubeField_2(int32_t _x, int32_t _y, int32_t _z, int32_t _cubeSizeX, int32_t _cubeSizeY, int32_t _cubeSizeZ)
 		{
@@ -113,14 +113,14 @@ namespace Engine::Algorithm
 			cubeSizeZ = _cubeSizeZ;
 		};
 
-		virtual bool IsContainPoint(const std::shared_ptr<SPoint3D>& _point) override;
+		virtual bool IsContainPoint(const SPoint3D& _point) override;
 
 		virtual void MeshStorageData() override;
 	};
 
 	struct SVertexCubeField_3 : public SVertexCubeField
 	{
-		SVertexCubeField_3() = delete;
+		SVertexCubeField_3() = default;
 
 		SVertexCubeField_3(int32_t _x, int32_t _y, int32_t _z, int32_t _cubeSizeX, int32_t _cubeSizeY, int32_t _cubeSizeZ)
 		{
@@ -132,14 +132,14 @@ namespace Engine::Algorithm
 			cubeSizeZ = _cubeSizeZ;
 		};
 
-		virtual bool IsContainPoint(const std::shared_ptr<SPoint3D>& _point) override;
+		virtual bool IsContainPoint(const SPoint3D& _point) override;
 
 		virtual void MeshStorageData() override;
 	};
 
 	struct SVertexCubeField_4 : public SVertexCubeField
 	{
-		SVertexCubeField_4() = delete;
+		SVertexCubeField_4() = default;
 
 		SVertexCubeField_4(int32_t _x, int32_t _y, int32_t _z, int32_t _cubeSizeX, int32_t _cubeSizeY, int32_t _cubeSizeZ)
 		{
@@ -151,7 +151,7 @@ namespace Engine::Algorithm
 			cubeSizeZ = _cubeSizeZ;
 		};
 
-		virtual bool IsContainPoint(const std::shared_ptr<SPoint3D>& _point) override;
+		virtual bool IsContainPoint(const SPoint3D& _point) override;
 
 		virtual void MeshStorageData() override;
 
@@ -159,7 +159,7 @@ namespace Engine::Algorithm
 
 	struct SVertexCubeField_5 : public SVertexCubeField
 	{
-		SVertexCubeField_5() = delete;
+		SVertexCubeField_5() = default;
 
 		SVertexCubeField_5(int32_t _x, int32_t _y, int32_t _z, int32_t _cubeSizeX, int32_t _cubeSizeY, int32_t _cubeSizeZ)
 		{
@@ -171,7 +171,7 @@ namespace Engine::Algorithm
 			cubeSizeZ = _cubeSizeZ;
 		};
 
-		virtual bool IsContainPoint(const std::shared_ptr<SPoint3D>& _point) override;
+		virtual bool IsContainPoint(const SPoint3D& _point) override;
 
 		virtual void MeshStorageData() override;
 
@@ -179,7 +179,7 @@ namespace Engine::Algorithm
 
 	struct SVertexCubeField_6 : public SVertexCubeField
 	{
-		SVertexCubeField_6() = delete;
+		SVertexCubeField_6() = default;
 
 		SVertexCubeField_6(int32_t _x, int32_t _y, int32_t _z, int32_t _cubeSizeX, int32_t _cubeSizeY, int32_t _cubeSizeZ)
 		{
@@ -191,7 +191,7 @@ namespace Engine::Algorithm
 			cubeSizeZ = _cubeSizeZ;
 		};
 
-		virtual bool IsContainPoint(const std::shared_ptr<SPoint3D>& _point) override;
+		virtual bool IsContainPoint(const SPoint3D& _point) override;
 
 		virtual void MeshStorageData() override;
 
@@ -199,7 +199,7 @@ namespace Engine::Algorithm
 
 	struct SVertexCubeField_7 : public SVertexCubeField
 	{
-		SVertexCubeField_7() = delete;
+		SVertexCubeField_7() = default;
 
 		SVertexCubeField_7(int32_t _x, int32_t _y, int32_t _z, int32_t _cubeSizeX, int32_t _cubeSizeY, int32_t _cubeSizeZ)
 		{
@@ -211,7 +211,7 @@ namespace Engine::Algorithm
 			cubeSizeZ = _cubeSizeZ;
 		};
 
-		virtual bool IsContainPoint(const std::shared_ptr<SPoint3D>& _point) override;
+		virtual bool IsContainPoint(const SPoint3D& _point) override;
 
 		virtual void MeshStorageData() override;
 
@@ -219,11 +219,11 @@ namespace Engine::Algorithm
 
 	struct SMarchingCube
 	{
-		SMarchingCube() = delete;
+		SMarchingCube() = default;
 
 		SMarchingCube(int32_t _startX, int32_t _startY, int32_t _startZ, int32_t _cubeSizeX, int32_t _cubeSizeY, int32_t _cubeSizeZ);
 
-		void FillMeshSubSpace(const std::shared_ptr<SPoint3D>& _point);
+		void FillMeshSubSpace(const SPoint3D& _point);
 
 	private:
 
@@ -237,7 +237,15 @@ namespace Engine::Algorithm
 
 		bool bAllMeshFound;
 
-		std::list<std::shared_ptr<SVertexCubeField>> mpVertices;
+		SVertexCubeField_0 mV0;
+		SVertexCubeField_1 mV1;
+		SVertexCubeField_2 mV2;
+		SVertexCubeField_3 mV3;
+		SVertexCubeField_4 mV4;
+		SVertexCubeField_5 mV5;
+		SVertexCubeField_6 mV6;
+		SVertexCubeField_7 mV7;
+
 	};
 
 }

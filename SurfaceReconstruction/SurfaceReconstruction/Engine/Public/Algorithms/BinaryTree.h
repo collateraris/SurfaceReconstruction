@@ -44,11 +44,11 @@ namespace Engine::Algorithm
 	{
 		SBSTChunkBase() {};
 
-		void CreateLeftNodeData(const SNodeData& fromData, SNodeData& leftData) const;
+		inline static void CreateLeftNodeData(const SNodeData& fromData, SNodeData& leftData);
 
-		void CreateRightNodeData(const SNodeData& fromData, SNodeData& rightData) const;
+		inline static void CreateRightNodeData(const SNodeData& fromData, SNodeData& rightData);
 
-		void CreateRootNodeData(const SNodeData& fromData, SNodeData& rootData) const;
+		inline static void CreateRootNodeData(const SNodeData& fromData, SNodeData& rootData) ;
 	};
 
 	struct SBSTChunkOx;
@@ -57,24 +57,24 @@ namespace Engine::Algorithm
 	{
 		SBSTContainer(SNodeData _data);
 
-		void Find(const std::shared_ptr<SPoint3D>& _point);
+		void Find(const SPoint3D& _point);
 
 	private:
 
 		std::vector<std::shared_ptr<SBSTChunkOx>> chunksOx;
 
 		SNodeData mData;
-
-		std::shared_ptr<SBSTChunkBase> base;
 	};
 
 	struct SBSTChunkOy;
 
 	struct SBSTChunkOx
 	{
+		SBSTChunkOx() = default;
+
 		SBSTChunkOx(SNodeData _data);
 
-		void Find(int32_t axisKey, const std::shared_ptr<SPoint3D>& _point);
+		void Find(int32_t axisKey, const SPoint3D& _point);
 
 		const SNodeData& GetData()
 		{
@@ -82,20 +82,20 @@ namespace Engine::Algorithm
 		}
 
 	private:
-		 std::vector<std::shared_ptr<SBSTChunkOy>> chunksOy;
+		 std::vector< std::shared_ptr<SBSTChunkOy>> chunksOy;
 		 
 		 SNodeData mData;
-
-		 std::shared_ptr<SBSTChunkBase> base;
 	};
 
 	struct SBSTChunkOz;
 
 	struct SBSTChunkOy
 	{
+		SBSTChunkOy() = default;
+
 		SBSTChunkOy(SNodeData _data);
 
-		void Find(int32_t axisKey,const std::shared_ptr<SPoint3D>& _point);
+		void Find(int32_t axisKey,const SPoint3D& _point);
 
 		const SNodeData& GetData()
 		{
@@ -107,15 +107,15 @@ namespace Engine::Algorithm
 		std::vector<std::shared_ptr<SBSTChunkOz>> chunksOz;
 
 		SNodeData mData;
-
-		std::shared_ptr<SBSTChunkBase> base;
 	};
 
 	struct SBSTChunkOz
 	{
+		SBSTChunkOz() = default;
+
 		SBSTChunkOz(SNodeData _data);
 
-		void Perform(const std::shared_ptr<SPoint3D>& _point);
+		void Perform(const SPoint3D& _point);
 
 		const SNodeData& GetData()
 		{
@@ -124,10 +124,8 @@ namespace Engine::Algorithm
 
 	private:
 
-		std::shared_ptr<SMarchingCube> cubes;
+		SMarchingCube cubes;
 
 		SNodeData mData;
-
-		std::shared_ptr<SBSTChunkBase> base;
 	};
 }

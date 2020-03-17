@@ -11,10 +11,10 @@
 using namespace Engine::Algorithm;
 using namespace Engine::File;
 
-void BST(SBSTContainer& bst, std::vector<std::shared_ptr<Engine::Algorithm::SPoint3D>>& _points)
+void BST(SBSTContainer& bst, std::vector<Engine::Algorithm::SPoint3D>& _points)
 {
     #pragma omp parallel for
-    for (std::shared_ptr<Engine::Algorithm::SPoint3D>& p : _points)
+    for (Engine::Algorithm::SPoint3D& p : _points)
     {
         bst.Find(p);
     }
@@ -24,7 +24,7 @@ void BST(SBSTContainer& bst, std::vector<std::shared_ptr<Engine::Algorithm::SPoi
 int main()
 {
     const int32_t MULTIPLICATOR = 100000000;
-    std::vector<std::shared_ptr<Engine::Algorithm::SPoint3D>> _points;
+    std::vector<Engine::Algorithm::SPoint3D> _points;
 
     CReadPoints::ParseFromText("object.pts", _points, MULTIPLICATOR);
 
@@ -32,7 +32,7 @@ int main()
     data.minOx = -10 * MULTIPLICATOR;
     data.minOy = -10 * MULTIPLICATOR;
     data.minOz = -10 * MULTIPLICATOR;
-    data.chunkNumber = 2048;
+    data.chunkNumber = 512;
     data.cubeSizeX = (20 * MULTIPLICATOR) / data.chunkNumber;
     data.cubeSizeY = (20 * MULTIPLICATOR) / data.chunkNumber;
     data.cubeSizeZ = (20 * MULTIPLICATOR) / data.chunkNumber;

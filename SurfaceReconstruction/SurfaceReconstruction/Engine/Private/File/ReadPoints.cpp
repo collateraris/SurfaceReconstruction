@@ -10,7 +10,7 @@ using namespace Engine::File;
 
 const double EPSILON = 1e-6;
 
-void CReadPoints::ParseFromText(const char* filename, std::vector<std::shared_ptr<Engine::Algorithm::SPoint3D>>& _points, const int32_t _MULTIPLICATOR /* = 10000*/)
+void CReadPoints::ParseFromText(const char* filename, std::vector<Engine::Algorithm::SPoint3D>& _points, const int32_t _MULTIPLICATOR /* = 10000*/)
 {
 	std::ifstream in;
 	in.open(filename, std::ifstream::in);
@@ -26,6 +26,6 @@ void CReadPoints::ParseFromText(const char* filename, std::vector<std::shared_pt
 			iss >> num[i];
 		}
 
-		_points.push_back(std::make_shared<Engine::Algorithm::SPoint3D>(static_cast<int32_t>(num[0] * _MULTIPLICATOR), static_cast<int32_t>(num[1] * _MULTIPLICATOR), static_cast<int32_t>(num[2] * _MULTIPLICATOR)));
+		_points.push_back(std::move(Engine::Algorithm::SPoint3D(static_cast<int32_t>(num[0] * _MULTIPLICATOR), static_cast<int32_t>(num[1] * _MULTIPLICATOR), static_cast<int32_t>(num[2] * _MULTIPLICATOR))));
 	}
 }
