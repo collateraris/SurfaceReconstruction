@@ -10,45 +10,45 @@ namespace Engine::Algorithm
 	{
 		//points space divided on chunk. we want to know chunck Index each axis (oX, oY, oZ)
 		// and know chunk value in current axis coordinates;
-		int deltaNode;
-		int chunkIndex;
-		double chunkValue;
-		double nextChunkValue;
-		int chunkNumber;
+		int16_t deltaNode;
+		int16_t chunkIndex;
+		float_t chunkValue;
+		float_t nextChunkValue;
+		int16_t chunkNumber;
 		// difference between n and n-1 chunk value // 
-		double deltaChunkValue;
-		double startChunkValue;
+		float_t deltaChunkValue;
+		float_t startChunkValue;
 		// minimal point of cloud
-		double minOx;
-		double minOy;
-		double minOz;
+		float_t minOx;
+		float_t minOy;
+		float_t minOz;
 		// start position of marching cube (it should be vertex 0 (-1, -1, -1 in normalized coordinates))
-		double startX;
-		double startY;
-		double startZ;
+		float_t startX;
+		float_t startY;
+		float_t startZ;
 		// marhing cube size
-		double cubeSizeX;
-		double cubeSizeY;
-		double cubeSizeZ;
+		float_t cubeSizeX;
+		float_t cubeSizeY;
+		float_t cubeSizeZ;
 
 		// navigation
-		int leftNodeIndex = -1;
-		int rightNodeIndex = -1;
-		int rootNodeIndex = -1;
+		int16_t leftNodeIndex = -1;
+		int16_t rightNodeIndex = -1;
+		int16_t rootNodeIndex = -1;
 
 		//
-		int depthTree = -1;
+		uint8_t depthTree;
 	};
 
 	struct SBSTChunkBase
 	{
 		SBSTChunkBase() {};
 
-		void CreateLeftNodeData(const SNodeData& fromData, SNodeData& leftData);
+		inline void CreateLeftNodeData(const SNodeData& fromData, SNodeData& leftData) const;
 
-		void CreateRightNodeData(const SNodeData& fromData, SNodeData& rightData);
+		inline void CreateRightNodeData(const SNodeData& fromData, SNodeData& rightData) const;
 
-		void CreateRootNodeData(const SNodeData& fromData, SNodeData& rootData);
+		inline void CreateRootNodeData(const SNodeData& fromData, SNodeData& rootData) const;
 	};
 
 	struct SBSTChunkOx;
@@ -74,7 +74,7 @@ namespace Engine::Algorithm
 	{
 		SBSTChunkOx(SNodeData _data);
 
-		void Find(double axisKey, const std::shared_ptr<SPoint3D>& _point);
+		void Find(float_t axisKey, const std::shared_ptr<SPoint3D>& _point);
 
 		const SNodeData& GetData()
 		{
@@ -95,7 +95,7 @@ namespace Engine::Algorithm
 	{
 		SBSTChunkOy(SNodeData _data);
 
-		void Find(double axisKey,const std::shared_ptr<SPoint3D>& _point);
+		void Find(float_t axisKey,const std::shared_ptr<SPoint3D>& _point);
 
 		const SNodeData& GetData()
 		{

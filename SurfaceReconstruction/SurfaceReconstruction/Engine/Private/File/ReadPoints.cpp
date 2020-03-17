@@ -16,7 +16,7 @@ void CReadPoints::ParseFromText(const char* filename, std::vector<std::shared_pt
 	in.open(filename, std::ifstream::in);
 	if (in.fail()) return;
 	std::string line;
-	double num[3];
+	float_t num[3];
 
 	while (!in.eof()) {
 		std::getline(in, line);

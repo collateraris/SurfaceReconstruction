@@ -18,21 +18,21 @@ namespace Engine::Algorithm
 	{
 		SPoint3D() {};
 
-		SPoint3D(double _x, double _y, double _z)
+		SPoint3D(float_t _x, float_t _y, float_t _z)
 			: x{_x}
 			, y{_y}
 			, z{_z}
 		{};
 
-		virtual double GetX() const { return x; };
-		virtual double GetY() const { return y; };
-		virtual double GetZ() const { return z; };
+		virtual float_t GetX() const { return x; };
+		virtual float_t GetY() const { return y; };
+		virtual float_t GetZ() const { return z; };
 
 	protected:
 
-		double x;
-		double y;
-		double z;
+		float_t x;
+		float_t y;
+		float_t z;
 	};
 
 	struct SVertexCubeField : public SPoint3D
@@ -50,9 +50,9 @@ namespace Engine::Algorithm
 
 		bool bIsMesh = false;
 
-		double cubeSizeX;
-		double cubeSizeY;
-		double cubeSizeZ;
+		float_t cubeSizeX;
+		float_t cubeSizeY;
+		float_t cubeSizeZ;
 	};
 	//struct for storage 1/8 cube
 	// marching cube presents as 8 voxel
@@ -65,7 +65,7 @@ namespace Engine::Algorithm
 	{
 		SVertexCubeField_0() = delete;
 
-		SVertexCubeField_0(double _x, double _y, double _z, double _cubeSizeX, double _cubeSizeY, double _cubeSizeZ)
+		SVertexCubeField_0(float_t _x, float_t _y, float_t _z, float_t _cubeSizeX, float_t _cubeSizeY, float_t _cubeSizeZ)
 		{
 			x = _x;
 			y = _y;
@@ -84,7 +84,7 @@ namespace Engine::Algorithm
 	{
 		SVertexCubeField_1() = delete;
 
-		SVertexCubeField_1(double _x, double _y, double _z, double _cubeSizeX, double _cubeSizeY, double _cubeSizeZ)
+		SVertexCubeField_1(float_t _x, float_t _y, float_t _z, float_t _cubeSizeX, float_t _cubeSizeY, float_t _cubeSizeZ)
 		{
 			x = _x;
 			y = _y;
@@ -103,7 +103,7 @@ namespace Engine::Algorithm
 	{
 		SVertexCubeField_2() = delete;
 
-		SVertexCubeField_2(double _x, double _y, double _z, double _cubeSizeX, double _cubeSizeY, double _cubeSizeZ)
+		SVertexCubeField_2(float_t _x, float_t _y, float_t _z, float_t _cubeSizeX, float_t _cubeSizeY, float_t _cubeSizeZ)
 		{
 			x = _x;
 			y = _y;
@@ -122,7 +122,7 @@ namespace Engine::Algorithm
 	{
 		SVertexCubeField_3() = delete;
 
-		SVertexCubeField_3(double _x, double _y, double _z, double _cubeSizeX, double _cubeSizeY, double _cubeSizeZ)
+		SVertexCubeField_3(float_t _x, float_t _y, float_t _z, float_t _cubeSizeX, float_t _cubeSizeY, float_t _cubeSizeZ)
 		{
 			x = _x;
 			y = _y;
@@ -141,7 +141,7 @@ namespace Engine::Algorithm
 	{
 		SVertexCubeField_4() = delete;
 
-		SVertexCubeField_4(double _x, double _y, double _z, double _cubeSizeX, double _cubeSizeY, double _cubeSizeZ)
+		SVertexCubeField_4(float_t _x, float_t _y, float_t _z, float_t _cubeSizeX, float_t _cubeSizeY, float_t _cubeSizeZ)
 		{
 			x = _x;
 			y = _y;
@@ -161,7 +161,7 @@ namespace Engine::Algorithm
 	{
 		SVertexCubeField_5() = delete;
 
-		SVertexCubeField_5(double _x, double _y, double _z, double _cubeSizeX, double _cubeSizeY, double _cubeSizeZ)
+		SVertexCubeField_5(float_t _x, float_t _y, float_t _z, float_t _cubeSizeX, float_t _cubeSizeY, float_t _cubeSizeZ)
 		{
 			x = _x;
 			y = _y;
@@ -181,7 +181,7 @@ namespace Engine::Algorithm
 	{
 		SVertexCubeField_6() = delete;
 
-		SVertexCubeField_6(double _x, double _y, double _z, double _cubeSizeX, double _cubeSizeY, double _cubeSizeZ)
+		SVertexCubeField_6(float_t _x, float_t _y, float_t _z, float_t _cubeSizeX, float_t _cubeSizeY, float_t _cubeSizeZ)
 		{
 			x = _x;
 			y = _y;
@@ -201,7 +201,7 @@ namespace Engine::Algorithm
 	{
 		SVertexCubeField_7() = delete;
 
-		SVertexCubeField_7(double _x, double _y, double _z, double _cubeSizeX, double _cubeSizeY, double _cubeSizeZ)
+		SVertexCubeField_7(float_t _x, float_t _y, float_t _z, float_t _cubeSizeX, float_t _cubeSizeY, float_t _cubeSizeZ)
 		{
 			x = _x;
 			y = _y;
@@ -221,19 +221,19 @@ namespace Engine::Algorithm
 	{
 		SMarchingCube() = delete;
 
-		SMarchingCube(double _startX, double _startY, double _startZ, double _cubeSizeX, double _cubeSizeY, double _cubeSizeZ);
+		SMarchingCube(float_t _startX, float_t _startY, float_t _startZ, float_t _cubeSizeX, float_t _cubeSizeY, float_t _cubeSizeZ);
 
 		void FillMeshSubSpace(const std::shared_ptr<SPoint3D>& _point);
 
 	private:
 
-		double startX;
-		double startY;
-		double startZ;
+		float_t startX;
+		float_t startY;
+		float_t startZ;
 
-		double cubeSizeX;
-		double cubeSizeY;
-		double cubeSizeZ;
+		float_t cubeSizeX;
+		float_t cubeSizeY;
+		float_t cubeSizeZ;
 
 		bool bAllMeshFound;
 

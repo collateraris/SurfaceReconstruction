@@ -4,7 +4,7 @@
 
 using namespace Engine::Algorithm;
 
-void SBSTChunkBase::CreateLeftNodeData(const SNodeData& fromData, SNodeData& leftData)
+void SBSTChunkBase::CreateLeftNodeData(const SNodeData& fromData, SNodeData& leftData) const
 {
 	leftData = fromData;
 	leftData.chunkIndex = fromData.leftNodeIndex;
@@ -15,7 +15,7 @@ void SBSTChunkBase::CreateLeftNodeData(const SNodeData& fromData, SNodeData& lef
 	leftData.rightNodeIndex = leftData.chunkIndex + leftData.deltaNode;
 }
 
-void SBSTChunkBase::CreateRightNodeData(const SNodeData& fromData, SNodeData& rightData)
+void SBSTChunkBase::CreateRightNodeData(const SNodeData& fromData, SNodeData& rightData) const
 {
 	rightData = fromData;
 	rightData.chunkIndex = fromData.rightNodeIndex;
@@ -26,7 +26,7 @@ void SBSTChunkBase::CreateRightNodeData(const SNodeData& fromData, SNodeData& ri
 	rightData.rightNodeIndex = rightData.chunkIndex + rightData.deltaNode;
 }
 
-void SBSTChunkBase::CreateRootNodeData(const SNodeData& fromData, SNodeData& rootData)
+void SBSTChunkBase::CreateRootNodeData(const SNodeData& fromData, SNodeData& rootData) const
 {
 	rootData = fromData;
 	rootData.chunkIndex = fromData.chunkNumber;
@@ -61,15 +61,15 @@ SBSTContainer::SBSTContainer(SNodeData _data)
 
 void SBSTContainer::Find(const std::shared_ptr<SPoint3D>& _point)
 {
-	int depthTree = mData.depthTree;
-	int searchIndex = mData.rootNodeIndex;
+	uint8_t depthTree = mData.depthTree;
+	int16_t searchIndex = mData.rootNodeIndex;
 
-	double axisKey = _point->GetX();
+	float_t axisKey = _point->GetX();
 
 	SNodeData leftData;
 	SNodeData rightData;
 
-	for (int i = 0; i < depthTree; ++i)
+	for (uint8_t i = 0; i < depthTree; ++i)
 	{
 		assert(chunksOx[searchIndex].get() != nullptr);
 
@@ -125,15 +125,15 @@ SBSTChunkOx::SBSTChunkOx(SNodeData _data)
 	mData.rootNodeIndex = rootData.chunkIndex;
 }
 
-void SBSTChunkOx::Find(double axisKey,const std::shared_ptr<SPoint3D>& _point)
+void SBSTChunkOx::Find(float_t axisKey,const std::shared_ptr<SPoint3D>& _point)
 {
-	int depthTree = mData.depthTree;
-	int searchIndex = mData.rootNodeIndex;
+	uint8_t depthTree = mData.depthTree;
+	int16_t searchIndex = mData.rootNodeIndex;
 
 	SNodeData leftData;
 	SNodeData rightData;
 
-	for (int i = 0; i < depthTree; ++i)
+	for (uint8_t i = 0; i < depthTree; ++i)
 	{
 		assert(chunksOy[searchIndex].get() != nullptr);
 
@@ -189,15 +189,15 @@ SBSTChunkOy::SBSTChunkOy(SNodeData _data)
 	mData.rootNodeIndex = rootData.chunkIndex;
 }
 
-void SBSTChunkOy::Find(double axisKey, const std::shared_ptr<SPoint3D>& _point)
+void SBSTChunkOy::Find(float_t axisKey, const std::shared_ptr<SPoint3D>& _point)
 {
-	int depthTree = mData.depthTree;
-	int searchIndex = mData.rootNodeIndex;
+	uint8_t depthTree = mData.depthTree;
+	int16_t searchIndex = mData.rootNodeIndex;
 
 	SNodeData leftData;
 	SNodeData rightData;
 
-	for (int i = 0; i < depthTree; ++i)
+	for (uint8_t i = 0; i < depthTree; ++i)
 	{
 		assert(chunksOz[searchIndex].get() != nullptr);
 
