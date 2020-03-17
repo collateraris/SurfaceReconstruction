@@ -12,24 +12,24 @@ namespace Engine::Algorithm
 		// and know chunk value in current axis coordinates;
 		int16_t deltaNode;
 		int16_t chunkIndex;
-		float_t chunkValue;
-		float_t nextChunkValue;
+		int32_t chunkValue;
+		int32_t nextChunkValue;
 		int16_t chunkNumber;
 		// difference between n and n-1 chunk value // 
-		float_t deltaChunkValue;
-		float_t startChunkValue;
+		int32_t deltaChunkValue;
+		int32_t startChunkValue;
 		// minimal point of cloud
-		float_t minOx;
-		float_t minOy;
-		float_t minOz;
+		int32_t minOx;
+		int32_t minOy;
+		int32_t minOz;
 		// start position of marching cube (it should be vertex 0 (-1, -1, -1 in normalized coordinates))
-		float_t startX;
-		float_t startY;
-		float_t startZ;
+		int32_t startX;
+		int32_t startY;
+		int32_t startZ;
 		// marhing cube size
-		float_t cubeSizeX;
-		float_t cubeSizeY;
-		float_t cubeSizeZ;
+		int32_t cubeSizeX;
+		int32_t cubeSizeY;
+		int32_t cubeSizeZ;
 
 		// navigation
 		int16_t leftNodeIndex = -1;
@@ -44,11 +44,11 @@ namespace Engine::Algorithm
 	{
 		SBSTChunkBase() {};
 
-		inline void CreateLeftNodeData(const SNodeData& fromData, SNodeData& leftData) const;
+		void CreateLeftNodeData(const SNodeData& fromData, SNodeData& leftData) const;
 
-		inline void CreateRightNodeData(const SNodeData& fromData, SNodeData& rightData) const;
+		void CreateRightNodeData(const SNodeData& fromData, SNodeData& rightData) const;
 
-		inline void CreateRootNodeData(const SNodeData& fromData, SNodeData& rootData) const;
+		void CreateRootNodeData(const SNodeData& fromData, SNodeData& rootData) const;
 	};
 
 	struct SBSTChunkOx;
@@ -74,7 +74,7 @@ namespace Engine::Algorithm
 	{
 		SBSTChunkOx(SNodeData _data);
 
-		void Find(float_t axisKey, const std::shared_ptr<SPoint3D>& _point);
+		void Find(int32_t axisKey, const std::shared_ptr<SPoint3D>& _point);
 
 		const SNodeData& GetData()
 		{
@@ -95,7 +95,7 @@ namespace Engine::Algorithm
 	{
 		SBSTChunkOy(SNodeData _data);
 
-		void Find(float_t axisKey,const std::shared_ptr<SPoint3D>& _point);
+		void Find(int32_t axisKey,const std::shared_ptr<SPoint3D>& _point);
 
 		const SNodeData& GetData()
 		{

@@ -276,7 +276,7 @@ void SVertexCubeField_7::MeshStorageData()
 	g_storageVoxels.push_back(std::make_shared<SVertexVoxelUnit>(unit));
 }
 
-SMarchingCube::SMarchingCube(float_t _startX, float_t _startY, float_t _startZ, float_t _cubeSizeX, float_t _cubeSizeY, float_t _cubeSizeZ)
+SMarchingCube::SMarchingCube(int32_t _startX, int32_t _startY, int32_t _startZ, int32_t _cubeSizeX, int32_t _cubeSizeY, int32_t _cubeSizeZ)
 	: startX{_startX}
 	, startY{_startY}
 	, startZ{_startZ}
@@ -284,9 +284,9 @@ SMarchingCube::SMarchingCube(float_t _startX, float_t _startY, float_t _startZ, 
 	, cubeSizeY{ _cubeSizeY }
 	, cubeSizeZ{ _cubeSizeZ }
 {
-	float_t cubeHalfSizeX = cubeSizeX * 0.5f;
-	float_t cubeHalfSizeY = cubeSizeY * 0.5f;
-	float_t cubeHalfSizeZ = cubeSizeZ * 0.5f;
+	int32_t cubeHalfSizeX = cubeSizeX >> 1;
+	int32_t cubeHalfSizeY = cubeSizeY >> 1;
+	int32_t cubeHalfSizeZ = cubeSizeZ >> 1;
 
 	bAllMeshFound = false;
 
