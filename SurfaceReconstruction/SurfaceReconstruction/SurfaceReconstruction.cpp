@@ -29,13 +29,13 @@ int main()
     CReadPoints::ParseFromText("object.pts", _points, MULTIPLICATOR);
 
     SNodeData data;
-    data.minOx = -10. * MULTIPLICATOR;
-    data.minOy = -10. * MULTIPLICATOR;
-    data.minOz = -10. * MULTIPLICATOR;
-    data.chunkNumber = 512;
-    data.cubeSizeX = (20. * MULTIPLICATOR) / data.chunkNumber;
-    data.cubeSizeY = (20. * MULTIPLICATOR) / data.chunkNumber;
-    data.cubeSizeZ = (20. * MULTIPLICATOR) / data.chunkNumber;
+    data.minOx = -10 * MULTIPLICATOR;
+    data.minOy = -10 * MULTIPLICATOR;
+    data.minOz = -10 * MULTIPLICATOR;
+    data.chunkNumber = 2048;
+    data.cubeSizeX = (20 * MULTIPLICATOR) / data.chunkNumber;
+    data.cubeSizeY = (20 * MULTIPLICATOR) / data.chunkNumber;
+    data.cubeSizeZ = (20 * MULTIPLICATOR) / data.chunkNumber;
 
     SBSTContainer bst(data);
 
