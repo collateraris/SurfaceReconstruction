@@ -3,6 +3,7 @@
 #include "CommonStruct.h"
 #include <memory>
 #include <vector>
+#include <unordered_map>
 
 namespace Engine::Algorithm
 {
@@ -61,7 +62,9 @@ namespace Engine::Algorithm
 
 	private:
 
-		std::vector<std::shared_ptr<SBSTChunkOx>> chunksOx;
+		//std::vector<std::shared_ptr<SBSTChunkOx>> chunksOx;
+		//std::unordered_map<uint32_t, SBSTChunkOx> chunksOx;
+		std::vector<SBSTChunkOx> chunksOx;
 
 		SNodeData mData;
 	};
@@ -81,10 +84,16 @@ namespace Engine::Algorithm
 			return mData;
 		}
 
+		bool IsEmpty() { return bIsEmpty; };
+
 	private:
-		 std::vector< std::shared_ptr<SBSTChunkOy>> chunksOy;
+		 //std::vector< std::shared_ptr<SBSTChunkOy>> chunksOy;
+		//std::unordered_map<uint32_t, SBSTChunkOy> chunksOy;
+		std::vector<SBSTChunkOy> chunksOy;
 		 
 		 SNodeData mData;
+
+		 bool bIsEmpty = true;
 	};
 
 	struct SBSTChunkOz;
@@ -102,11 +111,16 @@ namespace Engine::Algorithm
 			return mData;
 		}
 
+		bool IsEmpty() { return bIsEmpty; };
+
 	private:
 
 		std::vector<std::shared_ptr<SBSTChunkOz>> chunksOz;
+		//std::unordered_map<uint32_t, SBSTChunkOz> chunksOz;
 
 		SNodeData mData;
+
+		bool bIsEmpty = true;
 	};
 
 	struct SBSTChunkOz
