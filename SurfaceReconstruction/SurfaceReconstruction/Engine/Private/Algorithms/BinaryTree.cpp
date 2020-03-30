@@ -42,7 +42,6 @@ SBSTContainer::SBSTContainer(SNodeData _data)
 	mData = std::move(_data);
 
 	chunksOx.resize(mData.chunkNumber + 1);
-	//chunksOx.reserve(mData.chunkNumber + 1);
 
 	//start (root) is last pos
 	SNodeData rootData;
@@ -53,76 +52,193 @@ SBSTContainer::SBSTContainer(SNodeData _data)
 	mData.depthTree = static_cast<uint8_t>(log2(mData.chunkNumber)) + 1;
 	rootData.depthTree = mData.depthTree;
 	rootData.startX = rootData.chunkValue;
-
-	//chunksOx[mData.chunkNumber] = std::move(std::make_shared<SBSTChunkOx>(rootData));
-	chunksOx[mData.chunkNumber] = std::move(SBSTChunkOx(rootData));
-	//chunksOx.emplace(std::move(std::make_pair(mData.chunkNumber, SBSTChunkOx(rootData))));
-
 	mData.rootNodeIndex = rootData.chunkIndex;
+
+	chunksOx[mData.chunkNumber] = std::move(std::make_shared<SBSTChunkOx>());
+	chunksOx[mData.chunkNumber]->SetData(std::move(rootData));
+}
+
+void SBSTContainer::InitCubesPool(int32_t _poolSize)
+{
+	voxelsPool.reserve(_poolSize + 1);
+
+	for (int32_t i = 0; i < _poolSize; ++i)
+	{
+		voxelsPool.push_back(std::move(std::make_shared<SVoxelData>()));
+	}
+}
+
+void SBSTContainer::TriggerVoxel(std::shared_ptr<SBSTChunkOz>& issueChunk)
+{
+	if (issueChunk->voxel == nullptr)
+	{
+		issueChunk->voxel = voxelsPool[usedVoxels++];
+
+		SNodeData data = issueChunk->mData;
+		issueChunk->subVoxelIndex = issueChunk->voxel->PushSubVoxelData(data.startX, data.startY, data.startZ, data.cubeSizeX, data.cubeSizeY, data.cubeSizeZ);
+	}
+}
+
+void SBSTContainer::AttachMeshSpace(std::shared_ptr<SBSTChunkOz>& issueChunk, const SPoint3D& _point)
+{
+	issueChunk->voxel->AttachMeshSpace(_point, issueChunk->subVoxelIndex);
 }
 
 void SBSTContainer::Find(const SPoint3D& _point)
 {
 	uint8_t depthTree = mData.depthTree;
+
 	int16_t searchIndex = mData.rootNodeIndex;
 
-	float_t axisKey = _point.GetX();
+	int32_t axisKey = _point.GetX();
 
 	SNodeData leftData;
 	SNodeData rightData;
 
+	std::vector<std::shared_ptr<SBSTChunkOy>>* chunksOy = nullptr;
+	std::vector<std::shared_ptr<SBSTChunkOz>>* chunksOz = nullptr;
+
 	for (uint8_t i = 0; i < depthTree; ++i)
 	{
-		//assert(chunksOx[searchIndex].get() != nullptr);
-		//assert(chunksOx.find(searchIndex) != chunksOx.end());
-		assert(!chunksOx[searchIndex].IsEmpty());
+		std::shared_ptr<SBSTChunkOx>& issueChunk = chunksOx[searchIndex];
+		assert(issueChunk.get() != nullptr);
 
-		const SNodeData& data = chunksOx[searchIndex].GetData();
+		const SNodeData& data = issueChunk->mData;
 
 		if (data.chunkValue <= axisKey && axisKey <= data.nextChunkValue)
 		{
-			chunksOx[searchIndex].Find(_point.GetY(), _point);
+			axisKey = _point.GetY();
+			chunksOy = &issueChunk->chunksOy;
+			break;
+		}
+
+		if (i == depthTree - 1)
+		{
+			return;
+		}
+
+		if (axisKey < data.chunkValue)
+		{
+			searchIndex = data.leftNodeIndex;
+			std::shared_ptr<SBSTChunkOx>& nextChunk = chunksOx[searchIndex];
+			if (nextChunk.get() == nullptr)
+			{
+				SBSTChunkBase::CreateLeftNodeData(data, leftData);
+				leftData.startX = leftData.chunkValue;
+				nextChunk = std::move(std::make_shared<SBSTChunkOx>());
+				nextChunk->SetData(std::move(leftData));
+			}
+		}
+		else if (data.nextChunkValue < axisKey)
+		{
+			searchIndex = data.rightNodeIndex;
+			std::shared_ptr<SBSTChunkOx>& nextChunk = chunksOx[searchIndex];
+			if (nextChunk.get() == nullptr)
+			{
+				SBSTChunkBase::CreateRightNodeData(data, rightData);
+				rightData.startX = rightData.chunkValue;
+				nextChunk = std::move(std::make_shared<SBSTChunkOx>());
+				nextChunk->SetData(std::move(rightData));
+			}
+		}
+
+	}
+
+	// for oy depth
+	searchIndex = mData.rootNodeIndex;
+	for (uint8_t i = 0; i < depthTree; ++i)
+	{
+		std::shared_ptr<SBSTChunkOy>& issueChunk = (*chunksOy)[searchIndex];
+		assert(issueChunk.get() != nullptr);
+
+		const SNodeData& data = issueChunk->mData;
+
+		if (data.chunkValue <= axisKey && axisKey <= data.nextChunkValue)
+		{
+			axisKey = _point.GetZ();
+			chunksOz = &issueChunk->chunksOz;
+			break;
+		}
+
+		if (i == depthTree - 1)
+		{
+			return;
+		}
+
+		if (axisKey < data.chunkValue)
+		{
+			searchIndex = data.leftNodeIndex;
+			std::shared_ptr<SBSTChunkOy>& nextChunk = (*chunksOy)[searchIndex];
+			if (nextChunk.get() == nullptr)	
+			{
+				SBSTChunkBase::CreateLeftNodeData(data, leftData);
+				leftData.startY = leftData.chunkValue;
+				nextChunk = std::move(std::make_shared<SBSTChunkOy>());
+				nextChunk->SetData(std::move(leftData));
+			}
+		}
+		else if (data.nextChunkValue < axisKey)
+		{
+			searchIndex = data.rightNodeIndex;
+			std::shared_ptr<SBSTChunkOy>& nextChunk = (*chunksOy)[searchIndex];
+			if (nextChunk.get() == nullptr)
+			{
+				SBSTChunkBase::CreateRightNodeData(data, rightData);
+				rightData.startY = rightData.chunkValue;
+				nextChunk = std::move(std::make_shared<SBSTChunkOy>());
+				nextChunk->SetData(std::move(rightData));
+			}
+		}
+	}
+
+	// for oz depth
+	searchIndex = mData.rootNodeIndex;
+	for (uint8_t i = 0; i < depthTree; ++i)
+	{
+		std::shared_ptr<SBSTChunkOz>& issueChunk = (*chunksOz)[searchIndex];
+		assert(issueChunk.get() != nullptr);
+
+		const SNodeData& data = issueChunk->mData;
+
+		if (data.chunkValue <= axisKey && axisKey <= data.nextChunkValue)
+		{
+			TriggerVoxel(issueChunk);
+			AttachMeshSpace(issueChunk, _point);
 			break;
 		}
 
 		if (axisKey < data.chunkValue)
 		{
 			searchIndex = data.leftNodeIndex;
-			//if (chunksOx.find(searchIndex) == chunksOx.end())
-			if (chunksOx[searchIndex].IsEmpty())
+			std::shared_ptr<SBSTChunkOz>& nextChunk = (*chunksOz)[searchIndex];
+			if (nextChunk.get() == nullptr)
 			{
 				SBSTChunkBase::CreateLeftNodeData(data, leftData);
-				leftData.startX = leftData.chunkValue;
-				//chunksOx[searchIndex] = std::move(std::make_shared<SBSTChunkOx>(leftData));
-				//chunksOx.emplace(std::move(std::make_pair(searchIndex, SBSTChunkOx(leftData))));
-				chunksOx[searchIndex] = std::move(SBSTChunkOx(leftData));
+				leftData.startZ = leftData.chunkValue;
+				nextChunk = std::move(std::make_shared<SBSTChunkOz>());
+				nextChunk->SetData(std::move(leftData));
 			}
 		}
 		else if (data.nextChunkValue < axisKey)
 		{
 			searchIndex = data.rightNodeIndex;
-			//if (chunksOx.find(searchIndex) == chunksOx.end())
-			if (chunksOx[searchIndex].IsEmpty())
+			std::shared_ptr<SBSTChunkOz>& nextChunk = (*chunksOz)[searchIndex];
+			if (nextChunk.get() == nullptr)
 			{
 				SBSTChunkBase::CreateRightNodeData(data, rightData);
-				rightData.startX = rightData.chunkValue;
-				//chunksOx[searchIndex] = std::move(std::make_shared<SBSTChunkOx>(rightData));
-				//chunksOx.emplace(std::move(std::make_pair(searchIndex, SBSTChunkOx(rightData))));
-				chunksOx[searchIndex] = std::move(SBSTChunkOx(rightData));
+				rightData.startZ = rightData.chunkValue;
+				nextChunk = std::move(std::make_shared<SBSTChunkOz>());
+				nextChunk->SetData(std::move(rightData));
 			}
 		}
 	}
 }
 
-SBSTChunkOx::SBSTChunkOx(SNodeData _data)
+void SBSTChunkOx::SetData(SNodeData&& _data)
 {
 	mData = std::move(_data);
 
-	bIsEmpty = false;
 	chunksOy.resize(mData.chunkNumber + 1);
-	//chunksOy.reserve(mData.chunkNumber + 1);
-
-	//start (root) is last pos
 	SNodeData rootData;
 	SNodeData data = mData;
 	data.deltaChunkValue = mData.cubeSizeY;
@@ -130,72 +246,17 @@ SBSTChunkOx::SBSTChunkOx(SNodeData _data)
 	SBSTChunkBase::CreateRootNodeData(data, rootData);
 	rootData.startY = rootData.chunkValue;
 	rootData.depthTree = mData.depthTree;
-
-	//chunksOy[mData.chunkNumber] = std::move(std::make_shared<SBSTChunkOy>(rootData));
-	//chunksOy.emplace(std::move(std::make_pair(mData.chunkNumber, SBSTChunkOy(rootData
-	chunksOy[mData.chunkNumber] = std::move(SBSTChunkOy(rootData));
-
 	mData.rootNodeIndex = rootData.chunkIndex;
+
+	chunksOy[mData.chunkNumber] = std::move(std::make_shared<SBSTChunkOy>());
+	chunksOy[mData.chunkNumber]->SetData(std::move(rootData));
 }
 
-void SBSTChunkOx::Find(int32_t axisKey,const SPoint3D& _point)
-{
-	uint8_t depthTree = mData.depthTree;
-	int16_t searchIndex = mData.rootNodeIndex;
-
-	SNodeData leftData;
-	SNodeData rightData;
-
-	for (uint8_t i = 0; i < depthTree; ++i)
-	{
-		//assert(chunksOy[searchIndex].get() != nullptr);
-		//assert(chunksOy.find(searchIndex) != chunksOy.end());
-		assert(!chunksOy[searchIndex].IsEmpty());
-
-		const SNodeData& data = chunksOy[searchIndex].GetData();
-
-		if (data.chunkValue <= axisKey && axisKey <= data.nextChunkValue)
-		{
-			chunksOy[searchIndex].Find(_point.GetZ(), _point);
-			break;
-		}
-
-		if (axisKey < data.chunkValue)
-		{
-			searchIndex = data.leftNodeIndex;
-			//if (chunksOy.find(searchIndex) == chunksOy.end())
-			if (chunksOy[searchIndex].IsEmpty())
-			{
-				SBSTChunkBase::CreateLeftNodeData(data, leftData);
-				leftData.startY = leftData.chunkValue;
-				//chunksOy[searchIndex] = std::move(std::make_shared<SBSTChunkOy>(leftData));
-				//chunksOy.emplace(std::move(std::make_pair(searchIndex, SBSTChunkOy(leftData))));
-				chunksOy[searchIndex] = std::move(SBSTChunkOy(leftData));
-			}
-		}
-		else if (data.nextChunkValue < axisKey)
-		{
-			searchIndex = data.rightNodeIndex;
-			//if (chunksOy.find(searchIndex) == chunksOy.end())
-			if (chunksOy[searchIndex].IsEmpty())
-			{
-				SBSTChunkBase::CreateRightNodeData(data, rightData);
-				rightData.startY = rightData.chunkValue;
-				//chunksOy[searchIndex] = std::move(std::make_shared<SBSTChunkOy>(rightData));
-				//chunksOy.emplace(std::move(std::make_pair(searchIndex, SBSTChunkOy(rightData))));
-				chunksOy[searchIndex] = std::move(SBSTChunkOy(rightData));
-			}
-		}
-	}
-}
-
-SBSTChunkOy::SBSTChunkOy(SNodeData _data)
+void SBSTChunkOy::SetData(SNodeData&& _data)
 {
 	mData = std::move(_data);
 
-	bIsEmpty = false;
 	chunksOz.resize(mData.chunkNumber + 1);
-	//chunksOz.reserve(mData.chunkNumber + 1);
 
 	//start (root) is last pos
 	SNodeData rootData;
@@ -205,69 +266,9 @@ SBSTChunkOy::SBSTChunkOy(SNodeData _data)
 	SBSTChunkBase::CreateRootNodeData(data, rootData);
 	rootData.startZ = rootData.chunkValue;
 	rootData.depthTree = mData.depthTree;
-
-	chunksOz[mData.chunkNumber] = std::move(std::make_shared<SBSTChunkOz>(rootData));
-	//chunksOz.emplace(std::move(std::make_pair(mData.chunkNumber, SBSTChunkOz(rootData))));
-
 	mData.rootNodeIndex = rootData.chunkIndex;
+
+	chunksOz[mData.chunkNumber] = std::move(std::make_shared<SBSTChunkOz>());
+	chunksOz[mData.chunkNumber]->SetData(std::move(rootData));
 }
 
-void SBSTChunkOy::Find(int32_t axisKey, const SPoint3D& _point)
-{
-	uint8_t depthTree = mData.depthTree;
-	int16_t searchIndex = mData.rootNodeIndex;
-
-	SNodeData leftData;
-	SNodeData rightData;
-
-	for (uint8_t i = 0; i < depthTree; ++i)
-	{
-		assert(chunksOz[searchIndex].get() != nullptr);
-		//assert(chunksOz.find(searchIndex) != chunksOz.end());
-
-		const SNodeData& data = chunksOz[searchIndex]->GetData();
-
-		if (data.chunkValue <= axisKey && axisKey <= data.nextChunkValue)
-		{
-			chunksOz[searchIndex]->Perform(_point);
-			break;
-		}
-
-		if (axisKey < data.chunkValue)
-		{
-			searchIndex = data.leftNodeIndex;
-			//if (chunksOz.find(searchIndex) == chunksOz.end())
-			if (chunksOz[searchIndex].get() == nullptr)
-			{
-				SBSTChunkBase::CreateLeftNodeData(data, leftData);
-				leftData.startZ = leftData.chunkValue;
-				chunksOz[searchIndex] = std::move(std::make_shared<SBSTChunkOz>(leftData));
-				//chunksOz.emplace(std::move(std::make_pair(searchIndex, SBSTChunkOz(leftData))));
-			}
-		}
-		else if (data.nextChunkValue < axisKey)
-		{
-			searchIndex = data.rightNodeIndex;
-			//if (chunksOz.find(searchIndex) == chunksOz.end())
-			if (chunksOz[searchIndex].get() == nullptr)
-			{
-				SBSTChunkBase::CreateRightNodeData(data, rightData);
-				rightData.startZ = rightData.chunkValue;
-				chunksOz[searchIndex] = std::move(std::make_shared<SBSTChunkOz>(rightData));
-				//chunksOz.emplace(std::move(std::make_pair(searchIndex, SBSTChunkOz(rightData))));
-			}
-		}
-	}
-}
-
-SBSTChunkOz::SBSTChunkOz(SNodeData _data)
-{
-	mData = std::move(_data);
-
-	cubes = std::move(SMarchingCube(mData.startX, mData.startY, mData.startZ, mData.cubeSizeX, mData.cubeSizeY, mData.cubeSizeZ));
-}
-
-void SBSTChunkOz::Perform(const SPoint3D& _point)
-{
-	cubes.FillMeshSubSpace(_point);
-}

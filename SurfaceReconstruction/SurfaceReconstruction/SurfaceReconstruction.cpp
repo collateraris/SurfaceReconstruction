@@ -6,14 +6,12 @@
 
 #include <algorithm>
 #include <chrono>
-#include <omp.h>
 
 using namespace Engine::Algorithm;
 using namespace Engine::File;
 
 void BST(SBSTContainer& bst, std::vector<Engine::Algorithm::SPoint3D>& _points)
 {
-    #pragma omp parallel for
     for (Engine::Algorithm::SPoint3D& p : _points)
     {
         bst.Find(p);
@@ -32,13 +30,13 @@ int main()
     data.minOx = -10 * MULTIPLICATOR;
     data.minOy = -10 * MULTIPLICATOR;
     data.minOz = -10 * MULTIPLICATOR;
-    data.chunkNumber = 512;
+    data.chunkNumber = 2048;
     data.cubeSizeX = (20 * MULTIPLICATOR) / data.chunkNumber;
     data.cubeSizeY = (20 * MULTIPLICATOR) / data.chunkNumber;
     data.cubeSizeZ = (20 * MULTIPLICATOR) / data.chunkNumber;
 
     SBSTContainer bst(data);
-
+    bst.InitCubesPool(_points.size());
     auto start = std::chrono::steady_clock::now();
     BST(bst, _points);
     auto end = std::chrono::steady_clock::now();

@@ -276,84 +276,85 @@ void SVertexCubeField_7::MeshStorageData()
 	g_storageVoxels.push_back(std::move(unit));
 }
 
-SMarchingCube::SMarchingCube(int32_t _startX, int32_t _startY, int32_t _startZ, int32_t _cubeSizeX, int32_t _cubeSizeY, int32_t _cubeSizeZ)
-	: startX{_startX}
-	, startY{_startY}
-	, startZ{_startZ}
-	, cubeSizeX{_cubeSizeX}
-	, cubeSizeY{ _cubeSizeY }
-	, cubeSizeZ{ _cubeSizeZ }
+int32_t SVoxelData::PushSubVoxelData(int32_t _startX, int32_t _startY, int32_t _startZ, int32_t _cubeSizeX, int32_t _cubeSizeY, int32_t _cubeSizeZ)
 {
+	int32_t startX = _startX;
+	int32_t startY = _startY;
+	int32_t startZ = _startZ;
+	int32_t cubeSizeX = _cubeSizeX;
+	int32_t cubeSizeY = _cubeSizeY;
+	int32_t cubeSizeZ = _cubeSizeZ;
+
 	int32_t cubeHalfSizeX = cubeSizeX >> 1;
 	int32_t cubeHalfSizeY = cubeSizeY >> 1;
 	int32_t cubeHalfSizeZ = cubeSizeZ >> 1;
+  
+	SSubVoxelData voxelData;
 
-	bAllMeshFound = false;
+	voxelData.mV0 = std::move(SVertexCubeField_0(startX, startY, startZ, cubeHalfSizeX, cubeHalfSizeY, cubeHalfSizeZ));
+	voxelData.mV1 = std::move(SVertexCubeField_1(startX, startY + cubeSizeY, startZ, cubeHalfSizeX, cubeHalfSizeY, cubeHalfSizeZ));
+	voxelData.mV2 = std::move(SVertexCubeField_2(startX + cubeSizeX, startY + cubeSizeY, startZ, cubeHalfSizeX, cubeHalfSizeY, cubeHalfSizeZ));
+	voxelData.mV3 = std::move(SVertexCubeField_3(startX + cubeSizeX, startY, startZ, cubeHalfSizeX, cubeHalfSizeY, cubeHalfSizeZ));
+	voxelData.mV4 = std::move(SVertexCubeField_4(startX, startY, startZ + cubeSizeZ, cubeHalfSizeX, cubeHalfSizeY, cubeHalfSizeZ));
+	voxelData.mV5 = std::move(SVertexCubeField_5(startX, startY + cubeSizeY, startZ + cubeSizeZ, cubeHalfSizeX, cubeHalfSizeY, cubeHalfSizeZ));
+	voxelData.mV6 = std::move(SVertexCubeField_6(startX + cubeSizeX, startY + cubeSizeY, startZ + cubeSizeZ, cubeHalfSizeX, cubeHalfSizeY, cubeHalfSizeZ));
+	voxelData.mV7 = std::move(SVertexCubeField_7(startX + cubeSizeX, startY, startZ + cubeSizeZ, cubeHalfSizeX, cubeHalfSizeY, cubeHalfSizeZ));
 
-	mV0 = std::move(SVertexCubeField_0(startX, startY, startZ, cubeHalfSizeX, cubeHalfSizeY, cubeHalfSizeZ));
-	mV1 = std::move(SVertexCubeField_1(startX, startY + cubeSizeY, startZ, cubeHalfSizeX, cubeHalfSizeY, cubeHalfSizeZ));
-	mV2 = std::move(SVertexCubeField_2(startX + cubeSizeX, startY + cubeSizeY, startZ, cubeHalfSizeX, cubeHalfSizeY, cubeHalfSizeZ));
-	mV3 = std::move(SVertexCubeField_3(startX + cubeSizeX, startY, startZ, cubeHalfSizeX, cubeHalfSizeY, cubeHalfSizeZ));
-	mV4 = std::move(SVertexCubeField_4(startX, startY, startZ + cubeSizeZ, cubeHalfSizeX, cubeHalfSizeY, cubeHalfSizeZ));
-	mV5 = std::move(SVertexCubeField_5(startX, startY + cubeSizeY, startZ + cubeSizeZ, cubeHalfSizeX, cubeHalfSizeY, cubeHalfSizeZ));
-	mV6 = std::move(SVertexCubeField_6(startX + cubeSizeX, startY + cubeSizeY, startZ + cubeSizeZ, cubeHalfSizeX, cubeHalfSizeY, cubeHalfSizeZ));
-	mV7 = std::move(SVertexCubeField_7(startX + cubeSizeX, startY, startZ + cubeSizeZ, cubeHalfSizeX, cubeHalfSizeY, cubeHalfSizeZ));
+	voxels.push_back(std::move(voxelData));
+
+	return voxels.size() - 1;
 }
 
-void SMarchingCube::FillMeshSubSpace(const SPoint3D& _point)
+void SVoxelData::AttachMeshSpace(const SPoint3D& _point, int32_t _subVoxelIndex)
 {
-	if (bAllMeshFound)
+	SSubVoxelData& subVoxel = voxels[_subVoxelIndex];
+
+	if (!subVoxel.mV0.IsMesh() && subVoxel.mV0.IsContainPoint(_point))
 	{
+		subVoxel.mV0.IncludeInMesh();
 		return;
 	}
 
-	if (!mV0.IsMesh() && mV0.IsContainPoint(_point))
+	if (!subVoxel.mV1.IsMesh() && subVoxel.mV1.IsContainPoint(_point))
 	{
-		mV0.MeshStorageData();
+		subVoxel.mV1.IncludeInMesh();
 		return;
 	}
 
-	if (!mV1.IsMesh() && mV1.IsContainPoint(_point))
+	if (!subVoxel.mV2.IsMesh() && subVoxel.mV2.IsContainPoint(_point))
 	{
-		mV1.MeshStorageData();
+		subVoxel.mV2.IncludeInMesh();
 		return;
 	}
 
-	if (!mV2.IsMesh() && mV2.IsContainPoint(_point))
+	if (!subVoxel.mV3.IsMesh() && subVoxel.mV3.IsContainPoint(_point))
 	{
-		mV2.MeshStorageData();
-		return;
-	}
-
-	if (!mV3.IsMesh() && mV3.IsContainPoint(_point))
-	{
-		mV3.MeshStorageData();
+		subVoxel.mV3.IncludeInMesh();
 		return;
 	}
 
 
-	if (!mV4.IsMesh() && mV4.IsContainPoint(_point))
+	if (!subVoxel.mV4.IsMesh() && subVoxel.mV4.IsContainPoint(_point))
 	{
-		mV4.MeshStorageData();
+		subVoxel.mV4.IncludeInMesh();
 		return;
 	}
 
-	if (!mV5.IsMesh() && mV5.IsContainPoint(_point))
+	if (!subVoxel.mV5.IsMesh() && subVoxel.mV5.IsContainPoint(_point))
 	{
-		mV5.MeshStorageData();
+		subVoxel.mV5.IncludeInMesh();
 		return;
 	}
 
-	if (!mV6.IsMesh() && mV6.IsContainPoint(_point))
+	if (!subVoxel.mV6.IsMesh() && subVoxel.mV6.IsContainPoint(_point))
 	{
-		mV6.MeshStorageData();
+		subVoxel.mV6.IncludeInMesh();
 		return;
 	}
 
-	if (!mV7.IsMesh() && mV7.IsContainPoint(_point))
+	if (!subVoxel.mV7.IsMesh() && subVoxel.mV7.IsContainPoint(_point))
 	{
-		mV7.MeshStorageData();
+		subVoxel.mV7.IncludeInMesh();
 		return;
 	}
-	bAllMeshFound = true;
 }

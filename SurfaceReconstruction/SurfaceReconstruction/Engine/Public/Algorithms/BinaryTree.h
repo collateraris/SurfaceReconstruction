@@ -54,17 +54,28 @@ namespace Engine::Algorithm
 
 	struct SBSTChunkOx;
 
-	struct SBSTContainer
+	struct SBSTChunkOz;
+
+	class SBSTContainer
 	{
+	public:
 		SBSTContainer(SNodeData _data);
+
+		void InitCubesPool(int32_t _poolSize);
 
 		void Find(const SPoint3D& _point);
 
 	private:
 
-		//std::vector<std::shared_ptr<SBSTChunkOx>> chunksOx;
-		//std::unordered_map<uint32_t, SBSTChunkOx> chunksOx;
-		std::vector<SBSTChunkOx> chunksOx;
+		void TriggerVoxel(std::shared_ptr<SBSTChunkOz>& issueChunk);
+
+		void AttachMeshSpace(std::shared_ptr<SBSTChunkOz>& issueChunk, const SPoint3D& _point);
+
+		std::vector<std::shared_ptr<SBSTChunkOx>> chunksOx;
+
+		std::vector<std::shared_ptr<SVoxelData>> voxelsPool;
+
+		int32_t usedVoxels = 0;
 
 		SNodeData mData;
 	};
@@ -75,70 +86,36 @@ namespace Engine::Algorithm
 	{
 		SBSTChunkOx() = default;
 
-		SBSTChunkOx(SNodeData _data);
+		void SetData(SNodeData&& mData);
 
-		void Find(int32_t axisKey, const SPoint3D& _point);
-
-		const SNodeData& GetData()
-		{
-			return mData;
-		}
-
-		bool IsEmpty() { return bIsEmpty; };
-
-	private:
-		 //std::vector< std::shared_ptr<SBSTChunkOy>> chunksOy;
-		//std::unordered_map<uint32_t, SBSTChunkOy> chunksOy;
-		std::vector<SBSTChunkOy> chunksOy;
+		std::vector<std::shared_ptr<SBSTChunkOy>> chunksOy;
 		 
-		 SNodeData mData;
-
-		 bool bIsEmpty = true;
+		SNodeData mData;
 	};
-
-	struct SBSTChunkOz;
 
 	struct SBSTChunkOy
 	{
 		SBSTChunkOy() = default;
 
-		SBSTChunkOy(SNodeData _data);
-
-		void Find(int32_t axisKey,const SPoint3D& _point);
-
-		const SNodeData& GetData()
-		{
-			return mData;
-		}
-
-		bool IsEmpty() { return bIsEmpty; };
-
-	private:
+		void SetData(SNodeData&& mData);
 
 		std::vector<std::shared_ptr<SBSTChunkOz>> chunksOz;
-		//std::unordered_map<uint32_t, SBSTChunkOz> chunksOz;
 
 		SNodeData mData;
-
-		bool bIsEmpty = true;
 	};
 
 	struct SBSTChunkOz
 	{
 		SBSTChunkOz() = default;
 
-		SBSTChunkOz(SNodeData _data);
+		std::shared_ptr<SVoxelData> voxel;
 
-		void Perform(const SPoint3D& _point);
+		int32_t subVoxelIndex = 0;
 
-		const SNodeData& GetData()
+		void SetData(SNodeData&& data)
 		{
-			return mData;
+			mData = std::move(data);
 		}
-
-	private:
-
-		SMarchingCube cubes;
 
 		SNodeData mData;
 	};

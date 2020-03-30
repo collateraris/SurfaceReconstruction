@@ -43,10 +43,11 @@ namespace Engine::Algorithm
 
 		virtual void MeshStorageData() {};
 
-		virtual bool IsContainPoint(const SPoint3D& _point) { return false;};
+		virtual bool IsContainPoint(const SPoint3D& _point) { return false; };
+
+		virtual void IncludeInMesh() { bIsMesh = true; };
 
 	protected:
-		virtual void IncludeInMesh() { bIsMesh = true; };
 
 		bool bIsMesh = false;
 
@@ -217,25 +218,11 @@ namespace Engine::Algorithm
 
 	};
 
-	struct SMarchingCube
+	struct SSubVoxelData
 	{
-		SMarchingCube() = default;
+		SSubVoxelData() = default;
 
-		SMarchingCube(int32_t _startX, int32_t _startY, int32_t _startZ, int32_t _cubeSizeX, int32_t _cubeSizeY, int32_t _cubeSizeZ);
-
-		void FillMeshSubSpace(const SPoint3D& _point);
-
-	private:
-
-		int32_t startX;
-		int32_t startY;
-		int32_t startZ;
-
-		int32_t cubeSizeX;
-		int32_t cubeSizeY;
-		int32_t cubeSizeZ;
-
-		bool bAllMeshFound;
+		bool bAllMeshFound = false;
 
 		SVertexCubeField_0 mV0;
 		SVertexCubeField_1 mV1;
@@ -245,7 +232,19 @@ namespace Engine::Algorithm
 		SVertexCubeField_5 mV5;
 		SVertexCubeField_6 mV6;
 		SVertexCubeField_7 mV7;
+	};
 
+	struct SVoxelData
+	{
+		SVoxelData() = default;
+
+		int32_t PushSubVoxelData(int32_t _startX, int32_t _startY, int32_t _startZ, int32_t _cubeSizeX, int32_t _cubeSizeY, int32_t _cubeSizeZ);
+
+		void AttachMeshSpace(const SPoint3D& _point, int32_t _subVoxelIndex);
+
+	private:
+		
+		std::vector<SSubVoxelData> voxels;
 	};
 
 }
