@@ -261,8 +261,9 @@ void SBSTContainer::Find(const SPoint3D& _point)
 	}
 }
 
-void SBSTContainer::CreateSolidMesh(int32_t numSteps/* = 100*/)
+void SBSTContainer::CreateSolidMesh(int32_t numSteps/* = 10*/, int32_t neutralSteps /* = 1*/)
 {
+	this->neutralSteps = neutralSteps;
 	for (int32_t st = 0; st < numSteps; st++)
 	{
 		for (std::size_t vx = 0; vx < usedVoxels; ++vx)
@@ -278,8 +279,10 @@ void SBSTContainer::SearchNeighbourX(std::shared_ptr<SVoxelData>& vxData, int32_
 	int32_t chunkSize = chunksOx.size() - 1;
 	int32_t searchIndexX = vxData->GetSearchIndexX();
 
-	for (int32_t i = -stepSize; i <= stepSize; ++i )
-	{
+	int32_t lowerBound = vxData->backDir ? -stepSize : 0;
+	int32_t upperBound = vxData->frontDir ? stepSize : 0;
+
+	for (int32_t i = lowerBound; i <= upperBound; ++i) {
 		int32_t checkIndexX = searchIndexX + i;
 		if (checkIndexX < 0 || checkIndexX > chunkSize)
 		{
@@ -301,7 +304,10 @@ void SBSTContainer::SearchNeighbourY(std::shared_ptr<SVoxelData>& vxData, int32_
 	int32_t chunkSize = chunksOy.size() - 1;
 	int32_t searchIndexY = vxData->GetSearchIndexY();
 
-	for (int32_t i = -stepSize; i <= stepSize; ++i)
+	int32_t lowerBound = vxData->leftDir ? -stepSize : 0;
+	int32_t upperBound = vxData->rightDir ? stepSize : 0;
+
+	for (int32_t i = lowerBound; i <= upperBound; ++i)
 	{
 		int32_t checkIndexY = searchIndexY + i;
 		if (checkIndexY < 0 || checkIndexY > chunkSize)
@@ -325,9 +331,16 @@ void SBSTContainer::SearchNeighbourZ(std::shared_ptr<SVoxelData>& vxData, int32_
 	std::vector<std::shared_ptr<SBSTChunkOy>>& chunksOy = chunksOx[chunkIndexX]->chunksOy;
 	std::vector<std::shared_ptr<SBSTChunkOz>>& chunksOz = chunksOy[chunkIndexY]->chunksOz;
 	int32_t chunkSize = chunksOz.size() - 1;
+	int32_t searchIndexX = vxData->GetSearchIndexX();
+	int32_t searchIndexY = vxData->GetSearchIndexY();
 	int32_t searchIndexZ = vxData->GetSearchIndexZ();
+	int32_t neutralLowerSize = searchIndexZ - neutralSteps;
+	int32_t neutralUperSize = searchIndexZ - neutralSteps;
 
-	for (int32_t i = -stepSize; i <= stepSize; ++i)
+	int32_t lowerBound = vxData->buttomDir ? -stepSize : 0;
+	int32_t upperBound = vxData->topDir ? stepSize : 0;
+
+	for (int32_t i = lowerBound; i <= upperBound; ++i)
 	{
 		int32_t checkIndexZ = searchIndexZ + i;
 		if (checkIndexZ < 0 || checkIndexZ > chunkSize)
@@ -346,9 +359,37 @@ void SBSTContainer::SearchNeighbourZ(std::shared_ptr<SVoxelData>& vxData, int32_
 			continue;
 		}
 
-		if (vxData->CompareGroup(chunkZ->voxel))
+		if ((checkIndexZ < neutralLowerSize || checkIndexZ > neutralUperSize) &&  vxData->CompareGroup(chunkZ->voxel))
 		{
 			continue;
+		}
+
+		// Compare directional;
+		if (searchIndexX > chunkIndexX)
+		{
+			vxData->backDir = false;
+		}
+		else
+		{
+			vxData->frontDir = false;
+		}
+
+		if (searchIndexY > chunkIndexY)
+		{
+			vxData->leftDir = false;
+		}
+		else
+		{
+			vxData->rightDir = false;
+		}
+
+		if (searchIndexZ > checkIndexZ)
+		{
+			vxData->buttomDir = false;
+		}
+		else
+		{
+			vxData->topDir = false;
 		}
 
 		// Found neighbour with another group!
@@ -423,6 +464,20 @@ void SBSTContainer::AddSubVoxel(std::shared_ptr<SVoxelData>& vxData, int32_t ste
 			chunkZ->subVoxelIndex = vxData->PushSubVoxelData(startX, startY, startZ, mData.cubeSizeX, mData.cubeSizeY, mData.cubeSizeZ);
 			vxData->AttachMeshSpace(chunkZ->subVoxelIndex);
 			chunkZ->voxel = vxData;
+		}
+	}
+}
+
+void SBSTContainer::GetAllMeshes(std::list<SVertexVoxelUnit>& allMeshesAsObj)
+{
+	for (std::size_t vx = 0; vx < usedVoxels; ++vx)
+	{
+		std::shared_ptr<SVoxelData>& vxData = voxelsPool[vx];
+		std::size_t subVoxelSize = vxData->voxels.size();
+
+		for (std::size_t svx = 0; svx < subVoxelSize; ++svx)
+		{
+			vxData->GetAllMeshes(allMeshesAsObj, svx);
 		}
 	}
 }

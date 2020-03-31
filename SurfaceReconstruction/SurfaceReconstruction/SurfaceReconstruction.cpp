@@ -30,7 +30,7 @@ int main()
     data.minOx = -2 * MULTIPLICATOR;
     data.minOy = -2 * MULTIPLICATOR;
     data.minOz = -2 * MULTIPLICATOR;
-    data.chunkNumber = 512;
+    data.chunkNumber = 128;
     data.cubeSizeX = (10 * MULTIPLICATOR) / data.chunkNumber;
     data.cubeSizeY = (10 * MULTIPLICATOR) / data.chunkNumber;
     data.cubeSizeZ = (10 * MULTIPLICATOR) / data.chunkNumber;
@@ -55,14 +55,24 @@ int main()
 
     {
         auto start = std::chrono::steady_clock::now();
-        bst.CreateSolidMesh(2);
+        bst.CreateSolidMesh(30, 1);
         auto end = std::chrono::steady_clock::now();
         std::chrono::duration<double> elapsed_seconds = end - start;
         std::cout << "Create solid mesh elapsed time: " << elapsed_seconds.count() << "s\n";
     }
 
-    std::cout << CCommonStruct::GetSizeVoxelList() << std::endl;
-    CCommonStruct::PrintVoxelsInObj("object.obj");
+    std::list<SVertexVoxelUnit> allMeshesAsObj;
+
+    {
+        auto start = std::chrono::steady_clock::now();
+        bst.GetAllMeshes(allMeshesAsObj);
+        auto end = std::chrono::steady_clock::now();
+        std::chrono::duration<double> elapsed_seconds = end - start;
+        std::cout << "Getting all meshes elapsed time: " << elapsed_seconds.count() << "s\n";
+    }
+
+    std::cout << allMeshesAsObj.size() << std::endl;
+    CCommonStruct::PrintVoxelsInObj("object.obj", allMeshesAsObj);
     system("pause");
 }
 

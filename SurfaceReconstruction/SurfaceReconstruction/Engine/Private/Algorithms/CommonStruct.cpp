@@ -5,14 +5,7 @@
 
 using namespace Engine::Algorithm;
 
-std::list<SVertexVoxelUnit> g_storageVoxels;
-
-int CCommonStruct::GetSizeVoxelList()
-{
-	return g_storageVoxels.size();
-}
-
-void CCommonStruct::PrintVoxelsInObj(const char* filename)
+void CCommonStruct::PrintVoxelsInObj(const char* filename, std::list<SVertexVoxelUnit>& storageVoxels)
 {
 	std::ofstream out;
 	out.open(filename);
@@ -21,7 +14,7 @@ void CCommonStruct::PrintVoxelsInObj(const char* filename)
 	{
 		const int VERTICES_BATCH_NUMBER = 8;
 		unsigned int offset = 0;
-		for (auto& it : g_storageVoxels)
+		for (auto& it : storageVoxels)
 		{
 			for (auto& v : it.vertices)
 			{
@@ -89,7 +82,7 @@ bool SVertexCubeField_0::IsContainPoint(const SPoint3D& _point)
 	return false;
 }
 
-void SVertexCubeField_0::MeshStorageData()
+void SVertexCubeField_0::MeshStorageData(std::list<SVertexVoxelUnit>& allMeshesAsObj)
 {
 	IncludeInMesh();
 	SVertexVoxelUnit unit;
@@ -101,7 +94,7 @@ void SVertexCubeField_0::MeshStorageData()
 	unit.vertices.push_back(std::move(SPoint3D(x, y + cubeSizeY, z + cubeSizeZ)));
 	unit.vertices.push_back(std::move(SPoint3D(x + cubeSizeX, y + cubeSizeY, z + cubeSizeZ)));
 	unit.vertices.push_back(std::move(SPoint3D(x + cubeSizeX, y, z + cubeSizeZ)));
-	g_storageVoxels.push_back(std::move(unit));
+	allMeshesAsObj.push_back(std::move(unit));
 }
 
 bool SVertexCubeField_1::IsContainPoint(const SPoint3D& _point)
@@ -115,7 +108,7 @@ bool SVertexCubeField_1::IsContainPoint(const SPoint3D& _point)
 	return false;
 }
 
-void SVertexCubeField_1::MeshStorageData()
+void SVertexCubeField_1::MeshStorageData(std::list<SVertexVoxelUnit>& allMeshesAsObj)
 {
 	IncludeInMesh();
 	SVertexVoxelUnit unit;
@@ -127,7 +120,7 @@ void SVertexCubeField_1::MeshStorageData()
 	unit.vertices.push_back(std::move(SPoint3D(x, y, z + cubeSizeZ)));
 	unit.vertices.push_back(std::move(SPoint3D(x + cubeSizeX, y, z + cubeSizeZ)));
 	unit.vertices.push_back(std::move(SPoint3D(x + cubeSizeX, y - cubeSizeY, z + cubeSizeZ)));
-	g_storageVoxels.push_back(std::move(unit));
+	allMeshesAsObj.push_back(std::move(unit));
 }
 
 bool SVertexCubeField_2::IsContainPoint(const SPoint3D& _point)
@@ -141,7 +134,7 @@ bool SVertexCubeField_2::IsContainPoint(const SPoint3D& _point)
 	return false;
 }
 
-void SVertexCubeField_2::MeshStorageData()
+void SVertexCubeField_2::MeshStorageData(std::list<SVertexVoxelUnit>& allMeshesAsObj)
 {
 	IncludeInMesh();
 	SVertexVoxelUnit unit;
@@ -153,7 +146,7 @@ void SVertexCubeField_2::MeshStorageData()
 	unit.vertices.push_back(std::move(SPoint3D(x - cubeSizeX, y, z + cubeSizeZ)));
 	unit.vertices.push_back(std::move(SPoint3D(x , y , z + cubeSizeZ)));
 	unit.vertices.push_back(std::move(SPoint3D(x, y - cubeSizeY, z + cubeSizeZ)));
-	g_storageVoxels.push_back(std::move(unit));
+	allMeshesAsObj.push_back(std::move(unit));
 }
 
 bool SVertexCubeField_3::IsContainPoint(const SPoint3D& _point)
@@ -167,7 +160,7 @@ bool SVertexCubeField_3::IsContainPoint(const SPoint3D& _point)
 	return false;
 }
 
-void SVertexCubeField_3::MeshStorageData()
+void SVertexCubeField_3::MeshStorageData(std::list<SVertexVoxelUnit>& allMeshesAsObj)
 {
 	IncludeInMesh();
 	SVertexVoxelUnit unit;
@@ -179,7 +172,7 @@ void SVertexCubeField_3::MeshStorageData()
 	unit.vertices.push_back(std::move(SPoint3D(x - cubeSizeX, y + cubeSizeY, z + cubeSizeZ)));
 	unit.vertices.push_back(std::move(SPoint3D(x, y + cubeSizeY, z + cubeSizeZ)));
 	unit.vertices.push_back(std::move(SPoint3D(x, y, z + cubeSizeZ)));
-	g_storageVoxels.push_back(std::move(unit));
+	allMeshesAsObj.push_back(std::move(unit));
 }
 
 bool SVertexCubeField_4::IsContainPoint(const SPoint3D& _point)
@@ -193,7 +186,7 @@ bool SVertexCubeField_4::IsContainPoint(const SPoint3D& _point)
 	return false;
 }
 
-void SVertexCubeField_4::MeshStorageData()
+void SVertexCubeField_4::MeshStorageData(std::list<SVertexVoxelUnit>& allMeshesAsObj)
 {
 	IncludeInMesh();
 }
@@ -209,7 +202,7 @@ bool SVertexCubeField_5::IsContainPoint(const SPoint3D& _point)
 	return false;
 }
 
-void SVertexCubeField_5::MeshStorageData()
+void SVertexCubeField_5::MeshStorageData(std::list<SVertexVoxelUnit>& allMeshesAsObj)
 {
 	IncludeInMesh();
 	SVertexVoxelUnit unit;
@@ -221,7 +214,7 @@ void SVertexCubeField_5::MeshStorageData()
 	unit.vertices.push_back(std::move(SPoint3D(x, y , z)));
 	unit.vertices.push_back(std::move(SPoint3D(x + cubeSizeX, y, z)));
 	unit.vertices.push_back(std::move(SPoint3D(x + cubeSizeX, y - cubeSizeY, z)));
-	g_storageVoxels.push_back(std::move(unit));
+	allMeshesAsObj.push_back(std::move(unit));
 }
 
 bool SVertexCubeField_6::IsContainPoint(const SPoint3D& _point)
@@ -235,7 +228,7 @@ bool SVertexCubeField_6::IsContainPoint(const SPoint3D& _point)
 	return false;
 }
 
-void SVertexCubeField_6::MeshStorageData()
+void SVertexCubeField_6::MeshStorageData(std::list<SVertexVoxelUnit>& allMeshesAsObj)
 {
 	IncludeInMesh();
 	SVertexVoxelUnit unit;
@@ -247,7 +240,7 @@ void SVertexCubeField_6::MeshStorageData()
 	unit.vertices.push_back(std::move(SPoint3D(x - cubeSizeX, y, z)));
 	unit.vertices.push_back(std::move(SPoint3D(x , y , z )));
 	unit.vertices.push_back(std::move(SPoint3D(x, y - cubeSizeY, z)));
-	g_storageVoxels.push_back(std::move(unit));
+	allMeshesAsObj.push_back(std::move(unit));
 }
 
 bool SVertexCubeField_7::IsContainPoint(const SPoint3D& _point)
@@ -261,7 +254,7 @@ bool SVertexCubeField_7::IsContainPoint(const SPoint3D& _point)
 	return false;
 }
 
-void SVertexCubeField_7::MeshStorageData()
+void SVertexCubeField_7::MeshStorageData(std::list<SVertexVoxelUnit>& allMeshesAsObj)
 {
 	IncludeInMesh();
 	SVertexVoxelUnit unit;
@@ -273,7 +266,7 @@ void SVertexCubeField_7::MeshStorageData()
 	unit.vertices.push_back(std::move(SPoint3D(x - cubeSizeX, y + cubeSizeY, z)));
 	unit.vertices.push_back(std::move(SPoint3D(x, y + cubeSizeY, z)));
 	unit.vertices.push_back(std::move(SPoint3D(x , y, z )));
-	g_storageVoxels.push_back(std::move(unit));
+	allMeshesAsObj.push_back(std::move(unit));
 }
 
 int32_t SVoxelData::PushSubVoxelData(int32_t _startX, int32_t _startY, int32_t _startZ, int32_t _cubeSizeX, int32_t _cubeSizeY, int32_t _cubeSizeZ)
@@ -311,58 +304,58 @@ void SVoxelData::AttachMeshSpace(const SPoint3D& _point, int32_t _subVoxelIndex)
 
 	if (!subVoxel.mV0.IsMesh() && subVoxel.mV0.IsContainPoint(_point))
 	{
-		//subVoxel.mV0.IncludeInMesh();
-		subVoxel.mV0.MeshStorageData();
+		subVoxel.mV0.IncludeInMesh();
+		//subVoxel.mV0.MeshStorageData();
 		return;
 	}
 
 	if (!subVoxel.mV1.IsMesh() && subVoxel.mV1.IsContainPoint(_point))
 	{
-		//subVoxel.mV1.IncludeInMesh();
-		subVoxel.mV1.MeshStorageData();
+		subVoxel.mV1.IncludeInMesh();
+		//subVoxel.mV1.MeshStorageData();
 		return;
 	}
 
 	if (!subVoxel.mV2.IsMesh() && subVoxel.mV2.IsContainPoint(_point))
 	{
-		//subVoxel.mV2.IncludeInMesh();
-		subVoxel.mV2.MeshStorageData();
+		subVoxel.mV2.IncludeInMesh();
+		//subVoxel.mV2.MeshStorageData();
 		return;
 	}
 
 	if (!subVoxel.mV3.IsMesh() && subVoxel.mV3.IsContainPoint(_point))
 	{
-		//subVoxel.mV3.IncludeInMesh();
-		subVoxel.mV3.MeshStorageData();
+		subVoxel.mV3.IncludeInMesh();
+		//subVoxel.mV3.MeshStorageData();
 		return;
 	}
 
 
 	if (!subVoxel.mV4.IsMesh() && subVoxel.mV4.IsContainPoint(_point))
 	{
-		//subVoxel.mV4.IncludeInMesh();
-		subVoxel.mV4.MeshStorageData();
+		subVoxel.mV4.IncludeInMesh();
+		//subVoxel.mV4.MeshStorageData();
 		return;
 	}
 
 	if (!subVoxel.mV5.IsMesh() && subVoxel.mV5.IsContainPoint(_point))
 	{
-		//subVoxel.mV5.IncludeInMesh();
-		subVoxel.mV5.MeshStorageData();
+		subVoxel.mV5.IncludeInMesh();
+		//subVoxel.mV5.MeshStorageData();
 		return;
 	}
 
 	if (!subVoxel.mV6.IsMesh() && subVoxel.mV6.IsContainPoint(_point))
 	{
-		//subVoxel.mV6.IncludeInMesh();
-		subVoxel.mV6.MeshStorageData();
+		subVoxel.mV6.IncludeInMesh();
+		//subVoxel.mV6.MeshStorageData();
 		return;
 	}
 
 	if (!subVoxel.mV7.IsMesh() && subVoxel.mV7.IsContainPoint(_point))
 	{
-		//subVoxel.mV7.IncludeInMesh();
-		subVoxel.mV7.MeshStorageData();
+		subVoxel.mV7.IncludeInMesh();
+		//subVoxel.mV7.MeshStorageData();
 		return;
 	}
 }
@@ -373,50 +366,95 @@ void SVoxelData::AttachMeshSpace(int32_t _subVoxelIndex)
 
 	if (!subVoxel.mV0.IsMesh())
 	{
-		//subVoxel.mV7.IncludeInMesh();
-		subVoxel.mV0.MeshStorageData();
+		subVoxel.mV0.IncludeInMesh();
+		//subVoxel.mV0.MeshStorageData();
 	}
 
 	if (!subVoxel.mV1.IsMesh())
 	{
-		//subVoxel.mV7.IncludeInMesh();
-		subVoxel.mV1.MeshStorageData();
+		subVoxel.mV1.IncludeInMesh();
+		//subVoxel.mV1.MeshStorageData();
 	}
 
 	if (!subVoxel.mV2.IsMesh())
 	{
-		//subVoxel.mV7.IncludeInMesh();
-		subVoxel.mV2.MeshStorageData();
+		subVoxel.mV2.IncludeInMesh();
+		//subVoxel.mV2.MeshStorageData();
 	}
 
 	if (!subVoxel.mV3.IsMesh())
 	{
-		//subVoxel.mV7.IncludeInMesh();
-		subVoxel.mV3.MeshStorageData();
+		subVoxel.mV7.IncludeInMesh();
+		//.mV3.MeshStorageData();
 	}
 
 	if (!subVoxel.mV4.IsMesh())
 	{
-		//subVoxel.mV7.IncludeInMesh();
-		subVoxel.mV4.MeshStorageData();
+		subVoxel.mV4.IncludeInMesh();
+		//subVoxel.mV4.MeshStorageData();
 	}
 
 	if (!subVoxel.mV5.IsMesh())
 	{
-		//subVoxel.mV7.IncludeInMesh();
-		subVoxel.mV5.MeshStorageData();
+		subVoxel.mV5.IncludeInMesh();
+		//.mV5.MeshStorageData();
 	}
 
 	if (!subVoxel.mV6.IsMesh())
 	{
-		//subVoxel.mV7.IncludeInMesh();
-		subVoxel.mV6.MeshStorageData();
+		subVoxel.mV6.IncludeInMesh();
+		//subVoxel.mV6.MeshStorageData();
 	}
 
 	if (!subVoxel.mV7.IsMesh())
 	{
-		//subVoxel.mV7.IncludeInMesh();
-		subVoxel.mV7.MeshStorageData();
+		subVoxel.mV7.IncludeInMesh();
+		//subVoxel.mV7.MeshStorageData();
+	}
+}
+
+void SVoxelData::GetAllMeshes(std::list<SVertexVoxelUnit>& allMeshesAsObj, int32_t _subVoxelIndex)
+{
+	SSubVoxelData& subVoxel = voxels[_subVoxelIndex];
+
+	if (subVoxel.mV0.IsMesh())
+	{
+		subVoxel.mV0.MeshStorageData(allMeshesAsObj);
+	}
+
+	if (subVoxel.mV1.IsMesh())
+	{
+		subVoxel.mV1.MeshStorageData(allMeshesAsObj);
+	}
+
+	if (subVoxel.mV2.IsMesh())
+	{
+		subVoxel.mV2.MeshStorageData(allMeshesAsObj);
+	}
+
+	if (subVoxel.mV3.IsMesh())
+	{
+		subVoxel.mV3.MeshStorageData(allMeshesAsObj);
+	}
+
+	if (subVoxel.mV4.IsMesh())
+	{
+		subVoxel.mV4.MeshStorageData(allMeshesAsObj);
+	}
+
+	if (subVoxel.mV5.IsMesh())
+	{
+		subVoxel.mV5.MeshStorageData(allMeshesAsObj);
+	}
+
+	if (subVoxel.mV6.IsMesh())
+	{
+		subVoxel.mV6.MeshStorageData(allMeshesAsObj);
+	}
+
+	if (subVoxel.mV7.IsMesh())
+	{
+		subVoxel.mV7.MeshStorageData(allMeshesAsObj);
 	}
 }
 

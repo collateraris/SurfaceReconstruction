@@ -74,7 +74,9 @@ namespace Engine::Algorithm
 
 		void Find(const SPoint3D& _point);
 
-		void CreateSolidMesh(int32_t numSteps = 100);
+		void CreateSolidMesh(int32_t numSteps = 10, int32_t neutralSteps = 1);
+
+		void GetAllMeshes(std::list<SVertexVoxelUnit>& allMeshesAsObj);
 
 	private:
 
@@ -93,6 +95,8 @@ namespace Engine::Algorithm
 		std::vector<std::shared_ptr<SVoxelData>> voxelsPool;
 
 		int32_t usedVoxels = 0;
+
+		int32_t neutralSteps = 1;
 
 		SNodeData mData;
 	};

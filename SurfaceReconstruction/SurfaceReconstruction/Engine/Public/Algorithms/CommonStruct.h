@@ -6,12 +6,13 @@
 
 namespace Engine::Algorithm
 {
+	struct SVertexVoxelUnit;
+
 	class CCommonStruct
 	{
 	public:
-		static int GetSizeVoxelList();
 
-		static void PrintVoxelsInObj(const char* filename);
+		static void PrintVoxelsInObj(const char* filename, std::list<SVertexVoxelUnit>& storageVoxels);
 	};
 
 	struct SPoint3D
@@ -41,7 +42,7 @@ namespace Engine::Algorithm
 
 		virtual bool IsMesh() const { return bIsMesh; };
 
-		virtual void MeshStorageData() {};
+		virtual void MeshStorageData(std::list<SVertexVoxelUnit>& allMeshesAsObj) {};
 
 		virtual bool IsContainPoint(const SPoint3D& _point) { return false; };
 
@@ -78,7 +79,7 @@ namespace Engine::Algorithm
 
 		virtual bool IsContainPoint(const SPoint3D& _point) override;
 
-		virtual void MeshStorageData() override;
+		virtual void MeshStorageData(std::list<SVertexVoxelUnit>& allMeshesAsObj) override;
 	};
 
 	struct SVertexCubeField_1 : public SVertexCubeField
@@ -97,7 +98,7 @@ namespace Engine::Algorithm
 
 		virtual bool IsContainPoint(const SPoint3D& _point) override;
 
-		virtual void MeshStorageData() override;
+		virtual void MeshStorageData(std::list<SVertexVoxelUnit>& allMeshesAsObj) override;
 	};
 
 	struct SVertexCubeField_2 : public SVertexCubeField
@@ -116,7 +117,7 @@ namespace Engine::Algorithm
 
 		virtual bool IsContainPoint(const SPoint3D& _point) override;
 
-		virtual void MeshStorageData() override;
+		virtual void MeshStorageData(std::list<SVertexVoxelUnit>& allMeshesAsObj) override;
 	};
 
 	struct SVertexCubeField_3 : public SVertexCubeField
@@ -135,7 +136,7 @@ namespace Engine::Algorithm
 
 		virtual bool IsContainPoint(const SPoint3D& _point) override;
 
-		virtual void MeshStorageData() override;
+		virtual void MeshStorageData(std::list<SVertexVoxelUnit>& allMeshesAsObj) override;
 	};
 
 	struct SVertexCubeField_4 : public SVertexCubeField
@@ -154,7 +155,7 @@ namespace Engine::Algorithm
 
 		virtual bool IsContainPoint(const SPoint3D& _point) override;
 
-		virtual void MeshStorageData() override;
+		virtual void MeshStorageData(std::list<SVertexVoxelUnit>& allMeshesAsObj) override;
 
 	};
 
@@ -174,7 +175,7 @@ namespace Engine::Algorithm
 
 		virtual bool IsContainPoint(const SPoint3D& _point) override;
 
-		virtual void MeshStorageData() override;
+		virtual void MeshStorageData(std::list<SVertexVoxelUnit>& allMeshesAsObj) override;
 
 	};
 
@@ -194,7 +195,7 @@ namespace Engine::Algorithm
 
 		virtual bool IsContainPoint(const SPoint3D& _point) override;
 
-		virtual void MeshStorageData() override;
+		virtual void MeshStorageData(std::list<SVertexVoxelUnit>& allMeshesAsObj) override;
 
 	};
 
@@ -214,7 +215,7 @@ namespace Engine::Algorithm
 
 		virtual bool IsContainPoint(const SPoint3D& _point) override;
 
-		virtual void MeshStorageData() override;
+		virtual void MeshStorageData(std::list<SVertexVoxelUnit>& allMeshesAsObj) override;
 
 	};
 
@@ -273,17 +274,30 @@ namespace Engine::Algorithm
 			return searchIndexZ;
 		}
 
+		void GetAllMeshes(std::list<SVertexVoxelUnit>& allMeshesAsObj, int32_t _subVoxelIndex);
+
+		std::vector<SSubVoxelData> voxels;
+
 	private:
 		friend class SVoxelData;
 
 		SVoxelData* groupHeader = nullptr;
 		
-		std::vector<SSubVoxelData> voxels;
+		//std::vector<SSubVoxelData> voxels;
 
 		//
 		int16_t searchIndexX = -1;
 		int16_t searchIndexY = -1;
 		int16_t searchIndexZ = -1;
+
+	public:
+		// direction permittion
+		bool leftDir = true;
+		bool rightDir = true;
+		bool topDir = true;
+		bool buttomDir = true;
+		bool backDir = true;
+		bool frontDir = true;
 	};
 
 }
