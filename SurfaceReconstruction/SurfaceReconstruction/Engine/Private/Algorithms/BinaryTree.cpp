@@ -1,6 +1,7 @@
 #include "Algorithms/BinaryTree.h"
 
 #include <cassert>
+#include <iostream>
 
 using namespace Engine::Algorithm;
 
@@ -45,6 +46,9 @@ SBSTContainer::SBSTContainer(SNodeData _data)
 
 	//start (root) is last pos
 	SNodeData rootData;
+	mData.maxOx = mData.minOx + mData.chunkNumber * mData.cubeSizeX;
+	mData.maxOy = mData.minOy + mData.chunkNumber * mData.cubeSizeY;
+	mData.maxOz = mData.minOz + mData.chunkNumber * mData.cubeSizeZ;
 	SNodeData data = mData;
 	data.deltaChunkValue = mData.cubeSizeX;
 	data.startChunkValue = mData.minOx;
@@ -70,11 +74,11 @@ void SBSTContainer::InitCubesPool(int32_t _poolSize)
 
 void SBSTContainer::TriggerVoxel(std::shared_ptr<SBSTChunkOz>& issueChunk)
 {
-	if (issueChunk->voxel == nullptr)
+	if (issueChunk->voxel.get() == nullptr)
 	{
 		issueChunk->voxel = voxelsPool[usedVoxels++];
-
-		SNodeData data = issueChunk->mData;
+		SNodeData& data = issueChunk->mData;
+		issueChunk->voxel->SetSearchIndexes(data.searchIndexX, data.searchIndexY, data.searchIndexZ);
 		issueChunk->subVoxelIndex = issueChunk->voxel->PushSubVoxelData(data.startX, data.startY, data.startZ, data.cubeSizeX, data.cubeSizeY, data.cubeSizeZ);
 	}
 }
@@ -86,11 +90,16 @@ void SBSTContainer::AttachMeshSpace(std::shared_ptr<SBSTChunkOz>& issueChunk, co
 
 void SBSTContainer::Find(const SPoint3D& _point)
 {
+	int32_t axisKey = _point.GetX();
+
+	if (axisKey < mData.minOx || axisKey > mData.maxOx)
+	{
+		return;
+	}
+
 	uint8_t depthTree = mData.depthTree;
 
 	int16_t searchIndex = mData.rootNodeIndex;
-
-	int32_t axisKey = _point.GetX();
 
 	SNodeData leftData;
 	SNodeData rightData;
@@ -108,6 +117,12 @@ void SBSTContainer::Find(const SPoint3D& _point)
 		if (data.chunkValue <= axisKey && axisKey <= data.nextChunkValue)
 		{
 			axisKey = _point.GetY();
+
+			if (axisKey < mData.minOy || axisKey > mData.maxOy)
+			{
+				return;
+			}
+
 			chunksOy = &issueChunk->chunksOy;
 			break;
 		}
@@ -125,6 +140,7 @@ void SBSTContainer::Find(const SPoint3D& _point)
 			{
 				SBSTChunkBase::CreateLeftNodeData(data, leftData);
 				leftData.startX = leftData.chunkValue;
+				leftData.searchIndexX = searchIndex;
 				nextChunk = std::move(std::make_shared<SBSTChunkOx>());
 				nextChunk->SetData(std::move(leftData));
 			}
@@ -137,6 +153,7 @@ void SBSTContainer::Find(const SPoint3D& _point)
 			{
 				SBSTChunkBase::CreateRightNodeData(data, rightData);
 				rightData.startX = rightData.chunkValue;
+				rightData.searchIndexX = searchIndex;
 				nextChunk = std::move(std::make_shared<SBSTChunkOx>());
 				nextChunk->SetData(std::move(rightData));
 			}
@@ -156,6 +173,12 @@ void SBSTContainer::Find(const SPoint3D& _point)
 		if (data.chunkValue <= axisKey && axisKey <= data.nextChunkValue)
 		{
 			axisKey = _point.GetZ();
+
+			if (axisKey < mData.minOz || axisKey > mData.maxOz)
+			{
+				return;
+			}
+
 			chunksOz = &issueChunk->chunksOz;
 			break;
 		}
@@ -173,6 +196,7 @@ void SBSTContainer::Find(const SPoint3D& _point)
 			{
 				SBSTChunkBase::CreateLeftNodeData(data, leftData);
 				leftData.startY = leftData.chunkValue;
+				leftData.searchIndexY = searchIndex;
 				nextChunk = std::move(std::make_shared<SBSTChunkOy>());
 				nextChunk->SetData(std::move(leftData));
 			}
@@ -185,6 +209,7 @@ void SBSTContainer::Find(const SPoint3D& _point)
 			{
 				SBSTChunkBase::CreateRightNodeData(data, rightData);
 				rightData.startY = rightData.chunkValue;
+				rightData.searchIndexY = searchIndex;
 				nextChunk = std::move(std::make_shared<SBSTChunkOy>());
 				nextChunk->SetData(std::move(rightData));
 			}
@@ -215,6 +240,7 @@ void SBSTContainer::Find(const SPoint3D& _point)
 			{
 				SBSTChunkBase::CreateLeftNodeData(data, leftData);
 				leftData.startZ = leftData.chunkValue;
+				leftData.searchIndexZ = searchIndex;
 				nextChunk = std::move(std::make_shared<SBSTChunkOz>());
 				nextChunk->SetData(std::move(leftData));
 			}
@@ -227,9 +253,176 @@ void SBSTContainer::Find(const SPoint3D& _point)
 			{
 				SBSTChunkBase::CreateRightNodeData(data, rightData);
 				rightData.startZ = rightData.chunkValue;
+				rightData.searchIndexZ = searchIndex;
 				nextChunk = std::move(std::make_shared<SBSTChunkOz>());
 				nextChunk->SetData(std::move(rightData));
 			}
+		}
+	}
+}
+
+void SBSTContainer::CreateSolidMesh(int32_t numSteps/* = 100*/)
+{
+	for (int32_t st = 0; st < numSteps; st++)
+	{
+		for (std::size_t vx = 0; vx < usedVoxels; ++vx)
+		{
+			std::shared_ptr<SVoxelData>& vxData = voxelsPool[vx];
+			SearchNeighbourX(vxData, st + 1);
+		}
+	}
+}
+
+void SBSTContainer::SearchNeighbourX(std::shared_ptr<SVoxelData>& vxData, int32_t stepSize)
+{
+	int32_t chunkSize = chunksOx.size() - 1;
+	int32_t searchIndexX = vxData->GetSearchIndexX();
+
+	for (int32_t i = -stepSize; i <= stepSize; ++i )
+	{
+		int32_t checkIndexX = searchIndexX + i;
+		if (checkIndexX < 0 || checkIndexX > chunkSize)
+		{
+			continue;
+		}
+
+		if (chunksOx[checkIndexX].get() == nullptr)
+		{
+			continue;
+		}
+
+		SearchNeighbourY(vxData, stepSize, checkIndexX);
+	}
+}
+
+void SBSTContainer::SearchNeighbourY(std::shared_ptr<SVoxelData>& vxData, int32_t stepSize, int32_t chunkIndexX)
+{
+	std::vector<std::shared_ptr<SBSTChunkOy>>& chunksOy = chunksOx[chunkIndexX]->chunksOy;
+	int32_t chunkSize = chunksOy.size() - 1;
+	int32_t searchIndexY = vxData->GetSearchIndexY();
+
+	for (int32_t i = -stepSize; i <= stepSize; ++i)
+	{
+		int32_t checkIndexY = searchIndexY + i;
+		if (checkIndexY < 0 || checkIndexY > chunkSize)
+		{
+			continue;
+		}
+
+		std::shared_ptr<SBSTChunkOy>& chunkY = chunksOy[checkIndexY];
+
+		if (chunkY.get() == nullptr)
+		{
+			continue;
+		}
+
+		SearchNeighbourZ(vxData, stepSize, chunkIndexX, checkIndexY);
+	}
+}
+
+void SBSTContainer::SearchNeighbourZ(std::shared_ptr<SVoxelData>& vxData, int32_t stepSize, int32_t chunkIndexX, int32_t chunkIndexY)
+{
+	std::vector<std::shared_ptr<SBSTChunkOy>>& chunksOy = chunksOx[chunkIndexX]->chunksOy;
+	std::vector<std::shared_ptr<SBSTChunkOz>>& chunksOz = chunksOy[chunkIndexY]->chunksOz;
+	int32_t chunkSize = chunksOz.size() - 1;
+	int32_t searchIndexZ = vxData->GetSearchIndexZ();
+
+	for (int32_t i = -stepSize; i <= stepSize; ++i)
+	{
+		int32_t checkIndexZ = searchIndexZ + i;
+		if (checkIndexZ < 0 || checkIndexZ > chunkSize)
+		{
+			continue;
+		}
+
+		std::shared_ptr<SBSTChunkOz>& chunkZ = chunksOz[checkIndexZ];
+		if (chunkZ.get() == nullptr)
+		{
+			continue;
+		}
+
+		if (chunkZ->voxel.get() == nullptr)
+		{
+			continue;
+		}
+
+		if (vxData->CompareGroup(chunkZ->voxel))
+		{
+			continue;
+		}
+
+		// Found neighbour with another group!
+		vxData->UnionGroup(chunkZ->voxel);
+
+		AddSubVoxel(vxData, stepSize, chunkIndexX, chunkIndexY, checkIndexZ);
+	}
+}
+
+void SBSTContainer::AddSubVoxel(std::shared_ptr<SVoxelData>& vxData, int32_t stepSize, int32_t chunkIndexX, int32_t chunkIndexY, int32_t chunkIndexZ)
+{
+	int32_t searchIndexX = vxData->GetSearchIndexX();
+	int32_t searchIndexY = vxData->GetSearchIndexY();
+	int32_t searchIndexZ = vxData->GetSearchIndexZ();
+
+	int32_t signX = searchIndexX > chunkIndexX ? 1 : -1;
+	int32_t signY = searchIndexY > chunkIndexY ? 1 : -1;
+	int32_t signZ = searchIndexZ > chunkIndexZ ? 1 : -1;
+
+	int32_t newChunkX = chunkIndexX;
+	int32_t newChunkY = chunkIndexY;
+	int32_t newChunkZ = chunkIndexZ;
+
+	int32_t chunkSize = chunksOx.size() - 1;
+
+	for (int32_t i = 0; i < stepSize; ++i)
+	{
+		newChunkX = (newChunkX == searchIndexX) ? newChunkX : (newChunkX + signX);
+		newChunkY = (newChunkY == searchIndexY) ? newChunkY : (newChunkY + signY);
+		newChunkZ = (newChunkZ == searchIndexZ) ? newChunkZ : (newChunkZ + signZ);
+
+		if (newChunkX < 0 || newChunkX > chunkSize)
+		{
+			continue;
+		}
+
+		if (newChunkY < 0 || newChunkY > chunkSize)
+		{
+			continue;
+		}
+
+		if (newChunkZ < 0 || newChunkZ > chunkSize)
+		{
+			continue;
+		}
+
+		std::shared_ptr<SBSTChunkOx>& chunkX = chunksOx[newChunkX];
+		if (chunkX.get() == nullptr)
+		{
+			chunkX = std::move(std::make_shared<SBSTChunkOx>());
+			chunkX->chunksOy.resize(chunkSize + 1);
+		}
+
+		std::vector<std::shared_ptr<SBSTChunkOy>>& chunksOy = chunkX->chunksOy;
+		std::shared_ptr<SBSTChunkOy>& chunkY = chunksOy[newChunkY];
+		if (chunkY.get() == nullptr)
+		{
+			chunkY = std::move(std::make_shared<SBSTChunkOy>());
+			chunkY->chunksOz.resize(chunkSize + 1);
+		}
+
+		std::vector<std::shared_ptr<SBSTChunkOz>>& chunksOz = chunkY->chunksOz;
+		std::shared_ptr<SBSTChunkOz>& chunkZ = chunksOz[newChunkZ];
+
+		if (chunkZ.get() == nullptr)
+		{
+			chunkZ = std::move(std::make_shared<SBSTChunkOz>());
+
+			int32_t startX = mData.minOx + (newChunkX - 1) * mData.cubeSizeX;
+			int32_t startY = mData.minOy + (newChunkY - 1) * mData.cubeSizeY;
+			int32_t startZ = mData.minOz + (newChunkZ - 1) * mData.cubeSizeZ;
+			chunkZ->subVoxelIndex = vxData->PushSubVoxelData(startX, startY, startZ, mData.cubeSizeX, mData.cubeSizeY, mData.cubeSizeZ);
+			vxData->AttachMeshSpace(chunkZ->subVoxelIndex);
+			chunkZ->voxel = vxData;
 		}
 	}
 }

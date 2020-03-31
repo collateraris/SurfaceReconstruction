@@ -27,21 +27,40 @@ int main()
     CReadPoints::ParseFromText("object.pts", _points, MULTIPLICATOR);
 
     SNodeData data;
-    data.minOx = -10 * MULTIPLICATOR;
-    data.minOy = -10 * MULTIPLICATOR;
-    data.minOz = -10 * MULTIPLICATOR;
-    data.chunkNumber = 2048;
-    data.cubeSizeX = (20 * MULTIPLICATOR) / data.chunkNumber;
-    data.cubeSizeY = (20 * MULTIPLICATOR) / data.chunkNumber;
-    data.cubeSizeZ = (20 * MULTIPLICATOR) / data.chunkNumber;
+    data.minOx = -2 * MULTIPLICATOR;
+    data.minOy = -2 * MULTIPLICATOR;
+    data.minOz = -2 * MULTIPLICATOR;
+    data.chunkNumber = 512;
+    data.cubeSizeX = (10 * MULTIPLICATOR) / data.chunkNumber;
+    data.cubeSizeY = (10 * MULTIPLICATOR) / data.chunkNumber;
+    data.cubeSizeZ = (10 * MULTIPLICATOR) / data.chunkNumber;
 
     SBSTContainer bst(data);
-    bst.InitCubesPool(_points.size());
-    auto start = std::chrono::steady_clock::now();
-    BST(bst, _points);
-    auto end = std::chrono::steady_clock::now();
-    std::chrono::duration<double> elapsed_seconds = end - start;
-    std::cout << "elapsed time: " << elapsed_seconds.count() << "s\n";
+
+    {
+        auto start = std::chrono::steady_clock::now();
+        bst.InitCubesPool(_points.size());
+        auto end = std::chrono::steady_clock::now();
+        std::chrono::duration<double> elapsed_seconds = end - start;
+        std::cout << "Create voxel pool elapsed time: " << elapsed_seconds.count() << "s\n";
+    }
+ 
+    {
+        auto start = std::chrono::steady_clock::now();
+        BST(bst, _points);
+        auto end = std::chrono::steady_clock::now();
+        std::chrono::duration<double> elapsed_seconds = end - start;
+        std::cout << "Create voxel tree elapsed time: " << elapsed_seconds.count() << "s\n";
+    }
+
+    {
+        auto start = std::chrono::steady_clock::now();
+        bst.CreateSolidMesh(2);
+        auto end = std::chrono::steady_clock::now();
+        std::chrono::duration<double> elapsed_seconds = end - start;
+        std::cout << "Create solid mesh elapsed time: " << elapsed_seconds.count() << "s\n";
+    }
+
     std::cout << CCommonStruct::GetSizeVoxelList() << std::endl;
     CCommonStruct::PrintVoxelsInObj("object.obj");
     system("pause");

@@ -311,50 +311,125 @@ void SVoxelData::AttachMeshSpace(const SPoint3D& _point, int32_t _subVoxelIndex)
 
 	if (!subVoxel.mV0.IsMesh() && subVoxel.mV0.IsContainPoint(_point))
 	{
-		subVoxel.mV0.IncludeInMesh();
+		//subVoxel.mV0.IncludeInMesh();
+		subVoxel.mV0.MeshStorageData();
 		return;
 	}
 
 	if (!subVoxel.mV1.IsMesh() && subVoxel.mV1.IsContainPoint(_point))
 	{
-		subVoxel.mV1.IncludeInMesh();
+		//subVoxel.mV1.IncludeInMesh();
+		subVoxel.mV1.MeshStorageData();
 		return;
 	}
 
 	if (!subVoxel.mV2.IsMesh() && subVoxel.mV2.IsContainPoint(_point))
 	{
-		subVoxel.mV2.IncludeInMesh();
+		//subVoxel.mV2.IncludeInMesh();
+		subVoxel.mV2.MeshStorageData();
 		return;
 	}
 
 	if (!subVoxel.mV3.IsMesh() && subVoxel.mV3.IsContainPoint(_point))
 	{
-		subVoxel.mV3.IncludeInMesh();
+		//subVoxel.mV3.IncludeInMesh();
+		subVoxel.mV3.MeshStorageData();
 		return;
 	}
 
 
 	if (!subVoxel.mV4.IsMesh() && subVoxel.mV4.IsContainPoint(_point))
 	{
-		subVoxel.mV4.IncludeInMesh();
+		//subVoxel.mV4.IncludeInMesh();
+		subVoxel.mV4.MeshStorageData();
 		return;
 	}
 
 	if (!subVoxel.mV5.IsMesh() && subVoxel.mV5.IsContainPoint(_point))
 	{
-		subVoxel.mV5.IncludeInMesh();
+		//subVoxel.mV5.IncludeInMesh();
+		subVoxel.mV5.MeshStorageData();
 		return;
 	}
 
 	if (!subVoxel.mV6.IsMesh() && subVoxel.mV6.IsContainPoint(_point))
 	{
-		subVoxel.mV6.IncludeInMesh();
+		//subVoxel.mV6.IncludeInMesh();
+		subVoxel.mV6.MeshStorageData();
 		return;
 	}
 
 	if (!subVoxel.mV7.IsMesh() && subVoxel.mV7.IsContainPoint(_point))
 	{
-		subVoxel.mV7.IncludeInMesh();
+		//subVoxel.mV7.IncludeInMesh();
+		subVoxel.mV7.MeshStorageData();
 		return;
 	}
+}
+
+void SVoxelData::AttachMeshSpace(int32_t _subVoxelIndex)
+{
+	SSubVoxelData& subVoxel = voxels[_subVoxelIndex];
+
+	if (!subVoxel.mV0.IsMesh())
+	{
+		//subVoxel.mV7.IncludeInMesh();
+		subVoxel.mV0.MeshStorageData();
+	}
+
+	if (!subVoxel.mV1.IsMesh())
+	{
+		//subVoxel.mV7.IncludeInMesh();
+		subVoxel.mV1.MeshStorageData();
+	}
+
+	if (!subVoxel.mV2.IsMesh())
+	{
+		//subVoxel.mV7.IncludeInMesh();
+		subVoxel.mV2.MeshStorageData();
+	}
+
+	if (!subVoxel.mV3.IsMesh())
+	{
+		//subVoxel.mV7.IncludeInMesh();
+		subVoxel.mV3.MeshStorageData();
+	}
+
+	if (!subVoxel.mV4.IsMesh())
+	{
+		//subVoxel.mV7.IncludeInMesh();
+		subVoxel.mV4.MeshStorageData();
+	}
+
+	if (!subVoxel.mV5.IsMesh())
+	{
+		//subVoxel.mV7.IncludeInMesh();
+		subVoxel.mV5.MeshStorageData();
+	}
+
+	if (!subVoxel.mV6.IsMesh())
+	{
+		//subVoxel.mV7.IncludeInMesh();
+		subVoxel.mV6.MeshStorageData();
+	}
+
+	if (!subVoxel.mV7.IsMesh())
+	{
+		//subVoxel.mV7.IncludeInMesh();
+		subVoxel.mV7.MeshStorageData();
+	}
+}
+
+bool SVoxelData::CompareGroup(std::shared_ptr<SVoxelData>& _srsData)
+{
+	if (&_srsData->groupHeader->groupHeader == &this->groupHeader)
+	{
+		return true;
+	}
+	return false;
+}
+
+void SVoxelData::UnionGroup(std::shared_ptr<SVoxelData>& _srsData)
+{
+	_srsData->groupHeader->groupHeader = this->groupHeader;
 }

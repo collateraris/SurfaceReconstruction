@@ -236,15 +236,54 @@ namespace Engine::Algorithm
 
 	struct SVoxelData
 	{
-		SVoxelData() = default;
+		SVoxelData()
+		{
+			groupHeader = this;
+		}
 
 		int32_t PushSubVoxelData(int32_t _startX, int32_t _startY, int32_t _startZ, int32_t _cubeSizeX, int32_t _cubeSizeY, int32_t _cubeSizeZ);
 
 		void AttachMeshSpace(const SPoint3D& _point, int32_t _subVoxelIndex);
 
+		void AttachMeshSpace(int32_t _subVoxelIndex);
+
+		bool CompareGroup(std::shared_ptr<SVoxelData>& _srsData);
+
+		void UnionGroup(std::shared_ptr<SVoxelData>& _srsData);
+
+		void SetSearchIndexes(int32_t indX, int32_t indY, int32_t indZ)
+		{
+			searchIndexX = indX;
+			searchIndexY = indY;
+			searchIndexZ = indZ;
+		}
+
+		int32_t GetSearchIndexX()
+		{
+			return searchIndexX;
+		}
+
+		int32_t GetSearchIndexY()
+		{
+			return searchIndexY;
+		}
+
+		int32_t GetSearchIndexZ()
+		{
+			return searchIndexZ;
+		}
+
 	private:
+		friend class SVoxelData;
+
+		SVoxelData* groupHeader = nullptr;
 		
 		std::vector<SSubVoxelData> voxels;
+
+		//
+		int16_t searchIndexX = -1;
+		int16_t searchIndexY = -1;
+		int16_t searchIndexZ = -1;
 	};
 
 }
