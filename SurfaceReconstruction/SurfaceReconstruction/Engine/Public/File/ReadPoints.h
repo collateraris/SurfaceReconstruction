@@ -10,6 +10,6 @@ namespace Engine::File
 	class CReadPoints
 	{
 	public:
-		static void ParseFromText(const char* filename, std::vector<Engine::Algorithm::SPoint3D>& _points, const int32_t _MULTIPLICATOR = 10000);
+		static void ParseFromText(const char* filename, std::vector<Engine::Algorithm::SPoint3D>& _points, Engine::Algorithm::SMinMaxPoint& _minmax, const int32_t _MULTIPLICATOR = 10000);
 	};
 }

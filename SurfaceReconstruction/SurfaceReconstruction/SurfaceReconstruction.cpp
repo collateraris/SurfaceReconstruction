@@ -23,17 +23,20 @@ int main()
 {
     const int32_t MULTIPLICATOR = 100000000;
     std::vector<Engine::Algorithm::SPoint3D> _points;
+    Engine::Algorithm::SMinMaxPoint minmax;
 
-    CReadPoints::ParseFromText("object.pts", _points, MULTIPLICATOR);
+    CReadPoints::ParseFromText("object.pts", _points, minmax, MULTIPLICATOR);
+
+    std::cout << "Point size " << _points.size() << std::endl;
 
     SNodeData data;
-    data.minOx = -2 * MULTIPLICATOR;
-    data.minOy = -2 * MULTIPLICATOR;
-    data.minOz = -2 * MULTIPLICATOR;
+    data.minOx = minmax.minX;
+    data.minOy = minmax.minY;
+    data.minOz = minmax.minZ;
     data.chunkNumber = 256;
-    data.cubeSizeX = (10 * MULTIPLICATOR) / data.chunkNumber;
-    data.cubeSizeY = (10 * MULTIPLICATOR) / data.chunkNumber;
-    data.cubeSizeZ = (10 * MULTIPLICATOR) / data.chunkNumber;
+    data.cubeSizeX = (minmax.maxX - minmax.minX) / data.chunkNumber;
+    data.cubeSizeY = (minmax.maxY - minmax.minY) / data.chunkNumber;
+    data.cubeSizeZ = (minmax.maxZ - minmax.minZ) / data.chunkNumber;
 
     SBSTContainer bst(data);
 
@@ -55,7 +58,7 @@ int main()
 
     {
         auto start = std::chrono::steady_clock::now();
-        bst.CreateSolidMesh(20, 0);
+        bst.CreateSolidMesh(3, 0);
         auto end = std::chrono::steady_clock::now();
         std::chrono::duration<double> elapsed_seconds = end - start;
         std::cout << "Create solid mesh elapsed time: " << elapsed_seconds.count() << "s\n";

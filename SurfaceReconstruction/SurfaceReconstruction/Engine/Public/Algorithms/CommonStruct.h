@@ -7,6 +7,16 @@
 
 namespace Engine::Algorithm
 {
+	struct SMinMaxPoint
+	{
+		int32_t maxX;
+		int32_t minX;
+		int32_t maxY;
+		int32_t minY;
+		int32_t maxZ;
+		int32_t minZ;
+	};
+
 	struct SVertexVoxelUnit;
 
 	class CCommonStruct
