@@ -213,6 +213,8 @@ namespace Engine::Algorithm
 
 		std::vector<SSubVoxelData> voxels;
 
+		bool bActive = true;
+
 	private:
 		friend class SVoxelData;
 

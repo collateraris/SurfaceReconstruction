@@ -384,11 +384,11 @@ void SBSTContainer::SearchNeighbourZ(std::shared_ptr<SVoxelData>& vxData, int32_
 
 		/*if (((chunkIndexX < neutralLowerSizeX || chunkIndexX > neutralUperSizeX) ||
 			(chunkIndexY < neutralLowerSizeY || chunkIndexY > neutralUperSizeY) ||
-			(checkIndexZ < neutralLowerSizeZ || checkIndexZ > neutralUperSizeZ)) &&
-			vxData->CompareGroup(chunkZ->voxel))
+			(checkIndexZ < neutralLowerSizeZ || checkIndexZ > neutralUperSizeZ)) &&*/
+		//if(	vxData->CompareGroup(chunkZ->voxel))
 		{
-			continue;
-		}*/
+			//continue;
+		}
 
 		// Compare directional;
 		//if (chunkIndexX < neutralLowerSizeX || chunkIndexX > neutralUperSizeX) {
@@ -424,13 +424,11 @@ void SBSTContainer::SearchNeighbourZ(std::shared_ptr<SVoxelData>& vxData, int32_
 			{
 				vxData->SetTopDir(false, subVoxelIndex);
 			}
-		//}
+		}
 
 		// Found neighbour with another group!
-		//if (!vxData->CompareGroup(chunkZ->voxel))
-		{
-			//vxData->UnionGroup(chunkZ->voxel);
-		}
+
+		//vxData->UnionGroup(chunkZ->voxel);
 
 		AddSubVoxel(vxData, stepSize, chunkIndexX, chunkIndexY, checkIndexZ, subVoxelIndex);
 	}

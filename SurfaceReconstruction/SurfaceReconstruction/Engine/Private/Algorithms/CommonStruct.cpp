@@ -142,7 +142,7 @@ void SVoxelData::GetAllMeshes(std::list<SVertexVoxelUnit>& allMeshesAsObj, int32
 
 bool SVoxelData::CompareGroup(std::shared_ptr<SVoxelData>& _srsData)
 {
-	if (&_srsData->groupHeader->groupHeader == &this->groupHeader->groupHeader)
+	if (_srsData->groupHeader != this  && &_srsData->groupHeader == &this->groupHeader)
 	{
 		return true;
 	}
@@ -151,5 +151,5 @@ bool SVoxelData::CompareGroup(std::shared_ptr<SVoxelData>& _srsData)
 
 void SVoxelData::UnionGroup(std::shared_ptr<SVoxelData>& _srsData)
 {
-	_srsData->groupHeader->groupHeader = this->groupHeader->groupHeader;
+	this->groupHeader->groupHeader = &*_srsData->groupHeader->groupHeader;
 }
