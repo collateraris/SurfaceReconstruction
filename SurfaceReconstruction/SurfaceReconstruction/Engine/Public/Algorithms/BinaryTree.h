@@ -80,15 +80,17 @@ namespace Engine::Algorithm
 
 	private:
 
+		void GetVoxelFromPool(std::shared_ptr<SVoxelData>& _voxel);
+
 		void TriggerVoxel(std::shared_ptr<SBSTChunkOz>& issueChunk);
 
 		void AttachMeshSpace(std::shared_ptr<SBSTChunkOz>& issueChunk, const SPoint3D& _point);
 
-		void SearchNeighbourX(std::shared_ptr<SVoxelData>& vxData, int32_t stepSize);
-		void SearchNeighbourY(std::shared_ptr<SVoxelData>& vxData, int32_t stepSize, int32_t chunkIndexX);
-		void SearchNeighbourZ(std::shared_ptr<SVoxelData>& vxData, int32_t stepSize, int32_t chunkIndexX, int32_t chunkIndexY);
+		void SearchNeighbourX(std::shared_ptr<SVoxelData>& vxData, int32_t stepSize, int32_t subVoxelIndex = 0);
+		void SearchNeighbourY(std::shared_ptr<SVoxelData>& vxData, int32_t stepSize, int32_t chunkIndexX, int32_t subVoxelIndex = 0);
+		void SearchNeighbourZ(std::shared_ptr<SVoxelData>& vxData, int32_t stepSize, int32_t chunkIndexX, int32_t chunkIndexY, int32_t subVoxelIndex = 0);
 
-		void AddSubVoxel(std::shared_ptr<SVoxelData>& vxData, int32_t stepSize, int32_t chunkIndexX, int32_t chunkIndexY, int32_t chunkIndexZ);
+		void AddSubVoxel(std::shared_ptr<SVoxelData>& vxData, int32_t stepSize, int32_t chunkIndexX, int32_t chunkIndexY, int32_t chunkIndexZ, int32_t subVoxelIndex = 0);
 
 		std::vector<std::shared_ptr<SBSTChunkOx>> chunksOx;
 

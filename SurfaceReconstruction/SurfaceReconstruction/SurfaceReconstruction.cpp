@@ -30,7 +30,7 @@ int main()
     data.minOx = -2 * MULTIPLICATOR;
     data.minOy = -2 * MULTIPLICATOR;
     data.minOz = -2 * MULTIPLICATOR;
-    data.chunkNumber = 128;
+    data.chunkNumber = 512;
     data.cubeSizeX = (10 * MULTIPLICATOR) / data.chunkNumber;
     data.cubeSizeY = (10 * MULTIPLICATOR) / data.chunkNumber;
     data.cubeSizeZ = (10 * MULTIPLICATOR) / data.chunkNumber;
@@ -55,7 +55,7 @@ int main()
 
     {
         auto start = std::chrono::steady_clock::now();
-        bst.CreateSolidMesh(30, 1);
+        bst.CreateSolidMesh(10, 0);
         auto end = std::chrono::steady_clock::now();
         std::chrono::duration<double> elapsed_seconds = end - start;
         std::cout << "Create solid mesh elapsed time: " << elapsed_seconds.count() << "s\n";

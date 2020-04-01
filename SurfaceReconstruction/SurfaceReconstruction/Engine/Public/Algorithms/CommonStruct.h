@@ -3,6 +3,7 @@
 #include <memory>
 #include <list>
 #include <vector>
+#include <cassert>
 
 namespace Engine::Algorithm
 {
@@ -48,6 +49,10 @@ namespace Engine::Algorithm
 
 		virtual void IncludeInMesh() { bIsMesh = true; };
 
+		virtual int32_t GetCubeSizeX() { return cubeSizeX; }
+		virtual int32_t GetCubeSizeY() { return cubeSizeY; }
+		virtual int32_t GetCubeSizeZ() { return cubeSizeZ; }
+
 	protected:
 
 		bool bIsMesh = false;
@@ -63,176 +68,38 @@ namespace Engine::Algorithm
 		std::vector<SPoint3D> vertices;
 	};
 
-	struct SVertexCubeField_0 : public SVertexCubeField
-	{
-		SVertexCubeField_0() = default;
-
-		SVertexCubeField_0(int32_t _x, int32_t _y, int32_t _z, int32_t _cubeSizeX, int32_t _cubeSizeY, int32_t _cubeSizeZ)
-		{
-			x = _x;
-			y = _y;
-			z = _z;
-			cubeSizeX = _cubeSizeX;
-			cubeSizeY = _cubeSizeY;
-			cubeSizeZ = _cubeSizeZ;
-		};
-
-		virtual bool IsContainPoint(const SPoint3D& _point) override;
-
-		virtual void MeshStorageData(std::list<SVertexVoxelUnit>& allMeshesAsObj) override;
-	};
-
-	struct SVertexCubeField_1 : public SVertexCubeField
-	{
-		SVertexCubeField_1() = default;
-
-		SVertexCubeField_1(int32_t _x, int32_t _y, int32_t _z, int32_t _cubeSizeX, int32_t _cubeSizeY, int32_t _cubeSizeZ)
-		{
-			x = _x;
-			y = _y;
-			z = _z;
-			cubeSizeX = _cubeSizeX;
-			cubeSizeY = _cubeSizeY;
-			cubeSizeZ = _cubeSizeZ;
-		};
-
-		virtual bool IsContainPoint(const SPoint3D& _point) override;
-
-		virtual void MeshStorageData(std::list<SVertexVoxelUnit>& allMeshesAsObj) override;
-	};
-
-	struct SVertexCubeField_2 : public SVertexCubeField
-	{
-		SVertexCubeField_2() = default;
-
-		SVertexCubeField_2(int32_t _x, int32_t _y, int32_t _z, int32_t _cubeSizeX, int32_t _cubeSizeY, int32_t _cubeSizeZ)
-		{
-			x = _x;
-			y = _y;
-			z = _z;
-			cubeSizeX = _cubeSizeX;
-			cubeSizeY = _cubeSizeY;
-			cubeSizeZ = _cubeSizeZ;
-		};
-
-		virtual bool IsContainPoint(const SPoint3D& _point) override;
-
-		virtual void MeshStorageData(std::list<SVertexVoxelUnit>& allMeshesAsObj) override;
-	};
-
-	struct SVertexCubeField_3 : public SVertexCubeField
-	{
-		SVertexCubeField_3() = default;
-
-		SVertexCubeField_3(int32_t _x, int32_t _y, int32_t _z, int32_t _cubeSizeX, int32_t _cubeSizeY, int32_t _cubeSizeZ)
-		{
-			x = _x;
-			y = _y;
-			z = _z;
-			cubeSizeX = _cubeSizeX;
-			cubeSizeY = _cubeSizeY;
-			cubeSizeZ = _cubeSizeZ;
-		};
-
-		virtual bool IsContainPoint(const SPoint3D& _point) override;
-
-		virtual void MeshStorageData(std::list<SVertexVoxelUnit>& allMeshesAsObj) override;
-	};
-
-	struct SVertexCubeField_4 : public SVertexCubeField
-	{
-		SVertexCubeField_4() = default;
-
-		SVertexCubeField_4(int32_t _x, int32_t _y, int32_t _z, int32_t _cubeSizeX, int32_t _cubeSizeY, int32_t _cubeSizeZ)
-		{
-			x = _x;
-			y = _y;
-			z = _z;
-			cubeSizeX = _cubeSizeX;
-			cubeSizeY = _cubeSizeY;
-			cubeSizeZ = _cubeSizeZ;
-		};
-
-		virtual bool IsContainPoint(const SPoint3D& _point) override;
-
-		virtual void MeshStorageData(std::list<SVertexVoxelUnit>& allMeshesAsObj) override;
-
-	};
-
-	struct SVertexCubeField_5 : public SVertexCubeField
-	{
-		SVertexCubeField_5() = default;
-
-		SVertexCubeField_5(int32_t _x, int32_t _y, int32_t _z, int32_t _cubeSizeX, int32_t _cubeSizeY, int32_t _cubeSizeZ)
-		{
-			x = _x;
-			y = _y;
-			z = _z;
-			cubeSizeX = _cubeSizeX;
-			cubeSizeY = _cubeSizeY;
-			cubeSizeZ = _cubeSizeZ;
-		};
-
-		virtual bool IsContainPoint(const SPoint3D& _point) override;
-
-		virtual void MeshStorageData(std::list<SVertexVoxelUnit>& allMeshesAsObj) override;
-
-	};
-
-	struct SVertexCubeField_6 : public SVertexCubeField
-	{
-		SVertexCubeField_6() = default;
-
-		SVertexCubeField_6(int32_t _x, int32_t _y, int32_t _z, int32_t _cubeSizeX, int32_t _cubeSizeY, int32_t _cubeSizeZ)
-		{
-			x = _x;
-			y = _y;
-			z = _z;
-			cubeSizeX = _cubeSizeX;
-			cubeSizeY = _cubeSizeY;
-			cubeSizeZ = _cubeSizeZ;
-		};
-
-		virtual bool IsContainPoint(const SPoint3D& _point) override;
-
-		virtual void MeshStorageData(std::list<SVertexVoxelUnit>& allMeshesAsObj) override;
-
-	};
-
-	struct SVertexCubeField_7 : public SVertexCubeField
-	{
-		SVertexCubeField_7() = default;
-
-		SVertexCubeField_7(int32_t _x, int32_t _y, int32_t _z, int32_t _cubeSizeX, int32_t _cubeSizeY, int32_t _cubeSizeZ)
-		{
-			x = _x;
-			y = _y;
-			z = _z;
-			cubeSizeX = _cubeSizeX;
-			cubeSizeY = _cubeSizeY;
-			cubeSizeZ = _cubeSizeZ;
-		};
-
-		virtual bool IsContainPoint(const SPoint3D& _point) override;
-
-		virtual void MeshStorageData(std::list<SVertexVoxelUnit>& allMeshesAsObj) override;
-
-	};
-
-	struct SSubVoxelData
+	struct SSubVoxelData : public SVertexCubeField
 	{
 		SSubVoxelData() = default;
 
+		SSubVoxelData(int32_t _x, int32_t _y, int32_t _z, int32_t _cubeSizeX, int32_t _cubeSizeY, int32_t _cubeSizeZ)
+		{
+			x = _x;
+			y = _y;
+			z = _z;
+			cubeSizeX = _cubeSizeX;
+			cubeSizeY = _cubeSizeY;
+			cubeSizeZ = _cubeSizeZ;
+		};
+
+		virtual void MeshStorageData(std::list<SVertexVoxelUnit>& allMeshesAsObj) override;
+
+		virtual bool IsContainPoint(const SPoint3D& _point) override;
+
 		bool bAllMeshFound = false;
 
-		SVertexCubeField_0 mV0;
-		SVertexCubeField_1 mV1;
-		SVertexCubeField_2 mV2;
-		SVertexCubeField_3 mV3;
-		SVertexCubeField_4 mV4;
-		SVertexCubeField_5 mV5;
-		SVertexCubeField_6 mV6;
-		SVertexCubeField_7 mV7;
+		int32_t searchIndexX = -1;
+		int32_t searchIndexY = -1;
+		int32_t searchIndexZ = -1;
+
+		// direction permittion
+		bool leftDir = true;
+		bool rightDir = true;
+		bool topDir = true;
+		bool buttomDir = true;
+		bool backDir = true;
+		bool frontDir = true;
+
 	};
 
 	struct SVoxelData
@@ -252,26 +119,94 @@ namespace Engine::Algorithm
 
 		void UnionGroup(std::shared_ptr<SVoxelData>& _srsData);
 
-		void SetSearchIndexes(int32_t indX, int32_t indY, int32_t indZ)
+		void SetSearchIndexes(int32_t indX, int32_t indY, int32_t indZ, int32_t subVoxelIndex = 0)
 		{
-			searchIndexX = indX;
-			searchIndexY = indY;
-			searchIndexZ = indZ;
+			//assert(subVoxelIndex < voxels.size());
+
+			voxels[subVoxelIndex].searchIndexX = indX;
+			voxels[subVoxelIndex].searchIndexY = indY;
+			voxels[subVoxelIndex].searchIndexZ = indZ;
 		}
 
-		int32_t GetSearchIndexX()
+		int32_t GetSearchIndexX(int32_t subVoxelIndex = 0)
 		{
-			return searchIndexX;
+			//assert(subVoxelIndex < voxels.size());
+
+			return voxels[subVoxelIndex].searchIndexX;
 		}
 
-		int32_t GetSearchIndexY()
+		int32_t GetSearchIndexY(int32_t subVoxelIndex = 0)
 		{
-			return searchIndexY;
+			//assert(subVoxelIndex < voxels.size());
+
+			return voxels[subVoxelIndex].searchIndexY;
 		}
 
-		int32_t GetSearchIndexZ()
+		int32_t GetSearchIndexZ(int32_t subVoxelIndex = 0)
 		{
-			return searchIndexZ;
+			//assert(subVoxelIndex < voxels.size());
+
+			return voxels[subVoxelIndex].searchIndexZ;
+		}
+
+		bool GetLeftDir(int32_t subVoxelIndex = 0)
+		{
+			return voxels[subVoxelIndex].leftDir;
+		}
+
+		bool GetRightDir(int32_t subVoxelIndex = 0)
+		{
+			return voxels[subVoxelIndex].rightDir;
+		}
+
+		bool GetTopDir(int32_t subVoxelIndex = 0)
+		{
+			return voxels[subVoxelIndex].topDir;
+		}
+
+		bool GetButtomDir(int32_t subVoxelIndex = 0)
+		{
+			return voxels[subVoxelIndex].buttomDir;
+		}
+
+		bool GetBackDir(int32_t subVoxelIndex = 0)
+		{
+			return voxels[subVoxelIndex].backDir;
+		}
+
+		bool GetFrontDir(int32_t subVoxelIndex = 0)
+		{
+			return voxels[subVoxelIndex].frontDir;
+		}
+
+		void SetLeftDir(bool val, int32_t subVoxelIndex = 0)
+		{
+			voxels[subVoxelIndex].leftDir = val;
+		}
+
+		void SetRightDir(bool val, int32_t subVoxelIndex = 0)
+		{
+			voxels[subVoxelIndex].rightDir = val;
+		}
+
+		void SetTopDir(bool val, int32_t subVoxelIndex = 0)
+		{
+			voxels[subVoxelIndex].topDir = val;
+		}
+
+		void SetButtomDir(bool val, int32_t subVoxelIndex = 0)
+		{
+			voxels[subVoxelIndex].buttomDir = val;
+		}
+
+		void SetBackDir(bool val, int32_t subVoxelIndex = 0)
+		{
+			voxels[subVoxelIndex].backDir = val;
+		}
+
+		void SetFrontDir(bool val, int32_t subVoxelIndex = 0)
+		{
+			voxels[subVoxelIndex].frontDir = val;
 		}
 
 		void GetAllMeshes(std::list<SVertexVoxelUnit>& allMeshesAsObj, int32_t _subVoxelIndex);
@@ -282,22 +217,6 @@ namespace Engine::Algorithm
 		friend class SVoxelData;
 
 		SVoxelData* groupHeader = nullptr;
-		
-		//std::vector<SSubVoxelData> voxels;
-
-		//
-		int16_t searchIndexX = -1;
-		int16_t searchIndexY = -1;
-		int16_t searchIndexZ = -1;
-
-	public:
-		// direction permittion
-		bool leftDir = true;
-		bool rightDir = true;
-		bool topDir = true;
-		bool buttomDir = true;
-		bool backDir = true;
-		bool frontDir = true;
 	};
 
 }
