@@ -21,11 +21,15 @@ void BST(SBSTContainer& bst, std::vector<Engine::Algorithm::SPoint3D>& _points)
 
 int main()
 {
-    const int32_t MULTIPLICATOR = 100000000;
+    const int32_t MULTIPLICATOR = 10000000;
+    //const int32_t MULTIPLICATOR = 100000;
     std::vector<Engine::Algorithm::SPoint3D> _points;
     Engine::Algorithm::SMinMaxPoint minmax;
 
-    CReadPoints::ParseFromText("object.pts", _points, minmax, MULTIPLICATOR);
+    //CReadPoints::ParseFromText("object.pts", _points, minmax, MULTIPLICATOR);
+    //CReadPoints::ParseFromText("bunnyData.pts", _points, minmax, MULTIPLICATOR); //pump.ptx
+    //CReadPoints::ParseFromText("vertebra.pts", _points, minmax, MULTIPLICATOR);
+    CReadPoints::ParseFromText("face.xyz", _points, minmax, MULTIPLICATOR);
 
     std::cout << "Point size " << _points.size() << std::endl;
 
@@ -33,7 +37,7 @@ int main()
     data.minOx = minmax.minX;
     data.minOy = minmax.minY;
     data.minOz = minmax.minZ;
-    data.chunkNumber = 256;
+    data.chunkNumber = 128;
     data.cubeSizeX = (minmax.maxX - minmax.minX) / data.chunkNumber;
     data.cubeSizeY = (minmax.maxY - minmax.minY) / data.chunkNumber;
     data.cubeSizeZ = (minmax.maxZ - minmax.minZ) / data.chunkNumber;
@@ -42,7 +46,7 @@ int main()
 
     {
         auto start = std::chrono::steady_clock::now();
-        bst.InitCubesPool(_points.size());
+        bst.InitCubesPool(50000);
         auto end = std::chrono::steady_clock::now();
         std::chrono::duration<double> elapsed_seconds = end - start;
         std::cout << "Create voxel pool elapsed time: " << elapsed_seconds.count() << "s\n";
@@ -58,7 +62,7 @@ int main()
 
     {
         auto start = std::chrono::steady_clock::now();
-        bst.CreateSolidMesh(3, 0);
+        bst.CreateSolidMesh(5, 0);
         auto end = std::chrono::steady_clock::now();
         std::chrono::duration<double> elapsed_seconds = end - start;
         std::cout << "Create solid mesh elapsed time: " << elapsed_seconds.count() << "s\n";

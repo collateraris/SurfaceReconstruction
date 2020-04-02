@@ -79,7 +79,7 @@ void SBSTContainer::GetVoxelFromPool(std::shared_ptr<SVoxelData>& _voxel)
 	{
 		voxelsPool.push_back(std::move(std::make_shared<SVoxelData>()));
 	}
-	_voxel = voxelsPool[usedVoxels++];
+	_voxel = voxelsPool[usedVoxels];
 }
 
 void SBSTContainer::TriggerVoxel(std::shared_ptr<SBSTChunkOz>& issueChunk)
