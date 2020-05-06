@@ -9,6 +9,7 @@
 
 #include "Experiments/ExecuteAround.h"
 #include "Experiments/SafeThreadMap.h"
+#include "Experiments/AppCashFlow.h"
 
 using namespace Engine::Algorithm;
 using namespace Engine::File;
@@ -25,8 +26,8 @@ void BST(SBSTContainer& bst, std::vector<Engine::Algorithm::SPoint3D>& _points)
 int main()
 {
 
-    Experiments::Threads::SafeMapTest safeMapTest;
-    safeMapTest.testRun();
+    Experiments::Threads::AppCashFlow appCashFlow;
+    appCashFlow.testRun();
 
 
     /*

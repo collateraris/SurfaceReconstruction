@@ -92,7 +92,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
       <AdditionalIncludeDirectories>$(MSBuildProjectDirectory)\Engine\Public</AdditionalIncludeDirectories>
       <Optimization>MaxSpeed</Optimization>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
@@ -169,6 +169,7 @@
     <ClInclude Include="Engine\Public\Algorithms\BinaryTree.h" />
     <ClInclude Include="Engine\Public\Algorithms\CommonStruct.h" />
     <ClInclude Include="Engine\Public\File\ReadPoints.h" />
+    <ClInclude Include="Experiments\AppCashFlow.h" />
     <ClInclude Include="Experiments\ExecuteAround.h" />
     <ClInclude Include="Experiments\SafePtr.h" />
     <ClInclude Include="Experiments\SafeThreadMap.h" />

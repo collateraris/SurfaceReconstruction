@@ -23,6 +23,10 @@ namespace Experiments::Threads
 
 	void SafeMapTest::func(decltype(mSafeMapStrings) safeMapStrings)
 	{
+		/* for sequential conversion
+		std::lock_guard<decltype(safeMapStrings)> lock(safeMapStrings);
+		*/
+
 		(*safeMapStrings)["apple"].first = "fruit";
 		(*safeMapStrings)["potato"].first = "vegetable";
 
