@@ -43,9 +43,12 @@ namespace Experiments::Threads
 
             std::cout << " - start transaction... move_money() \n";
 
-            std::lock_guard<decltype(safe_user_accounts)> lock1(safe_user_accounts);
             std::lock_guard<decltype(safe_cash_flows_src_id)> lock2(safe_cash_flows_src_id);
+            std::this_thread::sleep_for(std::chrono::milliseconds(50)); // for example - OS decides to interrupt this thread
             std::lock_guard<decltype(safe_cash_flows_dst_id)> lock3(safe_cash_flows_dst_id);
+            //std::lock_guard<decltype(safe_user_accounts)> lock1(safe_user_accounts);
+            //std::lock_guard<decltype(safe_cash_flows_src_id)> lock2(safe_cash_flows_src_id);
+            std::lock_guard<decltype(safe_user_accounts)> lock1(safe_user_accounts);
 
             // update table-1
             safe_user_accounts->at(src_id).money -= money;            
@@ -89,9 +92,12 @@ namespace Experiments::Threads
 
                 std::cout << " - start transaction... show_user_money_on_time() \n";
 
-                std::lock_guard<decltype(safe_user_accounts)> lock1(safe_user_accounts);
-                std::lock_guard<decltype(safe_cash_flows_src_id)> lock2(safe_cash_flows_src_id);
                 std::lock_guard<decltype(safe_cash_flows_dst_id)> lock3(safe_cash_flows_dst_id);
+                std::this_thread::sleep_for(std::chrono::milliseconds(50)); // for example - OS decides to interrupt this thread
+                //std::lock_guard<decltype(safe_user_accounts)> lock1(safe_user_accounts);
+                std::lock_guard<decltype(safe_cash_flows_src_id)> lock2(safe_cash_flows_src_id);
+                //std::lock_guard<decltype(safe_cash_flows_dst_id)> lock3(safe_cash_flows_dst_id);
+                std::lock_guard<decltype(safe_user_accounts)> lock1(safe_user_accounts);
 
                 std::cout << std::endl;
                 auto in_range = safe_cash_flows_dst_id->equal_range(user_id);
