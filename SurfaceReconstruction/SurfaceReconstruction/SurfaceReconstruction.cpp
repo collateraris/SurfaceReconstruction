@@ -7,6 +7,9 @@
 #include <algorithm>
 #include <chrono>
 
+#include "Experiments/ExecuteAround.h"
+#include "Experiments/SafeThreadMap.h"
+
 using namespace Engine::Algorithm;
 using namespace Engine::File;
 
@@ -21,6 +24,12 @@ void BST(SBSTContainer& bst, std::vector<Engine::Algorithm::SPoint3D>& _points)
 
 int main()
 {
+
+    Experiments::Threads::SafeMapTest safeMapTest;
+    safeMapTest.testRun();
+
+
+    /*
     const int32_t MULTIPLICATOR = 10000000;
     //const int32_t MULTIPLICATOR = 100000;
     std::vector<Engine::Algorithm::SPoint3D> _points;
@@ -81,5 +90,6 @@ int main()
     std::cout << allMeshesAsObj.size() << std::endl;
     CCommonStruct::PrintVoxelsInObj("object.obj", allMeshesAsObj);
     system("pause");
+    */
 }
 

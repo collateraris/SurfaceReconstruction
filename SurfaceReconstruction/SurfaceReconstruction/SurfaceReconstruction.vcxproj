@@ -169,6 +169,9 @@
     <ClInclude Include="Engine\Public\Algorithms\BinaryTree.h" />
     <ClInclude Include="Engine\Public\Algorithms\CommonStruct.h" />
     <ClInclude Include="Engine\Public\File\ReadPoints.h" />
+    <ClInclude Include="Experiments\ExecuteAround.h" />
+    <ClInclude Include="Experiments\SafePtr.h" />
+    <ClInclude Include="Experiments\SafeThreadMap.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
