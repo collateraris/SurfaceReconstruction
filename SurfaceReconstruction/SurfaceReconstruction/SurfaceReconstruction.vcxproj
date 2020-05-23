@@ -164,6 +164,17 @@
     <ClCompile Include="Engine\Private\Algorithms\CommonStruct.cpp" />
     <ClCompile Include="Engine\Private\File\ReadPoints.cpp" />
     <ClCompile Include="SurfaceReconstruction.cpp" />
+    <ClCompile Include="voro\cell.cc" />
+    <ClCompile Include="voro\common.cc" />
+    <ClCompile Include="voro\container.cc" />
+    <ClCompile Include="voro\container_prd.cc" />
+    <ClCompile Include="voro\c_loops.cc" />
+    <ClCompile Include="voro\pre_container.cc" />
+    <ClCompile Include="voro\unitcell.cc" />
+    <ClCompile Include="voro\voro++.cc" />
+    <ClCompile Include="voro\v_base.cc" />
+    <ClCompile Include="voro\v_compute.cc" />
+    <ClCompile Include="voro\wall.cc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Public\Algorithms\BinaryTree.h" />
@@ -173,6 +184,27 @@
     <ClInclude Include="Experiments\ExecuteAround.h" />
     <ClInclude Include="Experiments\SafePtr.h" />
     <ClInclude Include="Experiments\SafeThreadMap.h" />
+    <ClInclude Include="voro\cell.hh" />
+    <ClInclude Include="voro\common.hh" />
+    <ClInclude Include="voro\config.hh" />
+    <ClInclude Include="voro\container.hh" />
+    <ClInclude Include="voro\container_prd.hh" />
+    <ClInclude Include="voro\c_loops.hh" />
+    <ClInclude Include="voro\pre_container.hh" />
+    <ClInclude Include="voro\rad_option.hh" />
+    <ClInclude Include="voro\unitcell.hh" />
+    <ClInclude Include="voro\voro++.hh" />
+    <ClInclude Include="voro\v_base.hh" />
+    <ClInclude Include="voro\v_compute.hh" />
+    <ClInclude Include="voro\wall.hh" />
+    <ClInclude Include="voro\worklist.hh" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="voro\Doxyfile" />
+    <None Include="voro\Makefile" />
+    <None Include="voro\Makefile.dep" />
+    <None Include="voro\README" />
+    <None Include="voro\worklist_gen.pl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

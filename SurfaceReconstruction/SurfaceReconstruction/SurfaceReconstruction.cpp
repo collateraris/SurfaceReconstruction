@@ -6,13 +6,17 @@
 
 #include <algorithm>
 #include <chrono>
+#include <vector>
 
 #include "Experiments/ExecuteAround.h"
 #include "Experiments/SafeThreadMap.h"
 #include "Experiments/AppCashFlow.h"
 
+#include "voro/voro++.hh"
+
 using namespace Engine::Algorithm;
 using namespace Engine::File;
+using namespace voro;
 
 void BST(SBSTContainer& bst, std::vector<Engine::Algorithm::SPoint3D>& _points)
 {
@@ -22,15 +26,47 @@ void BST(SBSTContainer& bst, std::vector<Engine::Algorithm::SPoint3D>& _points)
     }
 }
 
+double rnd() { return double(rand()) / RAND_MAX; }
 
 int main()
 {
-
-    Experiments::Threads::AppCashFlow appCashFlow;
-    appCashFlow.testRun();
-
-
     /*
+    unsigned int i;
+    double x, y, z, rsq, r;
+    voronoicell v;
+
+    v.init(-1, 1, -1, 1, -1, 1);
+
+    for (i = 0; i < 250; i++)
+    {
+        x = 2 * rnd() - 1;
+        y = 2 * rnd() - 1;
+        z = 2 * rnd() - 1;
+        rsq = x * x + y * y + z * z;
+        if (rsq > 0.01 && rsq < 1)
+        {
+            r = 1 / sqrt(rsq); x *= r; y *= r; z *= r;
+            v.plane(x, y, z, 1);
+        }
+    }
+
+    v.draw_gnuplot(0, 0, 0, "single_cell.gnu");
+
+    std::vector<int> f_vert;
+    std::vector<double> nor;
+    v.face_orders(f_vert);
+    v.normals(nor);
+
+    const char* parity[2] = { "even","odd" };
+    FILE* fp = safe_fopen("odd_even_pl.pov", "w");
+    for (i = 0; i < f_vert.size(); i++)
+        fprintf(fp, "plane{<%g,%g,%g>,0.5 texture{t_%s}}\n"
+           , nor[3 * i], nor[3 * i + 1], nor[3 * i + 2]
+           , parity[f_vert[i] & 1]);
+    fclose(fp);
+    v.draw_pov(0, 0, 0, "odd_even_v.pov");
+    */
+    ///*
     const int32_t MULTIPLICATOR = 10000000;
     //const int32_t MULTIPLICATOR = 100000;
     std::vector<Engine::Algorithm::SPoint3D> _points;
@@ -91,6 +127,6 @@ int main()
     std::cout << allMeshesAsObj.size() << std::endl;
     CCommonStruct::PrintVoxelsInObj("object.obj", allMeshesAsObj);
     system("pause");
-    */
+   // */
 }
 

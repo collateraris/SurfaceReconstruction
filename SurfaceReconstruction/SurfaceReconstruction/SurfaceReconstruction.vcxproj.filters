@@ -27,6 +27,39 @@
     <ClCompile Include="Engine\Private\File\ReadPoints.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="voro\c_loops.cc">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="voro\cell.cc">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="voro\common.cc">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="voro\container.cc">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="voro\container_prd.cc">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="voro\pre_container.cc">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="voro\unitcell.cc">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="voro\v_base.cc">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="voro\v_compute.cc">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="voro\voro++.cc">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="voro\wall.cc">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Public\Algorithms\CommonStruct.h">
@@ -50,5 +83,54 @@
     <ClInclude Include="Experiments\AppCashFlow.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="voro\c_loops.hh">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="voro\cell.hh">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="voro\common.hh">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="voro\config.hh">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="voro\container.hh">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="voro\container_prd.hh">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="voro\pre_container.hh">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="voro\rad_option.hh">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="voro\unitcell.hh">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="voro\v_base.hh">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="voro\v_compute.hh">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="voro\voro++.hh">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="voro\wall.hh">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="voro\worklist.hh">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="voro\Doxyfile" />
+    <None Include="voro\Makefile" />
+    <None Include="voro\Makefile.dep" />
+    <None Include="voro\README" />
+    <None Include="voro\worklist_gen.pl" />
   </ItemGroup>
 </Project>
