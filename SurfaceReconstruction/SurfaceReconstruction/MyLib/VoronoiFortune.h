@@ -24,7 +24,7 @@ namespace my_sr_lib
 			T x;
 			T y;
 
-			std::vector<std::shared_ptr<SPointXYZ<T>>> originalPoints;
+			SPointXYZ<T> originalPoints;
 		};
 
 		template<typename T>
@@ -104,6 +104,8 @@ namespace my_sr_lib
 	template<typename T>
 	void CVoronoiFortune::VoronoiDiagramFortune2D(std::vector<VoroFortune::SVoronoiPoint2D<T>>& points, VoroFortune::SVoronoiDiagram2D<T>& voronoiDiagram, const SBox2D<T>& boundingBox)
 	{
+		if (points.size() == 0) return;
+
 		std::shared_ptr<VoroFortune::SArc<T>> rootArcTree;
 
 		voronoiDiagram.siteSegmentMap.reserve(points.size());
