@@ -8,6 +8,7 @@
 #include "MyLib/ReadXYZ.h"
 #include "MyLib/VoronoiFortune.h"
 #include "MyLib/DelaunayTriangulation.h"
+#include "MyLib/WriteObj.h"
 
 #include <algorithm>
 #include <chrono>
@@ -77,6 +78,9 @@ int main()
         my_sr_lib::CVoronoiFortune::VoronoiDiagramFortune2D(pointsForVoronoi[index], voronoiDiagram[index], boundingBox);
         my_sr_lib::CDelaunayTriangulation::makeTriangulationBasedVoronoi(voronoiDiagram[index], triangleList[index]);
     }
+
+
+    my_sr_lib::print_triangulation_as_obj("bunnyData.obj", triangleList);
 
 
     auto end = std::chrono::steady_clock::now();

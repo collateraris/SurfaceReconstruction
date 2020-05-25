@@ -137,6 +137,9 @@
     <ClInclude Include="MyLib\DelaunayTriangulation.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="MyLib\WriteObj.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="voro\Doxyfile" />
