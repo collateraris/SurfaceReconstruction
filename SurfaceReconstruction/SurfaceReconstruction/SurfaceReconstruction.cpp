@@ -36,7 +36,8 @@ int main()
     std::vector<my_sr_lib::SPointXYZ<float>> points;
     my_sr_lib::SMinMaxPoint<float> minmax;
 
-    my_sr_lib::read_xyz("bunnyData.xyz", points, minmax);
+    const int32_t MULTIPLICATOR = 10000000;
+    my_sr_lib::read_xyz("bunnyData.xyz", points, minmax, MULTIPLICATOR);
     auto start = std::chrono::steady_clock::now();
     //cube size)
     std::size_t cubeSize = 64;
@@ -48,6 +49,7 @@ int main()
     float deltaZ = (minmax.maxZ - minmax.minZ) / 64;
     float invDeltaZ = 1.f / deltaZ;
     std::vector<std::vector<my_sr_lib::VoroFortune::SVoronoiPoint2D<float>>> pointsForVoronoi(numberTraverse + 1);
+
     for (my_sr_lib::SPointXYZ<float>& p: points)
     {
         // x axis yz coord

@@ -15,6 +15,7 @@ namespace my_sr_lib
 			VoroFortune::SVoronoiPoint2D<T> v1;
 			VoroFortune::SVoronoiPoint2D<T> v2;
 			VoroFortune::SVoronoiPoint2D<T> v3;
+			VoroFortune::SVoronoiPoint2D<T> v4;
 		};
 	}
 
@@ -76,8 +77,13 @@ namespace my_sr_lib
 				{
 					if ((*site1It).first == (*site2It).first)
 					{
-						my_sr_lib::VoroFortune::SVoronoiPoint2D<T>& v3 = (*site2It).second;
-						triangleList.push_back({v1, v2, v3});
+						my_sr_lib::VoroFortune::SVoronoiPoint2D<T> v3 = (*site2It).second;
+
+						if (std::abs(v3.originalPoints.x) < EPSILON && std::abs(v3.originalPoints.y) < EPSILON && std::abs(v3.originalPoints.z) < EPSILON)
+							continue;
+
+						my_sr_lib::VoroFortune::SVoronoiPoint2D<T> v4 = { 0, 0, {(v1.originalPoints.x + v2.originalPoints.x + v3.originalPoints.x) * 0.01, (v1.originalPoints.y + v2.originalPoints.y + v3.originalPoints.y) * 0.01, (v1.originalPoints.z + v2.originalPoints.z + v3.originalPoints.z) * 0.01 } };
+						triangleList.push_back({v1, v2, v3, v4});
 					}
 				}
 			}
