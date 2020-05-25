@@ -159,7 +159,7 @@ namespace my_sr_lib
 			}
 			arc->mCircleEvent.reset();
 
-			if (arc->mPrev.get() || arc->mNext.get())
+			if (!arc->mPrev.get() || !arc->mNext.get())
 				return;
 
 			T x;

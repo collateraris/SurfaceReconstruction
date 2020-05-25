@@ -7,6 +7,7 @@
 #include "MyLib/Struct.h"
 #include "MyLib/ReadXYZ.h"
 #include "MyLib/VoronoiFortune.h"
+#include "MyLib/DelaunayTriangulation.h"
 
 #include <algorithm>
 #include <chrono>
@@ -69,11 +70,15 @@ int main()
     }
 
     std::vector<my_sr_lib::VoroFortune::SVoronoiDiagram2D<float>> voronoiDiagram(numberTraverse + 1);
+    std::vector < std::list<my_sr_lib::DelaunayTriangulation::STriangle<float>>> triangleList(numberTraverse + 1);
     my_sr_lib::SBox2D<float> boundingBox = {minmax.maxX, minmax.minX, minmax.maxY, minmax.minY};
     for (std::size_t index = 0; index < pointsForVoronoi.size(); ++index)
     {
         my_sr_lib::CVoronoiFortune::VoronoiDiagramFortune2D(pointsForVoronoi[index], voronoiDiagram[index], boundingBox);
+        my_sr_lib::CDelaunayTriangulation::makeTriangulationBasedVoronoi(voronoiDiagram[index], triangleList[index]);
     }
+
+
     auto end = std::chrono::steady_clock::now();
     std::chrono::duration<double> elapsed_seconds = end - start;
     std::cout << "CVoronoiFortune::VoronoiDiagramFortune2D: " << elapsed_seconds.count() << "s\n";
