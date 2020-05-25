@@ -37,17 +37,19 @@ int main()
     my_sr_lib::SMinMaxPoint<float> minmax;
 
     const int32_t MULTIPLICATOR = 10000000;
-    my_sr_lib::read_xyz("bunnyData.xyz", points, minmax, MULTIPLICATOR);
+    my_sr_lib::read_xyz("object.pts", points, minmax, MULTIPLICATOR);
     auto start = std::chrono::steady_clock::now();
     //cube size)
-    std::size_t cubeSize = 64;
+    std::size_t cubeSize = 1024;
     std::size_t numberTraverse = cubeSize * 3;
-    float deltaX = (minmax.maxX - minmax.minX) / 64;
+    float deltaX = (minmax.maxX - minmax.minX) / cubeSize;
     float invDeltaX = 1.f / deltaX;
-    float deltaY = (minmax.maxY - minmax.minY) / 64;
+    float deltaY = (minmax.maxY - minmax.minY) / cubeSize;
     float invDeltaY = 1.f / deltaY;
-    float deltaZ = (minmax.maxZ - minmax.minZ) / 64;
+    float deltaZ = (minmax.maxZ - minmax.minZ) / cubeSize;
     float invDeltaZ = 1.f / deltaZ;
+    std::size_t maxCubeInDistantion = 50;
+    float sqrMaxDistantion = (maxCubeInDistantion * deltaX) * (maxCubeInDistantion * deltaX) + (maxCubeInDistantion * deltaY) * (maxCubeInDistantion * deltaY) + (maxCubeInDistantion * deltaZ) * (maxCubeInDistantion * deltaZ);
     std::vector<std::vector<my_sr_lib::VoroFortune::SVoronoiPoint2D<float>>> pointsForVoronoi(numberTraverse + 1);
 
     for (my_sr_lib::SPointXYZ<float>& p: points)
@@ -78,11 +80,13 @@ int main()
     for (std::size_t index = 0; index < pointsForVoronoi.size(); ++index)
     {
         my_sr_lib::CVoronoiFortune::VoronoiDiagramFortune2D(pointsForVoronoi[index], voronoiDiagram[index], boundingBox);
-        my_sr_lib::CDelaunayTriangulation::makeTriangulationBasedVoronoi(voronoiDiagram[index], triangleList[index]);
     }
 
-
-    my_sr_lib::print_triangulation_as_obj("bunnyData.obj", triangleList);
+    for (std::size_t index = 0; index < pointsForVoronoi.size(); ++index)
+    {
+        my_sr_lib::CDelaunayTriangulation::makeTriangulationBasedVoronoi(voronoiDiagram[index], triangleList[index], sqrMaxDistantion);
+    }
+    my_sr_lib::print_triangulation_as_obj("build.obj", triangleList);
 
 
     auto end = std::chrono::steady_clock::now();
