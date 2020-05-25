@@ -4,19 +4,19 @@
 #include "Algorithms/BinaryTree.h"
 #include "File/ReadPoints.h"
 
+#include "MyLib/Struct.h"
+#include "MyLib/ReadXYZ.h"
+
 #include <algorithm>
 #include <chrono>
 #include <vector>
+#include <fstream>
 
-#include "Experiments/ExecuteAround.h"
-#include "Experiments/SafeThreadMap.h"
-#include "Experiments/AppCashFlow.h"
-
-#include "voro/voro++.hh"
 
 using namespace Engine::Algorithm;
 using namespace Engine::File;
-using namespace voro;
+
+
 
 void BST(SBSTContainer& bst, std::vector<Engine::Algorithm::SPoint3D>& _points)
 {
@@ -30,6 +30,13 @@ double rnd() { return double(rand()) / RAND_MAX; }
 
 int main()
 {
+    std::vector<my_sr_lib::SPointXYZ<float>> points;
+    my_sr_lib::SMinMaxPoint<float> minmax;
+
+    my_sr_lib::read_xyz("bunnyData.xyz", points, minmax);
+
+    return  0;
+
     /*
     unsigned int i;
     double x, y, z, rsq, r;
@@ -66,7 +73,7 @@ int main()
     fclose(fp);
     v.draw_pov(0, 0, 0, "odd_even_v.pov");
     */
-    ///*
+    /*
     const int32_t MULTIPLICATOR = 10000000;
     //const int32_t MULTIPLICATOR = 100000;
     std::vector<Engine::Algorithm::SPoint3D> _points;

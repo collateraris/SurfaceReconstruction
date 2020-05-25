@@ -125,6 +125,12 @@
     <ClInclude Include="voro\worklist.hh">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="MyLib\ReadXYZ.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="MyLib\Struct.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="voro\Doxyfile" />

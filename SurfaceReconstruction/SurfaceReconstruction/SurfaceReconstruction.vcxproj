@@ -73,7 +73,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <ExecutablePath>$(ExecutablePath)</ExecutablePath>
-    <IncludePath>$(IncludePath)</IncludePath>
+    <IncludePath>D:\pet_project\vcpkg\installed\x86-windows\include;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\pet_project\vcpkg\installed\x86-windows\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -107,6 +108,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>mpfr.lib;mpir.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -184,6 +186,8 @@
     <ClInclude Include="Experiments\ExecuteAround.h" />
     <ClInclude Include="Experiments\SafePtr.h" />
     <ClInclude Include="Experiments\SafeThreadMap.h" />
+    <ClInclude Include="MyLib\ReadXYZ.h" />
+    <ClInclude Include="MyLib\Struct.h" />
     <ClInclude Include="voro\cell.hh" />
     <ClInclude Include="voro\common.hh" />
     <ClInclude Include="voro\config.hh" />
