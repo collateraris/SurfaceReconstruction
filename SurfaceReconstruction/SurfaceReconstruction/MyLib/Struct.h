@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 namespace my_sr_lib
 {
     template<typename T>
@@ -8,6 +10,13 @@ namespace my_sr_lib
 		T x;
 		T y;
 		T z;
+	};
+
+	template<typename T>
+	struct SPoint2D
+	{
+		T x;
+		T y;
 	};
 
     template<typename T>
@@ -20,4 +29,14 @@ namespace my_sr_lib
 		T maxZ;
 		T minZ;
 	};
+
+	template<typename T>
+	struct SBox2D
+	{
+		T maxX;
+		T minX;
+		T maxY;
+		T minY;
+	};
+
 }

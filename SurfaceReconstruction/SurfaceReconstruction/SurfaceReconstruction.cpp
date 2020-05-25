@@ -6,6 +6,7 @@
 
 #include "MyLib/Struct.h"
 #include "MyLib/ReadXYZ.h"
+#include "MyLib/VoronoiFortune.h"
 
 #include <algorithm>
 #include <chrono>
@@ -34,7 +35,19 @@ int main()
     my_sr_lib::SMinMaxPoint<float> minmax;
 
     my_sr_lib::read_xyz("bunnyData.xyz", points, minmax);
+    auto start = std::chrono::steady_clock::now();
+    std::vector<my_sr_lib::VoroFortune::SVoronoiPoint2D<float>> pointsForVoronoi;
+    for (my_sr_lib::SPointXYZ<float>& p: points)
+    {
+        pointsForVoronoi.push_back({p.x, p.y});
+    }
 
+    my_sr_lib::VoroFortune::SVoronoiDiagram2D<float> voronoiDiagram;
+    my_sr_lib::SBox2D<float> boundingBox = {minmax.maxX, minmax.minX, minmax.maxY, minmax.minY};
+    my_sr_lib::CVoronoiFortune::VoronoiDiagramFortune2D(pointsForVoronoi, voronoiDiagram, boundingBox);
+    auto end = std::chrono::steady_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end - start;
+    std::cout << "CVoronoiFortune::VoronoiDiagramFortune2D: " << elapsed_seconds.count() << "s\n";
     return  0;
 
     /*

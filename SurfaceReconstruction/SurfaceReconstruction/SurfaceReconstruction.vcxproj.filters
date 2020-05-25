@@ -131,6 +131,9 @@
     <ClInclude Include="MyLib\Struct.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="MyLib\VoronoiFortune.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="voro\Doxyfile" />
