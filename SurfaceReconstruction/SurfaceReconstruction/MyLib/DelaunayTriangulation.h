@@ -12,10 +12,10 @@ namespace my_sr_lib
 		template<typename T>
 		struct STriangle
 		{
-			VoroFortune::SVoronoiPoint2D<T> v1;
-			VoroFortune::SVoronoiPoint2D<T> v2;
-			VoroFortune::SVoronoiPoint2D<T> v3;
-			VoroFortune::SVoronoiPoint2D<T> v4;
+			VoronoiPoint2D<T> v1;
+			VoronoiPoint2D<T> v2;
+			VoronoiPoint2D<T> v3;
+			VoronoiPoint2D<T> v4;
 		};
 	}
 
@@ -23,28 +23,51 @@ namespace my_sr_lib
 	{
 	public:
 		template<typename T>
-		static void makeTriangulationBasedVoronoi(my_sr_lib::VoroFortune::SVoronoiDiagram2D<T>& voronoiDiagram, std::list<DelaunayTriangulation::STriangle<T>>& triangleList, T sqrMaxDistantion);
+		static void makeTriangulationBasedVoronoi(my_sr_lib::VoronoiDiagram2D<T>& voronoiDiagram, std::list<DelaunayTriangulation::STriangle<T>>& triangleList, T sqrMaxDistantion);
 	};
 
 	template<typename T>
-	void CDelaunayTriangulation::makeTriangulationBasedVoronoi(my_sr_lib::VoroFortune::SVoronoiDiagram2D<T>& voronoiDiagram, std::list<DelaunayTriangulation::STriangle<T>>& triangleList, T sqrMaxDistantion)
+	void CDelaunayTriangulation::makeTriangulationBasedVoronoi(my_sr_lib::VoronoiDiagram2D<T>& voronoiDiagram, std::list<DelaunayTriangulation::STriangle<T>>& triangleList, T sqrMaxDistantion)
 	{
 		std::size_t currSite;
-		std::unordered_map<std::size_t, std::list<std::pair<std::size_t, VoroFortune::SVoronoiPoint2D<T>>>> siteMap;
-
-		for (std::shared_ptr<my_sr_lib::VoroFortune::SSegment<T>> segment : voronoiDiagram.diagram)
+		std::unordered_map<std::size_t, std::list<std::pair<std::size_t, VoronoiPoint2D<T>>>> siteMap;
+		
+		for (auto* segment : voronoiDiagram.diagram)
 		{
-			// only two site here
-			if (segment->siteSet.size() != 2)
-				return; 
-
+			if (segment->siteSet.size() != 2 || segment->siteMap.size() != 2)
+			{
+				segment->bIsDone = false;
+				continue;
+			}
+			continue;
 			std::size_t site1;
 			std::size_t site2;
-			my_sr_lib::VoroFortune::SVoronoiPoint2D<T>& v1 = segment->siteMap[site1];
-			my_sr_lib::VoroFortune::SVoronoiPoint2D<T>& v2 = segment->siteMap[site2];
 			auto siteIt = segment->siteSet.begin();
 			site1 = *siteIt;
 			site2 = *(++siteIt);
+			my_sr_lib::SPointXYZ<T>& v1 = segment->siteMap[site1].originalPoints;
+			my_sr_lib::SPointXYZ<T>& v2 = segment->siteMap[site2].originalPoints;
+			T sqrDistantionp2p3 = (v1.x - v2.x) * (v1.x - v2.x) + (v1.y - v2.y) * (v1.y - v2.y) + (v1.z - v2.z);
+			if (sqrDistantionp2p3 > sqrMaxDistantion)
+			{
+				segment->bIsDone = false;
+				continue;
+			}
+		}
+		
+
+		for (auto* segment : voronoiDiagram.diagram)
+		{
+			if (!segment->bIsDone)
+				continue;
+
+			std::size_t site1;
+			std::size_t site2;
+			auto siteIt = segment->siteSet.begin();
+			site1 = *siteIt;
+			site2 = *(++siteIt);
+			my_sr_lib::VoronoiPoint2D<T>& v1 = segment->siteMap[site1];
+			my_sr_lib::VoronoiPoint2D<T>& v2 = segment->siteMap[site2];
 			if (siteMap.find(site1) == siteMap.end())
 				siteMap[site1] = { std::make_pair(site2, v2) };
 			else
@@ -59,45 +82,30 @@ namespace my_sr_lib
 		float delta = 0.5;
 
 		//search common member
-		for (std::shared_ptr<my_sr_lib::VoroFortune::SSegment<T>> segment : voronoiDiagram.diagram)
+		for (auto* segment : voronoiDiagram.diagram)
 		{
-			// only two site here
-			if (segment->siteSet.size() != 2)
-				return;
+			if (!segment->bIsDone)
+				continue;
 
 			std::size_t site1;
 			std::size_t site2;
 			auto siteIt = segment->siteSet.begin();
 			site1 = *siteIt;
 			site2 = *(++siteIt);
-			my_sr_lib::VoroFortune::SVoronoiPoint2D<T>& v1 = segment->siteMap[site1];
-			my_sr_lib::VoroFortune::SVoronoiPoint2D<T>& v2 = segment->siteMap[site2];
-
-			SPointXYZ<T>& p1 = v1.originalPoints;
-			SPointXYZ<T>& p2 = v2.originalPoints;
-
-			T sqrDistantionp1p2 = (p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y) + (p1.z - p2.z) * (p1.z - p2.z);
-
-			if (sqrDistantionp1p2 > sqrMaxDistantion) continue;
-
-			
+			my_sr_lib::VoronoiPoint2D<T>& v1 = segment->siteMap[site1];
+			my_sr_lib::VoronoiPoint2D<T>& v2 = segment->siteMap[site2];
+		
 			for (auto site1It = siteMap[site1].begin(); site1It != siteMap[site1].end(); ++site1It)
 			{
 				for (auto site2It = siteMap[site2].begin(); site2It != siteMap[site2].end(); ++site2It)
 				{
 					if ((*site1It).first == (*site2It).first)
 					{
-						my_sr_lib::VoroFortune::SVoronoiPoint2D<T>& v3 = (*site2It).second;
+						my_sr_lib::VoronoiPoint2D<T>& v3 = (*site2It).second;
 
 						SPointXYZ<T>& p3 = v3.originalPoints;
 
-						T sqrDistantionp1p3 = (p1.x - p3.x) * (p1.x - p3.x) + (p1.y - p3.y) * (p1.y - p3.y) + (p1.z - p3.z) * (p1.z - p3.z);
-						if (sqrDistantionp1p3 > sqrMaxDistantion) continue;
-
-						T sqrDistantionp2p3 = (p2.x - p3.x) * (p2.x - p3.x) + (p2.y - p3.y) * (p2.y - p3.y) + (p2.z - p3.z) * (p2.z - p3.z);
-						if (sqrDistantionp2p3 > sqrMaxDistantion) continue;
-
-						my_sr_lib::VoroFortune::SVoronoiPoint2D<T> v4 = { 0, 0, {(v1.originalPoints.x + delta), (v1.originalPoints.y + delta), (v1.originalPoints.z + delta) } };
+						my_sr_lib::VoronoiPoint2D<T> v4 = { 0, 0, {(v1.originalPoints.x + delta), (v1.originalPoints.y + delta), (v1.originalPoints.z + delta) } };
 						
 						triangleList.push_back({v1, v2, v3, v4});
 					}

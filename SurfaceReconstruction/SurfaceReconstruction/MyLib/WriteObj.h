@@ -21,7 +21,7 @@ namespace my_sr_lib
 
 		if (out.is_open())
 		{
-			const int VERTICES_BATCH_NUMBER = 4;
+			const int VERTICES_BATCH_NUMBER = 3;
 			unsigned int offset = 0;
 			for (auto& list: triangulationLists)
 			{
@@ -41,18 +41,19 @@ namespace my_sr_lib
 						<< " " << triangle.v3.originalPoints.y
 						<< " " << triangle.v3.originalPoints.z
 						<< std::endl;
-
+					/*
 					out << "v " << triangle.v4.originalPoints.x
 						<< " " << triangle.v4.originalPoints.y
 						<< " " << triangle.v4.originalPoints.z
 						<< std::endl;
+						*/
 
 					out << "f " << 1 + offset
 						<< " " << 2 + offset
 						<< " " << 3 + offset
 						<< std::endl;
 
-					out << "f " << 1 + offset
+					/*out << "f " << 1 + offset
 						<< " " << 2 + offset
 						<< " " << 4 + offset
 						<< std::endl;
@@ -65,7 +66,7 @@ namespace my_sr_lib
 					out << "f " << 2 + offset
 						<< " " << 3 + offset
 						<< " " << 4 + offset
-						<< std::endl;
+						<< std::endl;*/
 
 					offset += VERTICES_BATCH_NUMBER;
 				}
