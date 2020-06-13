@@ -7,6 +7,8 @@
 #include "MyLib/Struct.h"
 #include "MyLib/ReadXYZ.h"
 #include "MyLib/VoronoiFortune.h"
+#include "MyLib/DelaunayTriangulation.h"
+#include "MyLib/WriteObj.h"
 
 #include <algorithm>
 #include <chrono>
@@ -34,17 +36,65 @@ int main()
     std::vector<my_sr_lib::SPointXYZ<float>> points;
     my_sr_lib::SMinMaxPoint<float> minmax;
 
-    my_sr_lib::read_xyz("bunnyData.xyz", points, minmax);
+    const int32_t MULTIPLICATOR = 10000000;
+    my_sr_lib::read_xyz("bunnyData.xyz", points, minmax, MULTIPLICATOR);
     auto start = std::chrono::steady_clock::now();
-    std::vector<my_sr_lib::VoroFortune::SVoronoiPoint2D<float>> pointsForVoronoi;
+    //cube size)
+    std::size_t cubeSize = 512;
+    std::size_t numberTraverse = cubeSize * 3;
+    float deltaX = (minmax.maxX - minmax.minX) / cubeSize;
+    float invDeltaX = 1.f / deltaX;
+    float deltaY = (minmax.maxY - minmax.minY) / cubeSize;
+    float invDeltaY = 1.f / deltaY;
+    float deltaZ = (minmax.maxZ - minmax.minZ) / cubeSize;
+    float invDeltaZ = 1.f / deltaZ;
+    std::size_t maxCubeInDistantion = 20;
+    float sqrMaxDistantion = (maxCubeInDistantion * deltaX) * (maxCubeInDistantion * deltaX) + (maxCubeInDistantion * deltaY) * (maxCubeInDistantion * deltaY) + (maxCubeInDistantion * deltaZ) * (maxCubeInDistantion * deltaZ);
+    std::vector<std::vector<my_sr_lib::VoronoiPoint2D<float>>> pointsForVoronoi(numberTraverse + 1);
+
     for (my_sr_lib::SPointXYZ<float>& p: points)
     {
-        pointsForVoronoi.push_back({p.x, p.y});
+        // x axis yz coord
+        std::size_t index;
+        if ((index = p.x * invDeltaX) <= cubeSize)
+        {
+            pointsForVoronoi[index].push_back({ p.y, p.z, p });
+        }
+
+        // y axis xz coord
+        if ((index = p.y * invDeltaY) <= cubeSize)
+        {
+            pointsForVoronoi[cubeSize + index].push_back({ p.x, p.z, p });
+        }
+
+        // z axis xy coord
+        if ((index = p.z * invDeltaZ) <= cubeSize)
+        {
+            pointsForVoronoi[cubeSize * 2 + index].push_back({ p.x, p.y, p });
+        }
     }
 
-    my_sr_lib::VoroFortune::SVoronoiDiagram2D<float> voronoiDiagram;
+    std::vector<my_sr_lib::VoronoiDiagram2D<float>> voronoiDiagram(numberTraverse + 1);
+    std::vector < std::list<my_sr_lib::DelaunayTriangulation::STriangle<float>>> triangleList(numberTraverse + 1);
     my_sr_lib::SBox2D<float> boundingBox = {minmax.maxX, minmax.minX, minmax.maxY, minmax.minY};
-    my_sr_lib::CVoronoiFortune::VoronoiDiagramFortune2D(pointsForVoronoi, voronoiDiagram, boundingBox);
+    for (std::size_t index = 0; index < pointsForVoronoi.size(); ++index)
+    {
+        my_sr_lib::CVoronoiFortune::VoronoiDiagramFortune2D(pointsForVoronoi[index], voronoiDiagram[index], boundingBox);
+    }
+
+    {
+        auto end = std::chrono::steady_clock::now();
+        std::chrono::duration<double> elapsed_seconds = end - start;
+        std::cout << "CVoronoiFortune::VoronoiDiagramFortune2D: " << elapsed_seconds.count() << "s\n";
+    }
+
+    for (std::size_t index = 0; index < pointsForVoronoi.size(); ++index)
+    {
+        my_sr_lib::CDelaunayTriangulation::makeTriangulationBasedVoronoi(voronoiDiagram[index], triangleList[index], sqrMaxDistantion);
+    }
+    my_sr_lib::print_triangulation_as_obj("build.obj", triangleList);
+
+
     auto end = std::chrono::steady_clock::now();
     std::chrono::duration<double> elapsed_seconds = end - start;
     std::cout << "CVoronoiFortune::VoronoiDiagramFortune2D: " << elapsed_seconds.count() << "s\n";

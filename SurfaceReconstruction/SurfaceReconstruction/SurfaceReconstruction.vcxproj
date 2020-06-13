@@ -186,9 +186,11 @@
     <ClInclude Include="Experiments\ExecuteAround.h" />
     <ClInclude Include="Experiments\SafePtr.h" />
     <ClInclude Include="Experiments\SafeThreadMap.h" />
+    <ClInclude Include="MyLib\DelaunayTriangulation.h" />
     <ClInclude Include="MyLib\ReadXYZ.h" />
     <ClInclude Include="MyLib\Struct.h" />
     <ClInclude Include="MyLib\VoronoiFortune.h" />
+    <ClInclude Include="MyLib\WriteObj.h" />
     <ClInclude Include="voro\cell.hh" />
     <ClInclude Include="voro\common.hh" />
     <ClInclude Include="voro\config.hh" />
