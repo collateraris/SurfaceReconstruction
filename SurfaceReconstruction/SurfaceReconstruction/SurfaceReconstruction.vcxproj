@@ -187,6 +187,7 @@
     <ClInclude Include="Experiments\SafePtr.h" />
     <ClInclude Include="Experiments\SafeThreadMap.h" />
     <ClInclude Include="GPGPUlib\CommonOpenCL.h" />
+    <ClInclude Include="GPGPUlib\Image.h" />
     <ClInclude Include="GPGPUlib\Read.h" />
     <ClInclude Include="GPGPUlib\Sort.h" />
     <ClInclude Include="MyLib\DelaunayTriangulation.h" />
