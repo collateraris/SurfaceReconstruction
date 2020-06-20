@@ -14,14 +14,15 @@
 #include <fstream>
 
 #define TEXTURE_LOCAL_BLOCK_SIZE 1
+#define CUBE_SIZE 512
 
 int main()
 {
     GPGPUlib::SPointsData pointsData;
-    GPGPUlib::ReadPoint("bunnyData.xyz", pointsData);
+    GPGPUlib::ReadPoint("face.xyz", pointsData);
     std::cout << pointsData.pointsOfX.size();
-    GPGPUlib::IntervalSort(pointsData, 512);
-    std::cout << GPGPUlib::IntervalSortChecker(pointsData, 512);
+    GPGPUlib::IntervalSort(pointsData, CUBE_SIZE);
+    std::cout << GPGPUlib::IntervalSortChecker(pointsData, CUBE_SIZE);
 
     cl_context context = 0;
     cl_command_queue commandQueue = 0;
@@ -30,6 +31,8 @@ int main()
     cl_kernel kernel = 0;
 	cl_mem pointsMemObj[3] = {0, 0, 0};
 	cl_mem pointsTextureMemObj = 0;
+	cl_mem uniformCubesDistributionTextureMemObj = 0;
+	cl_mem inverseDeltaCubeMemObj = 0;
     cl_int errNum;
 
 	int POINTS_SIZE = pointsData.pointsOfX.size();
@@ -120,36 +123,56 @@ int main()
 		errNum = clEnqueueNDRangeKernel(commandQueue, kernel, 1, nullptr,
 			globalWorkSize, localWorkSize,
 			0, nullptr, nullptr);
+
 		if (errNum != CL_SUCCESS)
 		{
 			std::cerr << "Error queuing kernel for execution." << std::endl;
 			return 1;
 		}
 
-		char* buffer = new char[width * height * 4];
-		size_t origin[3] = { 0, 0, 0 };
-		size_t region[3] = { width, height, 1 };
-		errNum = clEnqueueReadImage(commandQueue, pointsTextureMemObj,
-			CL_TRUE,
-			origin, region, 0, 0, buffer,
-			0, nullptr, nullptr);
 
-		if (errNum != CL_SUCCESS)
+		clReleaseKernel(kernel);
+		clReleaseMemObject(*pointsMemObj);
+	}
+
+	{
+		kernel = clCreateKernel(program, "create_kd_tree_texture", nullptr);
+		if (kernel == nullptr)
 		{
-			std::cerr << "Error reading result buffer."
-				<< std::endl;
+			std::cerr << "Failed to create kernel" << std::endl;
 			return 1;
 		}
 
-		if (!GPGPUlib::SaveImage("pointsCloud.png", buffer, width, height))
+		cl_uint width, height, depth;
+		width = height = depth = CUBE_SIZE + 1;
+
+		uniformCubesDistributionTextureMemObj = GPGPUlib::Create3DImage(context, width, height, depth);
+
+		//because normalize coords between [0, 1]
+		float inverseDeltaCube = (1.0 - 0.0) / CUBE_SIZE;
+
+		inverseDeltaCubeMemObj = clCreateBuffer(context, CL_MEM_READ_ONLY,
+			sizeof(float), &inverseDeltaCube,
+			nullptr);
+
+		errNum = clSetKernelArg(kernel, 0, sizeof(cl_mem), &pointsTextureMemObj);
+		errNum |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &uniformCubesDistributionTextureMemObj);
+		errNum |= clSetKernelArg(kernel, 2, sizeof(cl_mem), &uniformCubesDistributionTextureMemObj);
+		errNum |= clSetKernelArg(kernel, 3, sizeof(cl_mem), &inverseDeltaCubeMemObj);
+
+		size_t localWorkSize[2] = { 16, 16 };
+		size_t globalWorkSize[2] = { GPGPUlib::RoundUp(localWorkSize[0], width), GPGPUlib::RoundUp(localWorkSize[1], height) };
+
+		errNum = clEnqueueNDRangeKernel(commandQueue, kernel, 2, nullptr,
+			globalWorkSize, localWorkSize,
+			0, nullptr, nullptr);
+		if (errNum != CL_SUCCESS)
 		{
-			std::cerr << "Error saving image." << std::endl;
+			std::cerr << "Error queuing kernel for execution." << std::endl;
 			return 1;
 		}
 
 		clReleaseKernel(kernel);
-		clReleaseMemObject(*pointsMemObj);
-		delete buffer;
 	}
 	
     return 0;
