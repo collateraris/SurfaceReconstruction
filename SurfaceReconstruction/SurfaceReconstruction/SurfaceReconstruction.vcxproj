@@ -190,6 +190,7 @@
     <ClInclude Include="GPGPUlib\Image.h" />
     <ClInclude Include="GPGPUlib\Read.h" />
     <ClInclude Include="GPGPUlib\Sort.h" />
+    <ClInclude Include="GPGPUlib\Write.h" />
     <ClInclude Include="MyLib\DelaunayTriangulation.h" />
     <ClInclude Include="MyLib\ReadXYZ.h" />
     <ClInclude Include="MyLib\Struct.h" />

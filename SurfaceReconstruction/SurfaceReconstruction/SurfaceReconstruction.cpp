@@ -7,23 +7,21 @@
 #include "GPGPUlib/Sort.h"
 #include "GPGPUlib/CommonOpenCL.h"
 #include "GPGPUlib/Image.h"
+#include "GPGPUlib/Write.h"
 
 #include <algorithm>
 #include <chrono>
 #include <vector>
 #include <fstream>
+#include <chrono>
 
-#define TEXTURE_LOCAL_BLOCK_SIZE 1
-#define CUBE_SIZE 256
+#define CUBE_SIZE 400
 
 int main()
 {
     GPGPUlib::SPointsData pointsData;
-    GPGPUlib::ReadPoint("face.xyz", pointsData);
+    GPGPUlib::ReadPoint("vertebra.xyz", pointsData);
     std::cout << pointsData.pointsOfX.size();
-    GPGPUlib::IntervalSort(pointsData, CUBE_SIZE);
-    std::cout << GPGPUlib::IntervalSortChecker(pointsData, CUBE_SIZE);
-
     cl_context context = 0;
     cl_command_queue commandQueue = 0;
     cl_program program = 0;
@@ -54,7 +52,7 @@ int main()
 	{
 		return 1;
 	}
-
+	auto start = std::chrono::steady_clock::now();
 	{
 
 		kernel = clCreateKernel(program, "normalize_points", nullptr);
@@ -79,12 +77,33 @@ int main()
 			sizeof(float) * POINTS_SIZE, &pointsData.pointsOfZ[0],
 			nullptr);
 
+
+		std::vector<float> minScaledPos = { pointsData.minX, pointsData.minY, pointsData.minZ};
+		float shiftVector = *std::min_element(minScaledPos.begin(), minScaledPos.end());
+		shiftVector = shiftVector < 0 ? -shiftVector : 0;
+
+		std::vector<float> extremalPosAbs = { pointsData.maxX + shiftVector, pointsData.maxY + shiftVector, pointsData.maxZ + +shiftVector};
+		float scaleVector = *std::max_element(extremalPosAbs.begin(), extremalPosAbs.end());
+		scaleVector = 1. / scaleVector;
+	
+		cl_mem shiftMemObj = clCreateBuffer(context, CL_MEM_READ_WRITE |
+			CL_MEM_COPY_HOST_PTR,
+			sizeof(float) , &shiftVector,
+			nullptr);
+
+		cl_mem scaleMemObj = clCreateBuffer(context, CL_MEM_READ_WRITE |
+			CL_MEM_COPY_HOST_PTR,
+			sizeof(float), &scaleVector,
+			nullptr);
+
 		errNum = clSetKernelArg(kernel, 0, sizeof(cl_mem), &pointsMemObj[0]);
 		errNum |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &pointsMemObj[1]);
 		errNum |= clSetKernelArg(kernel, 2, sizeof(cl_mem), &pointsMemObj[2]);
+		errNum |= clSetKernelArg(kernel, 3, sizeof(cl_mem), &shiftMemObj);
+		errNum |= clSetKernelArg(kernel, 4, sizeof(cl_mem), &scaleMemObj);
 
-		size_t globalWorkSize[1] = { POINTS_SIZE };
-		size_t localWorkSize[1] = { 1 };
+		size_t localWorkSize[1] = { 64 };
+		size_t globalWorkSize[1] = { GPGPUlib::RoundUp(localWorkSize[0], POINTS_SIZE) };
 
 		errNum = clEnqueueNDRangeKernel(commandQueue, kernel, 1, nullptr,
 			globalWorkSize, localWorkSize,
@@ -96,6 +115,8 @@ int main()
 		}
 
 		clReleaseKernel(kernel);
+		clReleaseMemObject(shiftMemObj);
+		clReleaseMemObject(scaleMemObj);
 	}
 
 	{
@@ -116,8 +137,8 @@ int main()
 		errNum |= clSetKernelArg(kernel, 2, sizeof(cl_mem), &pointsMemObj[2]);
 		errNum |= clSetKernelArg(kernel, 3, sizeof(cl_mem), &pointsTextureMemObj);
 
-		size_t globalWorkSize[1] = { POINTS_SIZE };
-		size_t localWorkSize[1] = { 1 };
+		size_t localWorkSize[1] = { 64 };
+		size_t globalWorkSize[1] = { GPGPUlib::RoundUp(localWorkSize[0], POINTS_SIZE) };
 
 		errNum = clEnqueueNDRangeKernel(commandQueue, kernel, 1, nullptr,
 			globalWorkSize, localWorkSize,
@@ -130,7 +151,6 @@ int main()
 		}
 
 		clReleaseKernel(kernel);
-		clReleaseMemObject(*pointsMemObj);
 		pointsData.pointsOfX.clear();
 		pointsData.pointsOfY.clear();
 		pointsData.pointsOfZ.clear();
@@ -198,8 +218,8 @@ int main()
 		cl_uint width, height, depth;
 		width = height = depth = CUBE_SIZE;
 
-		size_t localWorkSize[3] = { 1, 1, 1 };
-		size_t globalWorkSize[3] = { width, height, depth };
+		size_t localWorkSize[3] = { 8, 4, 4 };
+		size_t globalWorkSize[3] = { GPGPUlib::RoundUp(localWorkSize[0], width), GPGPUlib::RoundUp(localWorkSize[1], height), GPGPUlib::RoundUp(localWorkSize[2], depth) };
 
 		errNum = clEnqueueNDRangeKernel(commandQueue, kernel, 3, nullptr,
 			globalWorkSize, localWorkSize,
@@ -209,7 +229,9 @@ int main()
 			std::cerr << "Error queuing kernel for execution." << std::endl;
 			return 1;
 		}
-
+		auto end = std::chrono::steady_clock::now();
+		std::chrono::duration<double> elapsed_seconds = end - start;
+		std::cout << "elapsed time: " << elapsed_seconds.count() << "s\n";
 		errNum = clEnqueueReadBuffer(commandQueue, cubeMemObj,
 			CL_TRUE, 0,
 			sizeof(cl_uint) * CUBE_CUBE_SIZE, &cube[0],
@@ -219,14 +241,13 @@ int main()
 			std::cerr << "Error reading result buffer." << std::endl;
 			return 1;
 		}
-		int sum = 0;
-		for (cl_uint c: cube)
-		{
-			if (c != 0)
-				sum++;
-		}
-		std::cout << "sum " << sum << std::endl;
+		GPGPUlib::PrintOBJ("drag.obj", cube, CUBE_SIZE);
+
 		clReleaseKernel(kernel);
+		clReleaseMemObject(uniformCubesDistributionTextureMemObj);
+		clReleaseMemObject(pointsTextureMemObj);
+		clReleaseMemObject(cubeMemObj);
+		clReleaseMemObject(*pointsMemObj);
 	}
 	
     return 0;

@@ -1,15 +1,16 @@
-
-#define TEXTURE_LOCAL_BLOCK_SIZE 1
-
 const sampler_t sampler = CLK_ADDRESS_CLAMP_TO_EDGE | CLK_FILTER_NEAREST;
 
 
-__kernel void normalize_points(__global float* pointsX, __global float* pointsY, __global float* pointsZ) 
+__kernel void normalize_points(__global float* pointsX, 
+	__global float* pointsY, 
+	__global float* pointsZ,
+	__global float* shiftVector,
+	__global float* scaleVector) 
 {
 	int gid = get_global_id(0);
 	float3 vectorPoint = (float3)(pointsX[gid], pointsY[gid], pointsZ[gid]);
-	vectorPoint  = fast_normalize(vectorPoint);
-	vectorPoint = vectorPoint * (float3)(0.5) + (float3)(0.5);
+	vectorPoint = vectorPoint + (float3)(shiftVector[0], shiftVector[0], shiftVector[0]);
+	vectorPoint  = vectorPoint * (float3)(scaleVector[0], scaleVector[0], scaleVector[0]);
 	pointsX[gid] = vectorPoint.x;
 	pointsY[gid] = vectorPoint.y;
 	pointsZ[gid] = vectorPoint.z;
@@ -41,9 +42,6 @@ __kernel void create_kd_tree_texture(
 	
 	int width = get_image_width(pointsTexture);
 	int height = get_image_height(pointsTexture);
-	
-	if (x >= width || y >= height)
-		return;
 		
 	float4 point = read_imagef(pointsTexture, sampler, (int2)(x, y));
 		
@@ -66,12 +64,9 @@ __kernel void upload_voxel_grid(
 	int width = get_image_width(kdtreeTextureRead);
 	int height = get_image_height(kdtreeTextureRead);
 	int depth = get_image_height(kdtreeTextureRead);
-
-	if (x >= width || y >= height || z >= depth)
-		return;
 		
 	float4 kdtreePoint = read_imagef(kdtreeTextureRead, (int4)(x, y, z, 1.0));
-	float bias = 0.001;
+	float bias = 0.0001;
 	if (kdtreePoint.z < bias)
 		return;
 	int size = x * width * height + y * height + z;

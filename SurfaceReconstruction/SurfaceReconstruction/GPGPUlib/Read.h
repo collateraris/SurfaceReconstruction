@@ -62,7 +62,7 @@ void GPGPUlib::ReadPoint(const char* filename, GPGPUlib::SPointsData& outputData
 		{
 			outputData.maxX = num[0];
 		}
-		else if (outputData.minX > num[0])
+		if (outputData.minX > num[0])
 		{
 			outputData.minX = num[0];
 		}
@@ -71,7 +71,7 @@ void GPGPUlib::ReadPoint(const char* filename, GPGPUlib::SPointsData& outputData
 		{
 			outputData.maxY = num[1];
 		}
-		else if (outputData.minY > num[1])
+		if (outputData.minY > num[1])
 		{
 			outputData.minY = num[1];
 		}
@@ -80,7 +80,7 @@ void GPGPUlib::ReadPoint(const char* filename, GPGPUlib::SPointsData& outputData
 		{
 			outputData.maxZ = num[2];
 		}
-		else if (outputData.minZ > num[2])
+		if (outputData.minZ > num[2])
 		{
 			outputData.minZ = num[2];
 		}
