@@ -15,12 +15,13 @@
 #include <fstream>
 #include <chrono>
 
-#define CUBE_SIZE 400
+#define CUBE_SIZE 450
 
 int main()
 {
+	cl_uint searchRadius = 4;
     GPGPUlib::SPointsData pointsData;
-    GPGPUlib::ReadPoint("vertebra.xyz", pointsData);
+    GPGPUlib::ReadPoint("object.xyz", pointsData);
     std::cout << pointsData.pointsOfX.size();
     cl_context context = 0;
     cl_command_queue commandQueue = 0;
@@ -86,12 +87,12 @@ int main()
 		float scaleVector = *std::max_element(extremalPosAbs.begin(), extremalPosAbs.end());
 		scaleVector = 1. / scaleVector;
 	
-		cl_mem shiftMemObj = clCreateBuffer(context, CL_MEM_READ_WRITE |
+		cl_mem shiftMemObj = clCreateBuffer(context, CL_MEM_READ_ONLY |
 			CL_MEM_COPY_HOST_PTR,
 			sizeof(float) , &shiftVector,
 			nullptr);
 
-		cl_mem scaleMemObj = clCreateBuffer(context, CL_MEM_READ_WRITE |
+		cl_mem scaleMemObj = clCreateBuffer(context, CL_MEM_READ_ONLY |
 			CL_MEM_COPY_HOST_PTR,
 			sizeof(float), &scaleVector,
 			nullptr);
@@ -197,6 +198,41 @@ int main()
 	}
 
 	{
+		kernel = clCreateKernel(program, "inc_voxel_concentration", nullptr);
+		if (kernel == nullptr)
+		{
+			std::cerr << "Failed to create kernel" << std::endl;
+			return 1;
+		}
+
+		cl_mem searchRadiusMemObj = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+				sizeof(cl_uint), &searchRadius,
+				nullptr);
+
+		cl_uint width, height, depth;
+		width = height = depth = CUBE_SIZE;
+
+		errNum = clSetKernelArg(kernel, 0, sizeof(cl_mem), &uniformCubesDistributionTextureMemObj);
+		errNum |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &uniformCubesDistributionTextureMemObj);
+		errNum |= clSetKernelArg(kernel, 2, sizeof(cl_mem), &searchRadiusMemObj);
+
+		size_t localWorkSize[3] = { 8, 4, 4 };
+		size_t globalWorkSize[3] = { GPGPUlib::RoundUp(localWorkSize[0], width), GPGPUlib::RoundUp(localWorkSize[1], height), GPGPUlib::RoundUp(localWorkSize[2], depth) };
+
+		errNum = clEnqueueNDRangeKernel(commandQueue, kernel, 3, nullptr,
+			globalWorkSize, localWorkSize,
+			0, nullptr, nullptr);
+		if (errNum != CL_SUCCESS)
+		{
+			std::cerr << "Error queuing kernel for execution." << std::endl;
+			return 1;
+		}
+
+		clReleaseKernel(kernel);
+		clReleaseMemObject(searchRadiusMemObj);
+	}
+
+	{
 		kernel = clCreateKernel(program, "upload_voxel_grid", nullptr);
 		if (kernel == nullptr)
 		{
@@ -204,13 +240,11 @@ int main()
 			return 1;
 		}
 
-		int CUBE_CUBE_SIZE = CUBE_SIZE * CUBE_SIZE *CUBE_SIZE;
-		std::vector<cl_uint> cube(CUBE_CUBE_SIZE, 0);
+		int CUBE_CUBE_SIZE = CUBE_SIZE * CUBE_SIZE * CUBE_SIZE;
 
 		cl_mem cubeMemObj = clCreateBuffer(context, CL_MEM_READ_WRITE,
 			sizeof(cl_uint) * CUBE_CUBE_SIZE,
 			nullptr, nullptr);
-
 
 		errNum = clSetKernelArg(kernel, 0, sizeof(cl_mem), &cubeMemObj);
 		errNum |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &uniformCubesDistributionTextureMemObj);
@@ -232,6 +266,7 @@ int main()
 		auto end = std::chrono::steady_clock::now();
 		std::chrono::duration<double> elapsed_seconds = end - start;
 		std::cout << "elapsed time: " << elapsed_seconds.count() << "s\n";
+		std::vector<cl_uint> cube(CUBE_CUBE_SIZE, 0);
 		errNum = clEnqueueReadBuffer(commandQueue, cubeMemObj,
 			CL_TRUE, 0,
 			sizeof(cl_uint) * CUBE_CUBE_SIZE, &cube[0],
