@@ -1,202 +1,290 @@
 ﻿#include <iostream>
 
-#include "Algorithms/CommonStruct.h"
-#include "Algorithms/BinaryTree.h"
-#include "File/ReadPoints.h"
+#define CL_USE_DEPRECATED_OPENCL_2_0_APIS
+#include <CL/cl.h>
 
-#include "MyLib/Struct.h"
-#include "MyLib/ReadXYZ.h"
-#include "MyLib/VoronoiFortune.h"
-#include "MyLib/DelaunayTriangulation.h"
-#include "MyLib/WriteObj.h"
+#include "GPGPUlib/Read.h"
+#include "GPGPUlib/Sort.h"
+#include "GPGPUlib/CommonOpenCL.h"
+#include "GPGPUlib/Image.h"
+#include "GPGPUlib/Write.h"
 
 #include <algorithm>
 #include <chrono>
 #include <vector>
 #include <fstream>
+#include <chrono>
 
-
-using namespace Engine::Algorithm;
-using namespace Engine::File;
-
-
-
-void BST(SBSTContainer& bst, std::vector<Engine::Algorithm::SPoint3D>& _points)
-{
-    for (Engine::Algorithm::SPoint3D& p : _points)
-    {
-        bst.Find(p);
-    }
-}
-
-double rnd() { return double(rand()) / RAND_MAX; }
+#define CUBE_SIZE 450
 
 int main()
 {
-    std::vector<my_sr_lib::SPointXYZ<float>> points;
-    my_sr_lib::SMinMaxPoint<float> minmax;
+	cl_uint searchRadius = 4;
+    GPGPUlib::SPointsData pointsData;
+    GPGPUlib::ReadPoint("object.xyz", pointsData);
+    std::cout << pointsData.pointsOfX.size();
+    cl_context context = 0;
+    cl_command_queue commandQueue = 0;
+    cl_program program = 0;
+    cl_device_id device = 0;
+    cl_kernel kernel = 0;
+	cl_mem pointsMemObj[3] = {0, 0, 0};
+	cl_mem pointsTextureMemObj = 0;
+	cl_mem uniformCubesDistributionTextureMemObj = 0;
+    cl_int errNum;
 
-    const int32_t MULTIPLICATOR = 10000000;
-    my_sr_lib::read_xyz("bunnyData.xyz", points, minmax, MULTIPLICATOR);
-    auto start = std::chrono::steady_clock::now();
-    //cube size)
-    std::size_t cubeSize = 512;
-    std::size_t numberTraverse = cubeSize * 3;
-    float deltaX = (minmax.maxX - minmax.minX) / cubeSize;
-    float invDeltaX = 1.f / deltaX;
-    float deltaY = (minmax.maxY - minmax.minY) / cubeSize;
-    float invDeltaY = 1.f / deltaY;
-    float deltaZ = (minmax.maxZ - minmax.minZ) / cubeSize;
-    float invDeltaZ = 1.f / deltaZ;
-    std::size_t maxCubeInDistantion = 20;
-    float sqrMaxDistantion = (maxCubeInDistantion * deltaX) * (maxCubeInDistantion * deltaX) + (maxCubeInDistantion * deltaY) * (maxCubeInDistantion * deltaY) + (maxCubeInDistantion * deltaZ) * (maxCubeInDistantion * deltaZ);
-    std::vector<std::vector<my_sr_lib::VoronoiPoint2D<float>>> pointsForVoronoi(numberTraverse + 1);
+	int POINTS_SIZE = pointsData.pointsOfX.size();
 
-    for (my_sr_lib::SPointXYZ<float>& p: points)
-    {
-        // x axis yz coord
-        std::size_t index;
-        if ((index = p.x * invDeltaX) <= cubeSize)
-        {
-            pointsForVoronoi[index].push_back({ p.y, p.z, p });
-        }
+	context = GPGPUlib::CreateContext();
+	if (context == nullptr)
+	{
+		std::cerr << "Failed to create OpenCL context." << std::endl;
+		return 1;
+	}
 
-        // y axis xz coord
-        if ((index = p.y * invDeltaY) <= cubeSize)
-        {
-            pointsForVoronoi[cubeSize + index].push_back({ p.x, p.z, p });
-        }
+	commandQueue = GPGPUlib::CreateCommandQueue(context, &device);
+	if (commandQueue == nullptr)
+	{
+		return 1;
+	}
 
-        // z axis xy coord
-        if ((index = p.z * invDeltaZ) <= cubeSize)
-        {
-            pointsForVoronoi[cubeSize * 2 + index].push_back({ p.x, p.y, p });
-        }
-    }
+	program = GPGPUlib::CreateProgram(context, device, "GPGPUlib/kernels/surface_reconsturction.cl");
+	if (program == nullptr)
+	{
+		return 1;
+	}
+	auto start = std::chrono::steady_clock::now();
+	{
 
-    std::vector<my_sr_lib::VoronoiDiagram2D<float>> voronoiDiagram(numberTraverse + 1);
-    std::vector < std::list<my_sr_lib::DelaunayTriangulation::STriangle<float>>> triangleList(numberTraverse + 1);
-    my_sr_lib::SBox2D<float> boundingBox = {minmax.maxX, minmax.minX, minmax.maxY, minmax.minY};
-    for (std::size_t index = 0; index < pointsForVoronoi.size(); ++index)
-    {
-        my_sr_lib::CVoronoiFortune::VoronoiDiagramFortune2D(pointsForVoronoi[index], voronoiDiagram[index], boundingBox);
-    }
+		kernel = clCreateKernel(program, "normalize_points", nullptr);
+		if (kernel == nullptr)
+		{
+			std::cerr << "Failed to create kernel" << std::endl;
+			return 1;
+		}
 
-    {
-        auto end = std::chrono::steady_clock::now();
-        std::chrono::duration<double> elapsed_seconds = end - start;
-        std::cout << "CVoronoiFortune::VoronoiDiagramFortune2D: " << elapsed_seconds.count() << "s\n";
-    }
+		pointsMemObj[0] = clCreateBuffer(context, CL_MEM_READ_WRITE |
+			CL_MEM_COPY_HOST_PTR,
+			sizeof(float) * POINTS_SIZE, &pointsData.pointsOfX[0],
+			nullptr);
 
-    for (std::size_t index = 0; index < pointsForVoronoi.size(); ++index)
-    {
-        my_sr_lib::CDelaunayTriangulation::makeTriangulationBasedVoronoi(voronoiDiagram[index], triangleList[index], sqrMaxDistantion);
-    }
-    my_sr_lib::print_triangulation_as_obj("build.obj", triangleList);
+		pointsMemObj[1] = clCreateBuffer(context, CL_MEM_READ_WRITE |
+			CL_MEM_COPY_HOST_PTR,
+			sizeof(float) * POINTS_SIZE, &pointsData.pointsOfY[0],
+			nullptr);
+
+		pointsMemObj[2] = clCreateBuffer(context, CL_MEM_READ_WRITE |
+			CL_MEM_COPY_HOST_PTR,
+			sizeof(float) * POINTS_SIZE, &pointsData.pointsOfZ[0],
+			nullptr);
 
 
-    auto end = std::chrono::steady_clock::now();
-    std::chrono::duration<double> elapsed_seconds = end - start;
-    std::cout << "CVoronoiFortune::VoronoiDiagramFortune2D: " << elapsed_seconds.count() << "s\n";
-    return  0;
+		std::vector<float> minScaledPos = { pointsData.minX, pointsData.minY, pointsData.minZ};
+		float shiftVector = *std::min_element(minScaledPos.begin(), minScaledPos.end());
+		shiftVector = shiftVector < 0 ? -shiftVector : 0;
 
-    /*
-    unsigned int i;
-    double x, y, z, rsq, r;
-    voronoicell v;
+		std::vector<float> extremalPosAbs = { pointsData.maxX + shiftVector, pointsData.maxY + shiftVector, pointsData.maxZ + +shiftVector};
+		float scaleVector = *std::max_element(extremalPosAbs.begin(), extremalPosAbs.end());
+		scaleVector = 1. / scaleVector;
+	
+		cl_mem shiftMemObj = clCreateBuffer(context, CL_MEM_READ_ONLY |
+			CL_MEM_COPY_HOST_PTR,
+			sizeof(float) , &shiftVector,
+			nullptr);
 
-    v.init(-1, 1, -1, 1, -1, 1);
+		cl_mem scaleMemObj = clCreateBuffer(context, CL_MEM_READ_ONLY |
+			CL_MEM_COPY_HOST_PTR,
+			sizeof(float), &scaleVector,
+			nullptr);
 
-    for (i = 0; i < 250; i++)
-    {
-        x = 2 * rnd() - 1;
-        y = 2 * rnd() - 1;
-        z = 2 * rnd() - 1;
-        rsq = x * x + y * y + z * z;
-        if (rsq > 0.01 && rsq < 1)
-        {
-            r = 1 / sqrt(rsq); x *= r; y *= r; z *= r;
-            v.plane(x, y, z, 1);
-        }
-    }
+		errNum = clSetKernelArg(kernel, 0, sizeof(cl_mem), &pointsMemObj[0]);
+		errNum |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &pointsMemObj[1]);
+		errNum |= clSetKernelArg(kernel, 2, sizeof(cl_mem), &pointsMemObj[2]);
+		errNum |= clSetKernelArg(kernel, 3, sizeof(cl_mem), &shiftMemObj);
+		errNum |= clSetKernelArg(kernel, 4, sizeof(cl_mem), &scaleMemObj);
 
-    v.draw_gnuplot(0, 0, 0, "single_cell.gnu");
+		size_t localWorkSize[1] = { 64 };
+		size_t globalWorkSize[1] = { GPGPUlib::RoundUp(localWorkSize[0], POINTS_SIZE) };
 
-    std::vector<int> f_vert;
-    std::vector<double> nor;
-    v.face_orders(f_vert);
-    v.normals(nor);
+		errNum = clEnqueueNDRangeKernel(commandQueue, kernel, 1, nullptr,
+			globalWorkSize, localWorkSize,
+			0, nullptr, nullptr);
+		if (errNum != CL_SUCCESS)
+		{
+			std::cerr << "Error queuing kernel for execution." << std::endl;
+			return 1;
+		}
 
-    const char* parity[2] = { "even","odd" };
-    FILE* fp = safe_fopen("odd_even_pl.pov", "w");
-    for (i = 0; i < f_vert.size(); i++)
-        fprintf(fp, "plane{<%g,%g,%g>,0.5 texture{t_%s}}\n"
-           , nor[3 * i], nor[3 * i + 1], nor[3 * i + 2]
-           , parity[f_vert[i] & 1]);
-    fclose(fp);
-    v.draw_pov(0, 0, 0, "odd_even_v.pov");
-    */
-    /*
-    const int32_t MULTIPLICATOR = 10000000;
-    //const int32_t MULTIPLICATOR = 100000;
-    std::vector<Engine::Algorithm::SPoint3D> _points;
-    Engine::Algorithm::SMinMaxPoint minmax;
+		clReleaseKernel(kernel);
+		clReleaseMemObject(shiftMemObj);
+		clReleaseMemObject(scaleMemObj);
+	}
 
-    //CReadPoints::ParseFromText("object.pts", _points, minmax, MULTIPLICATOR);
-    //CReadPoints::ParseFromText("bunnyData.pts", _points, minmax, MULTIPLICATOR); //pump.ptx
-    //CReadPoints::ParseFromText("vertebra.pts", _points, minmax, MULTIPLICATOR);
-    CReadPoints::ParseFromText("face.xyz", _points, minmax, MULTIPLICATOR);
+	{
+		kernel = clCreateKernel(program, "create_points_texture", nullptr);
+		if (kernel == nullptr)
+		{
+			std::cerr << "Failed to create kernel" << std::endl;
+			return 1;
+		}
 
-    std::cout << "Point size " << _points.size() << std::endl;
+		cl_uint width, height;
+		width = height = sqrtf(POINTS_SIZE)+1;
 
-    SNodeData data;
-    data.minOx = minmax.minX;
-    data.minOy = minmax.minY;
-    data.minOz = minmax.minZ;
-    data.chunkNumber = 128;
-    data.cubeSizeX = (minmax.maxX - minmax.minX) / data.chunkNumber;
-    data.cubeSizeY = (minmax.maxY - minmax.minY) / data.chunkNumber;
-    data.cubeSizeZ = (minmax.maxZ - minmax.minZ) / data.chunkNumber;
+		pointsTextureMemObj = GPGPUlib::Create2DImage(context, width, height);
 
-    SBSTContainer bst(data);
+		errNum = clSetKernelArg(kernel, 0, sizeof(cl_mem), &pointsMemObj[0]);
+		errNum |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &pointsMemObj[1]);
+		errNum |= clSetKernelArg(kernel, 2, sizeof(cl_mem), &pointsMemObj[2]);
+		errNum |= clSetKernelArg(kernel, 3, sizeof(cl_mem), &pointsTextureMemObj);
 
-    {
-        auto start = std::chrono::steady_clock::now();
-        bst.InitCubesPool(50000);
-        auto end = std::chrono::steady_clock::now();
-        std::chrono::duration<double> elapsed_seconds = end - start;
-        std::cout << "Create voxel pool elapsed time: " << elapsed_seconds.count() << "s\n";
-    }
- 
-    {
-        auto start = std::chrono::steady_clock::now();
-        BST(bst, _points);
-        auto end = std::chrono::steady_clock::now();
-        std::chrono::duration<double> elapsed_seconds = end - start;
-        std::cout << "Create voxel tree elapsed time: " << elapsed_seconds.count() << "s\n";
-    }
+		size_t localWorkSize[1] = { 64 };
+		size_t globalWorkSize[1] = { GPGPUlib::RoundUp(localWorkSize[0], POINTS_SIZE) };
 
-    {
-        auto start = std::chrono::steady_clock::now();
-        bst.CreateSolidMesh(5, 0);
-        auto end = std::chrono::steady_clock::now();
-        std::chrono::duration<double> elapsed_seconds = end - start;
-        std::cout << "Create solid mesh elapsed time: " << elapsed_seconds.count() << "s\n";
-    }
+		errNum = clEnqueueNDRangeKernel(commandQueue, kernel, 1, nullptr,
+			globalWorkSize, localWorkSize,
+			0, nullptr, nullptr);
 
-    std::list<SVertexVoxelUnit> allMeshesAsObj;
+		if (errNum != CL_SUCCESS)
+		{
+			std::cerr << "Error queuing kernel for execution." << std::endl;
+			return 1;
+		}
 
-    {
-        auto start = std::chrono::steady_clock::now();
-        bst.GetAllMeshes(allMeshesAsObj);
-        auto end = std::chrono::steady_clock::now();
-        std::chrono::duration<double> elapsed_seconds = end - start;
-        std::cout << "Getting all meshes elapsed time: " << elapsed_seconds.count() << "s\n";
-    }
+		clReleaseKernel(kernel);
+		pointsData.pointsOfX.clear();
+		pointsData.pointsOfY.clear();
+		pointsData.pointsOfZ.clear();
+	}
 
-    std::cout << allMeshesAsObj.size() << std::endl;
-    CCommonStruct::PrintVoxelsInObj("object.obj", allMeshesAsObj);
-    system("pause");
-   // */
+	{
+		kernel = clCreateKernel(program, "create_kd_tree_texture", nullptr);
+		if (kernel == nullptr)
+		{
+			std::cerr << "Failed to create kernel" << std::endl;
+			return 1;
+		}
+
+		cl_uint width, height, depth;
+		width = height = depth = CUBE_SIZE;
+
+		uniformCubesDistributionTextureMemObj = GPGPUlib::Create3DImage(context, width, height, depth);
+
+		//because normalize coords between [0, 1]
+		float cubeSize = CUBE_SIZE;
+		cl_mem CubeSizeMemObj = 0;
+		CubeSizeMemObj = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+			sizeof(float), &cubeSize,
+			nullptr);
+
+		errNum = clSetKernelArg(kernel, 0, sizeof(cl_mem), &pointsTextureMemObj);
+		errNum |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &uniformCubesDistributionTextureMemObj);
+		errNum |= clSetKernelArg(kernel, 2, sizeof(cl_mem), &uniformCubesDistributionTextureMemObj);
+		errNum |= clSetKernelArg(kernel, 3, sizeof(cl_mem), &CubeSizeMemObj);
+
+		size_t localWorkSize[2] = { 16, 16 };
+		size_t globalWorkSize[2] = { GPGPUlib::RoundUp(localWorkSize[0], width), GPGPUlib::RoundUp(localWorkSize[1], height) };
+
+		errNum = clEnqueueNDRangeKernel(commandQueue, kernel, 2, nullptr,
+			globalWorkSize, localWorkSize,
+			0, nullptr, nullptr);
+		if (errNum != CL_SUCCESS)
+		{
+			std::cerr << "Error queuing kernel for execution." << std::endl;
+			return 1;
+		}
+
+		clReleaseKernel(kernel);
+	}
+
+	{
+		kernel = clCreateKernel(program, "inc_voxel_concentration", nullptr);
+		if (kernel == nullptr)
+		{
+			std::cerr << "Failed to create kernel" << std::endl;
+			return 1;
+		}
+
+		cl_mem searchRadiusMemObj = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+				sizeof(cl_uint), &searchRadius,
+				nullptr);
+
+		cl_uint width, height, depth;
+		width = height = depth = CUBE_SIZE;
+
+		errNum = clSetKernelArg(kernel, 0, sizeof(cl_mem), &uniformCubesDistributionTextureMemObj);
+		errNum |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &uniformCubesDistributionTextureMemObj);
+		errNum |= clSetKernelArg(kernel, 2, sizeof(cl_mem), &searchRadiusMemObj);
+
+		size_t localWorkSize[3] = { 8, 4, 4 };
+		size_t globalWorkSize[3] = { GPGPUlib::RoundUp(localWorkSize[0], width), GPGPUlib::RoundUp(localWorkSize[1], height), GPGPUlib::RoundUp(localWorkSize[2], depth) };
+
+		errNum = clEnqueueNDRangeKernel(commandQueue, kernel, 3, nullptr,
+			globalWorkSize, localWorkSize,
+			0, nullptr, nullptr);
+		if (errNum != CL_SUCCESS)
+		{
+			std::cerr << "Error queuing kernel for execution." << std::endl;
+			return 1;
+		}
+
+		clReleaseKernel(kernel);
+		clReleaseMemObject(searchRadiusMemObj);
+	}
+
+	{
+		kernel = clCreateKernel(program, "upload_voxel_grid", nullptr);
+		if (kernel == nullptr)
+		{
+			std::cerr << "Failed to create kernel" << std::endl;
+			return 1;
+		}
+
+		int CUBE_CUBE_SIZE = CUBE_SIZE * CUBE_SIZE * CUBE_SIZE;
+
+		cl_mem cubeMemObj = clCreateBuffer(context, CL_MEM_READ_WRITE,
+			sizeof(cl_uint) * CUBE_CUBE_SIZE,
+			nullptr, nullptr);
+
+		errNum = clSetKernelArg(kernel, 0, sizeof(cl_mem), &cubeMemObj);
+		errNum |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &uniformCubesDistributionTextureMemObj);
+
+		cl_uint width, height, depth;
+		width = height = depth = CUBE_SIZE;
+
+		size_t localWorkSize[3] = { 8, 4, 4 };
+		size_t globalWorkSize[3] = { GPGPUlib::RoundUp(localWorkSize[0], width), GPGPUlib::RoundUp(localWorkSize[1], height), GPGPUlib::RoundUp(localWorkSize[2], depth) };
+
+		errNum = clEnqueueNDRangeKernel(commandQueue, kernel, 3, nullptr,
+			globalWorkSize, localWorkSize,
+			0, nullptr, nullptr);
+		if (errNum != CL_SUCCESS)
+		{
+			std::cerr << "Error queuing kernel for execution." << std::endl;
+			return 1;
+		}
+		auto end = std::chrono::steady_clock::now();
+		std::chrono::duration<double> elapsed_seconds = end - start;
+		std::cout << "elapsed time: " << elapsed_seconds.count() << "s\n";
+		std::vector<cl_uint> cube(CUBE_CUBE_SIZE, 0);
+		errNum = clEnqueueReadBuffer(commandQueue, cubeMemObj,
+			CL_TRUE, 0,
+			sizeof(cl_uint) * CUBE_CUBE_SIZE, &cube[0],
+			0, nullptr, nullptr);
+		if (errNum != CL_SUCCESS)
+		{
+			std::cerr << "Error reading result buffer." << std::endl;
+			return 1;
+		}
+		GPGPUlib::PrintOBJ("drag.obj", cube, CUBE_SIZE);
+
+		clReleaseKernel(kernel);
+		clReleaseMemObject(uniformCubesDistributionTextureMemObj);
+		clReleaseMemObject(pointsTextureMemObj);
+		clReleaseMemObject(cubeMemObj);
+		clReleaseMemObject(*pointsMemObj);
+	}
+	
+    return 0;
 }
 
