@@ -12,7 +12,7 @@ namespace GPGPUlib
 
 	cl_mem Create2DImage(cl_context context, int width, int height);
 
-	cl_mem Create3DImage(cl_context context, int width, int height, int depth);
+	cl_mem Create3DImage(cl_context context, int width, int height, int depth, cl_channel_order order =  CL_RGBA, cl_channel_type type = CL_UNORM_INT8);
 
 	int RoundUp(std::size_t groupSize, std::size_t globalSize);
 }
@@ -62,11 +62,11 @@ cl_mem GPGPUlib::Create2DImage(cl_context context, int width, int height)
 	return memObj;
 }
 
-cl_mem GPGPUlib::Create3DImage(cl_context context, int width, int height, int depth)
+cl_mem GPGPUlib::Create3DImage(cl_context context, int width, int height, int depth, cl_channel_order order /*=  CL_RGBA*/, cl_channel_type type /*= CL_UNORM_INT8 */)
 {
 	cl_image_format clImageFormat;
-	clImageFormat.image_channel_order = CL_RGBA;
-	clImageFormat.image_channel_data_type = CL_UNORM_INT8;
+	clImageFormat.image_channel_order = order;
+	clImageFormat.image_channel_data_type = type;
 
 	cl_image_desc clImageDesc;
 	clImageDesc.image_type = CL_MEM_OBJECT_IMAGE3D;

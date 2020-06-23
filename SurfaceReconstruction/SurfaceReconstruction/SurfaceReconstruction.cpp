@@ -14,14 +14,17 @@
 #include <vector>
 #include <fstream>
 #include <chrono>
+#include <unordered_map>
+#include <list>
 
-#define CUBE_SIZE 450
+#define CUBE_SIZE 256
 
 int main()
 {
 	cl_uint searchRadius = 4;
+	cl_uint searchTriangulationRadius = 3;
     GPGPUlib::SPointsData pointsData;
-    GPGPUlib::ReadPoint("object.xyz", pointsData);
+    GPGPUlib::ReadPoint("bunny.xyz", pointsData);
     std::cout << pointsData.pointsOfX.size();
     cl_context context = 0;
     cl_command_queue commandQueue = 0;
@@ -31,6 +34,8 @@ int main()
 	cl_mem pointsMemObj[3] = {0, 0, 0};
 	cl_mem pointsTextureMemObj = 0;
 	cl_mem uniformCubesDistributionTextureMemObj = 0;
+	cl_mem triangulationResultTextureMemObj[2] = {0, 0};
+
     cl_int errNum;
 
 	int POINTS_SIZE = pointsData.pointsOfX.size();
@@ -152,6 +157,7 @@ int main()
 		}
 
 		clReleaseKernel(kernel);
+		clReleaseMemObject(*pointsMemObj);
 		pointsData.pointsOfX.clear();
 		pointsData.pointsOfY.clear();
 		pointsData.pointsOfZ.clear();
@@ -197,7 +203,7 @@ int main()
 		clReleaseKernel(kernel);
 	}
 
-	{
+	{   if (searchRadius >= 2) {
 		kernel = clCreateKernel(program, "inc_voxel_concentration", nullptr);
 		if (kernel == nullptr)
 		{
@@ -206,8 +212,8 @@ int main()
 		}
 
 		cl_mem searchRadiusMemObj = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-				sizeof(cl_uint), &searchRadius,
-				nullptr);
+			sizeof(cl_uint), &searchRadius,
+			nullptr);
 
 		cl_uint width, height, depth;
 		width = height = depth = CUBE_SIZE;
@@ -231,7 +237,138 @@ int main()
 		clReleaseKernel(kernel);
 		clReleaseMemObject(searchRadiusMemObj);
 	}
+	}
 
+	//triangulation
+	{
+		kernel = clCreateKernel(program, "surface_triangulation", nullptr);
+		if (kernel == nullptr)
+		{
+			std::cerr << "Failed to create kernel" << std::endl;
+			return 1;
+		}
+
+
+		cl_uint width, height, depth;
+		width = height = depth = CUBE_SIZE;
+		cl_float inverseCubeCubeCubeSize = 1. / (CUBE_SIZE * CUBE_SIZE * CUBE_SIZE);
+
+		cl_mem inverseCubeCubeCubeSizeMemObj = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+			sizeof(cl_float), &inverseCubeCubeCubeSize,
+			nullptr);
+
+		cl_mem cubeSizeMemObj = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+			sizeof(cl_uint), &width,
+			nullptr);
+
+		cl_mem searchRadiusMemObj = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+			sizeof(cl_uint), &searchTriangulationRadius,
+			nullptr);
+
+		triangulationResultTextureMemObj[0] = GPGPUlib::Create3DImage(context, width, height, depth, CL_RGBA, CL_UNSIGNED_INT32);
+		triangulationResultTextureMemObj[1] = GPGPUlib::Create3DImage(context, width, height, depth, CL_RGBA, CL_UNSIGNED_INT32);
+
+		errNum = clSetKernelArg(kernel, 0, sizeof(cl_mem), &uniformCubesDistributionTextureMemObj);
+		errNum |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &triangulationResultTextureMemObj[0]);
+		errNum |= clSetKernelArg(kernel, 2, sizeof(cl_mem), &triangulationResultTextureMemObj[1]);
+		errNum |= clSetKernelArg(kernel, 3, sizeof(cl_mem), &searchRadiusMemObj);
+		errNum |= clSetKernelArg(kernel, 4, sizeof(cl_mem), &cubeSizeMemObj);
+		errNum |= clSetKernelArg(kernel, 5, sizeof(cl_mem), &inverseCubeCubeCubeSizeMemObj);
+
+		size_t localWorkSize[3] = { 8, 4, 4 };
+		size_t globalWorkSize[3] = { GPGPUlib::RoundUp(localWorkSize[0], width), GPGPUlib::RoundUp(localWorkSize[1], height), GPGPUlib::RoundUp(localWorkSize[2], depth) };
+
+		errNum = clEnqueueNDRangeKernel(commandQueue, kernel, 3, nullptr,
+			globalWorkSize, localWorkSize,
+			0, nullptr, nullptr);
+		if (errNum != CL_SUCCESS)
+		{
+			std::cerr << "Error queuing kernel for execution." << std::endl;
+			return 1;
+		}
+
+		clReleaseKernel(kernel);
+		clReleaseMemObject(searchRadiusMemObj);
+		clReleaseMemObject(cubeSizeMemObj);
+		clReleaseMemObject(inverseCubeCubeCubeSizeMemObj);
+	}
+
+	auto end = std::chrono::steady_clock::now();
+	std::chrono::duration<double> elapsed_seconds = end - start;
+	std::cout << "elapsed time: " << elapsed_seconds.count() << "s\n";
+
+	{
+		kernel = clCreateKernel(program, "upload_triangulation", nullptr);
+		if (kernel == nullptr)
+		{
+			std::cerr << "Failed to create kernel" << std::endl;
+			return 1;
+		}
+
+		int CUBE_CUBE_SIZE = CUBE_SIZE * CUBE_SIZE * CUBE_SIZE;
+
+		cl_mem cubeMemObj = clCreateBuffer(context, CL_MEM_READ_WRITE,
+			sizeof(cl_uint) * CUBE_CUBE_SIZE,
+			nullptr, nullptr);
+
+		cl_uint width, height, depth;
+		width = height = depth = CUBE_SIZE;
+
+		std::vector<cl_uint> cube(CUBE_CUBE_SIZE, 0);
+
+		std::unordered_map<cl_uint, std::list<cl_uint>> triangulationResult;
+		triangulationResult.reserve(POINTS_SIZE);
+
+		for (int i = 0; i < 8; ++i)
+		{
+			int mode = i % 4;
+			cl_mem modeMemObj = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+				sizeof(cl_int), &mode, nullptr);
+
+			errNum = clSetKernelArg(kernel, 0, sizeof(cl_mem), &triangulationResultTextureMemObj[i / 4]);
+			errNum |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &cubeMemObj);
+			errNum |= clSetKernelArg(kernel, 2, sizeof(cl_mem), &modeMemObj);
+
+			size_t localWorkSize[3] = { 8, 4, 4 };
+			size_t globalWorkSize[3] = { GPGPUlib::RoundUp(localWorkSize[0], width), GPGPUlib::RoundUp(localWorkSize[1], height), GPGPUlib::RoundUp(localWorkSize[2], depth) };
+
+			errNum = clEnqueueNDRangeKernel(commandQueue, kernel, 3, nullptr,
+				globalWorkSize, localWorkSize,
+				0, nullptr, nullptr);
+			if (errNum != CL_SUCCESS)
+			{
+				std::cerr << "Error queuing kernel for execution." << std::endl;
+				return 1;
+			}
+
+			errNum = clEnqueueReadBuffer(commandQueue, cubeMemObj,
+				CL_TRUE, 0,
+				sizeof(cl_uint) * CUBE_CUBE_SIZE, &cube[0],
+				0, nullptr, nullptr);
+			if (errNum != CL_SUCCESS)
+			{
+				std::cerr << "Error reading result buffer." << std::endl;
+				return 1;
+			}
+
+			for (cl_uint k = 0; k  < cube.size(); ++k)
+			{
+				if (cube[k] == 0)
+					continue;
+
+				auto it = triangulationResult.find(k);
+				if (it == triangulationResult.end())
+				{
+					triangulationResult[k] = {};
+				}
+				triangulationResult[k].push_back(cube[k]);
+			}
+
+			clReleaseMemObject(modeMemObj);
+		}
+
+		GPGPUlib::PrintOBJ("dragon_triangulation.obj", triangulationResult, CUBE_SIZE);
+	}
 	{
 		kernel = clCreateKernel(program, "upload_voxel_grid", nullptr);
 		if (kernel == nullptr)
@@ -263,9 +400,6 @@ int main()
 			std::cerr << "Error queuing kernel for execution." << std::endl;
 			return 1;
 		}
-		auto end = std::chrono::steady_clock::now();
-		std::chrono::duration<double> elapsed_seconds = end - start;
-		std::cout << "elapsed time: " << elapsed_seconds.count() << "s\n";
 		std::vector<cl_uint> cube(CUBE_CUBE_SIZE, 0);
 		errNum = clEnqueueReadBuffer(commandQueue, cubeMemObj,
 			CL_TRUE, 0,
@@ -276,13 +410,11 @@ int main()
 			std::cerr << "Error reading result buffer." << std::endl;
 			return 1;
 		}
-		GPGPUlib::PrintOBJ("drag.obj", cube, CUBE_SIZE);
-
 		clReleaseKernel(kernel);
 		clReleaseMemObject(uniformCubesDistributionTextureMemObj);
 		clReleaseMemObject(pointsTextureMemObj);
 		clReleaseMemObject(cubeMemObj);
-		clReleaseMemObject(*pointsMemObj);
+		GPGPUlib::PrintOBJ("drag.obj", cube, CUBE_SIZE);
 	}
 	
     return 0;
