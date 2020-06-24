@@ -468,6 +468,7 @@ __kernel void surface_triangulation(
 	float3 nearestPoint = (float3)(-1, -1, -1); 
 	float3 maxSharpAnglePoint = (float3)(-1, -1, -1);
 	float betterDotProduct = 1;
+	const float MAX_SHARP_ACCUTE_ANGLE = 0.5;
 	//algoritm search
 	float radius = searchRadius[0];
 	for (int l = 1; l <= radius; ++l)
@@ -495,10 +496,18 @@ __kernel void surface_triangulation(
 					{
 						float3 sharPointCandidate = (float3)(x_cand, y_cand, z_cand);
 						float dotProduct = dot(nearestPoint, sharPointCandidate);
-						if (dotProduct > 0 && dotProduct < 1 && dotProduct < betterDotProduct)
+						if (dotProduct > MAX_SHARP_ACCUTE_ANGLE && dotProduct < 1 && dotProduct < betterDotProduct)
 						{
 							betterDotProduct = dotProduct;
 							maxSharpAnglePoint = sharPointCandidate;
+							
+							if ((MAX_SHARP_ACCUTE_ANGLE - betterDotProduct) < 0.01)
+							{
+								i += radius * 2;
+								j += i;
+								l += j;
+								break;
+							}
 						}
 					}
 				//up
@@ -512,10 +521,18 @@ __kernel void surface_triangulation(
 					{
 						float3 sharPointCandidate = (float3)(x_cand, y_cand, z_cand);
 						float dotProduct = dot(nearestPoint, sharPointCandidate);
-						if (dotProduct > 0 && dotProduct < 1 && dotProduct < betterDotProduct)
+						if (dotProduct > MAX_SHARP_ACCUTE_ANGLE && dotProduct < 1 && dotProduct < betterDotProduct)
 						{
 							betterDotProduct = dotProduct;
 							maxSharpAnglePoint = sharPointCandidate;
+							
+							if ((MAX_SHARP_ACCUTE_ANGLE - betterDotProduct) < 0.01)
+							{
+								i += radius * 2;
+								j += i;
+								l += j;
+								break;
+							}
 						}
 					}
 				//left
@@ -529,10 +546,18 @@ __kernel void surface_triangulation(
 					{
 						float3 sharPointCandidate = (float3)(x_cand, y_cand, z_cand);
 						float dotProduct = dot(nearestPoint, sharPointCandidate);
-						if (dotProduct > 0 && dotProduct < 1 && dotProduct < betterDotProduct)
+						if (dotProduct > MAX_SHARP_ACCUTE_ANGLE && dotProduct < 1 && dotProduct < betterDotProduct)
 						{
 							betterDotProduct = dotProduct;
 							maxSharpAnglePoint = sharPointCandidate;
+							
+							if ((MAX_SHARP_ACCUTE_ANGLE - betterDotProduct) < 0.01)
+							{
+								i += radius * 2;
+								j += i;
+								l += j;
+								break;
+							}
 						}
 					}
 				//down
@@ -546,10 +571,18 @@ __kernel void surface_triangulation(
 					{
 						float3 sharPointCandidate = (float3)(x_cand, y_cand, z_cand);
 						float dotProduct = dot(nearestPoint, sharPointCandidate);
-						if (dotProduct > 0 && dotProduct < 1 && dotProduct < betterDotProduct)
+						if (dotProduct > MAX_SHARP_ACCUTE_ANGLE && dotProduct < 1 && dotProduct < betterDotProduct)
 						{
 							betterDotProduct = dotProduct;
 							maxSharpAnglePoint = sharPointCandidate;
+							
+							if ((MAX_SHARP_ACCUTE_ANGLE - betterDotProduct) < 0.01)
+							{
+								i += radius * 2;
+								j += i;
+								l += j;
+								break;
+							}
 						}
 					}
 			}
@@ -571,10 +604,18 @@ __kernel void surface_triangulation(
 					{
 						float3 sharPointCandidate = (float3)(x_cand, y_cand, z_cand);
 						float dotProduct = dot(nearestPoint, sharPointCandidate);
-						if (dotProduct > 0 && dotProduct < 1 && dotProduct < betterDotProduct)
+						if (dotProduct > MAX_SHARP_ACCUTE_ANGLE && dotProduct < 1 && dotProduct < betterDotProduct)
 						{
 							betterDotProduct = dotProduct;
 							maxSharpAnglePoint = sharPointCandidate;
+							
+							if ((MAX_SHARP_ACCUTE_ANGLE - betterDotProduct) < 0.01)
+							{
+								i += radius * 2;
+								j += i;
+								l += j;
+								break;
+							}
 						}
 					}
 				//up
@@ -588,10 +629,18 @@ __kernel void surface_triangulation(
 					{
 						float3 sharPointCandidate = (float3)(x_cand, y_cand, z_cand);
 						float dotProduct = dot(nearestPoint, sharPointCandidate);
-						if (dotProduct > 0 && dotProduct < 1 && dotProduct < betterDotProduct)
+						if (dotProduct > MAX_SHARP_ACCUTE_ANGLE && dotProduct < 1 && dotProduct < betterDotProduct)
 						{
 							betterDotProduct = dotProduct;
 							maxSharpAnglePoint = sharPointCandidate;
+							
+							if ((MAX_SHARP_ACCUTE_ANGLE - betterDotProduct) < 0.01)
+							{
+								i += radius * 2;
+								j += i;
+								l += j;
+								break;
+							}
 						}
 					}
 				//left
@@ -605,10 +654,18 @@ __kernel void surface_triangulation(
 					{
 						float3 sharPointCandidate = (float3)(x_cand, y_cand, z_cand);
 						float dotProduct = dot(nearestPoint, sharPointCandidate);
-						if (dotProduct > 0 && dotProduct < 1 && dotProduct < betterDotProduct)
+						if (dotProduct > MAX_SHARP_ACCUTE_ANGLE && dotProduct < 1 && dotProduct < betterDotProduct)
 						{
 							betterDotProduct = dotProduct;
 							maxSharpAnglePoint = sharPointCandidate;
+							
+							if ((MAX_SHARP_ACCUTE_ANGLE - betterDotProduct) < 0.01)
+							{
+								i += radius * 2;
+								j += i;
+								l += j;
+								break;
+							}
 						}
 					}
 				//down
@@ -622,10 +679,18 @@ __kernel void surface_triangulation(
 					{
 						float3 sharPointCandidate = (float3)(x_cand, y_cand, z_cand);
 						float dotProduct = dot(nearestPoint, sharPointCandidate);
-						if (dotProduct > 0 && dotProduct < 1 && dotProduct < betterDotProduct)
+						if (dotProduct > MAX_SHARP_ACCUTE_ANGLE && dotProduct < 1 && dotProduct < betterDotProduct)
 						{
 							betterDotProduct = dotProduct;
 							maxSharpAnglePoint = sharPointCandidate;
+							
+							if ((MAX_SHARP_ACCUTE_ANGLE - betterDotProduct) < 0.01)
+							{
+								i += radius * 2;
+								j += i;
+								l += j;
+								break;
+							}
 						}
 					}
 			}
@@ -646,10 +711,18 @@ __kernel void surface_triangulation(
 					{
 						float3 sharPointCandidate = (float3)(x_cand, y_cand, z_cand);
 						float dotProduct = dot(nearestPoint, sharPointCandidate);
-						if (dotProduct > 0 && dotProduct < 1 && dotProduct < betterDotProduct)
+						if (dotProduct > MAX_SHARP_ACCUTE_ANGLE && dotProduct < 1 && dotProduct < betterDotProduct)
 						{
 							betterDotProduct = dotProduct;
 							maxSharpAnglePoint = sharPointCandidate;
+							
+							if ((MAX_SHARP_ACCUTE_ANGLE - betterDotProduct) < 0.01)
+							{
+								i += radius * 2;
+								j += i;
+								l += j;
+								break;
+							}
 						}
 					}
 				//up
@@ -663,10 +736,18 @@ __kernel void surface_triangulation(
 					{
 						float3 sharPointCandidate = (float3)(x_cand, y_cand, z_cand);
 						float dotProduct = dot(nearestPoint, sharPointCandidate);
-						if (dotProduct > 0 && dotProduct < 1 && dotProduct < betterDotProduct)
+						if (dotProduct > MAX_SHARP_ACCUTE_ANGLE && dotProduct < 1 && dotProduct < betterDotProduct)
 						{
 							betterDotProduct = dotProduct;
 							maxSharpAnglePoint = sharPointCandidate;
+							
+							if ((MAX_SHARP_ACCUTE_ANGLE - betterDotProduct) < 0.01)
+							{
+								i += radius * 2;
+								j += i;
+								l += j;
+								break;
+							}
 						}
 					}
 				//left
@@ -680,10 +761,18 @@ __kernel void surface_triangulation(
 					{
 						float3 sharPointCandidate = (float3)(x_cand, y_cand, z_cand);
 						float dotProduct = dot(nearestPoint, sharPointCandidate);
-						if (dotProduct > 0 && dotProduct < 1 && dotProduct < betterDotProduct)
+						if (dotProduct > MAX_SHARP_ACCUTE_ANGLE && dotProduct < 1 && dotProduct < betterDotProduct)
 						{
 							betterDotProduct = dotProduct;
 							maxSharpAnglePoint = sharPointCandidate;
+							
+							if ((MAX_SHARP_ACCUTE_ANGLE - betterDotProduct) < 0.01)
+							{
+								i += radius * 2;
+								j += i;
+								l += j;
+								break;
+							}
 						}
 					}
 				//down
@@ -697,10 +786,18 @@ __kernel void surface_triangulation(
 					{
 						float3 sharPointCandidate = (float3)(x_cand, y_cand, z_cand);
 						float dotProduct = dot(nearestPoint, sharPointCandidate);
-						if (dotProduct > 0 && dotProduct < 1 && dotProduct < betterDotProduct)
+						if (dotProduct > MAX_SHARP_ACCUTE_ANGLE && dotProduct < 1 && dotProduct < betterDotProduct)
 						{
 							betterDotProduct = dotProduct;
 							maxSharpAnglePoint = sharPointCandidate;
+							
+							if ((MAX_SHARP_ACCUTE_ANGLE - betterDotProduct) < 0.01)
+							{
+								i += radius * 2;
+								j += i;
+								l += j;
+								break;
+							}
 						}
 					}
 			}					 
@@ -720,10 +817,16 @@ __kernel void surface_triangulation(
 			{
 				float3 sharPointCandidate = (float3)(x_cand, y_cand, z_cand);
 				float dotProduct = dot(nearestPoint, sharPointCandidate);
-				if (dotProduct > 0 && dotProduct < 1 && dotProduct < betterDotProduct)
+				if (dotProduct > MAX_SHARP_ACCUTE_ANGLE && dotProduct < 1 && dotProduct < betterDotProduct)
 				{
 					betterDotProduct = dotProduct;
 					maxSharpAnglePoint = sharPointCandidate;
+					
+					if ((MAX_SHARP_ACCUTE_ANGLE - betterDotProduct) < 0.01)
+					{
+						i += radius * 2;
+						break;
+					}
 				}
 			}
 		y_cand = y + i;
@@ -735,10 +838,16 @@ __kernel void surface_triangulation(
 			{
 				float3 sharPointCandidate = (float3)(x_cand, y_cand, z_cand);
 				float dotProduct = dot(nearestPoint, sharPointCandidate);
-				if (dotProduct > 0 && dotProduct < 1 && dotProduct < betterDotProduct)
+				if (dotProduct > MAX_SHARP_ACCUTE_ANGLE && dotProduct < 1 && dotProduct < betterDotProduct)
 				{
 					betterDotProduct = dotProduct;
 					maxSharpAnglePoint = sharPointCandidate;
+					
+					if ((MAX_SHARP_ACCUTE_ANGLE - betterDotProduct) < 0.01)
+					{
+						i += radius * 2;
+						break;
+					}
 				}
 			}
 	}
@@ -767,15 +876,13 @@ __kernel void surface_triangulation(
 	BcoefOfPlane *= inverseNormalCoefOfPlane;
 	CcoefOfPlane *= inverseNormalCoefOfPlane;
 	DcoefOfPlane *= inverseNormalCoefOfPlane;
-	
-	float ERROR_DISTANSE_PERMITION = 1.4;
-	
+		
 	//search candidate for restricted voronoi cell
-	int8 voronoiCellCandidate_x = (int8)(-1, -1, -1, -1, -1, -1, -1, -1);
-	int8 voronoiCellCandidate_y = (int8)(-1, -1, -1, -1, -1, -1, -1, -1);
-	int8 voronoiCellCandidate_z = (int8)(-1, -1, -1, -1, -1, -1, -1, -1);
+	int16 voronoiCellCandidate_x = (int16)(-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
+	int16 voronoiCellCandidate_y = (int16)(-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
+	int16 voronoiCellCandidate_z = (int16)(-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
 	
-	const uint MAX_CANDIDATE_FOR_VORONOI_CELL = 8;
+	const uint MAX_CANDIDATE_FOR_VORONOI_CELL = 16;
 	int voronoi_cell_candidate_counter = 0;
 	
 	//walk around 3d cube with radius again
@@ -800,22 +907,18 @@ __kernel void surface_triangulation(
 				float4 voxelSearchArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
 				if (voxelSearchArea.z > bias && voronoi_cell_candidate_counter < MAX_CANDIDATE_FOR_VORONOI_CELL)
 				{
-					float distanceToDiscPlane = x_cand * AcoefOfPlane + y_cand * BcoefOfPlane + z_cand * CcoefOfPlane - DcoefOfPlane;
-					if (distanceToDiscPlane <= ERROR_DISTANSE_PERMITION)
+					voronoiCellCandidate_x[voronoi_cell_candidate_counter] = x_cand;
+					voronoiCellCandidate_y[voronoi_cell_candidate_counter] = y_cand;
+					voronoiCellCandidate_z[voronoi_cell_candidate_counter] = z_cand;
+					voronoi_cell_candidate_counter++;
+					if (voronoi_cell_candidate_counter >= MAX_CANDIDATE_FOR_VORONOI_CELL)
 					{
-						voronoiCellCandidate_x[voronoi_cell_candidate_counter] = x_cand;
-						voronoiCellCandidate_y[voronoi_cell_candidate_counter] = y_cand;
-						voronoiCellCandidate_z[voronoi_cell_candidate_counter] = z_cand;
-						voronoi_cell_candidate_counter++;
-						if (voronoi_cell_candidate_counter >= MAX_CANDIDATE_FOR_VORONOI_CELL)
-						{
-							//stop search
-							i += radius + 1;
-							j += 2*i;
-							sign += j;
-							l += sign;
-							break;
-						}
+						//stop search
+						i += radius + 1;
+						j += 2*i;
+						sign += j;
+						l += sign;
+						break;
 					}
 				}
 					
@@ -825,23 +928,20 @@ __kernel void surface_triangulation(
 				voxelSearchArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
 				if (voxelSearchArea.z > bias && voronoi_cell_candidate_counter < MAX_CANDIDATE_FOR_VORONOI_CELL)
 				{
-					float distanceToDiscPlane = x_cand * AcoefOfPlane + y_cand * BcoefOfPlane + z_cand * CcoefOfPlane - DcoefOfPlane;
-					if (distanceToDiscPlane <= ERROR_DISTANSE_PERMITION)
+					voronoiCellCandidate_x[voronoi_cell_candidate_counter] = x_cand;
+					voronoiCellCandidate_y[voronoi_cell_candidate_counter] = y_cand;
+					voronoiCellCandidate_z[voronoi_cell_candidate_counter] = z_cand;
+					voronoi_cell_candidate_counter++;
+					if (voronoi_cell_candidate_counter >= MAX_CANDIDATE_FOR_VORONOI_CELL)
 					{
-						voronoiCellCandidate_x[voronoi_cell_candidate_counter] = x_cand;
-						voronoiCellCandidate_y[voronoi_cell_candidate_counter] = y_cand;
-						voronoiCellCandidate_z[voronoi_cell_candidate_counter] = z_cand;
-						voronoi_cell_candidate_counter++;
-						if (voronoi_cell_candidate_counter >= MAX_CANDIDATE_FOR_VORONOI_CELL)
-						{
-							//stop search
-							i += radius + 1;
-							j += 2*i;
-							sign += j;
-							l += sign;
-							break;
-						}
+						//stop search
+						i += radius + 1;
+						j += 2*i;
+						sign += j;
+						l += sign;
+						break;
 					}
+
 				}
 				//left
 				x_cand = (x + i) - j;
@@ -849,22 +949,18 @@ __kernel void surface_triangulation(
 				voxelSearchArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
 				if (voxelSearchArea.z > bias && voronoi_cell_candidate_counter < MAX_CANDIDATE_FOR_VORONOI_CELL)
 				{
-					float distanceToDiscPlane = x_cand * AcoefOfPlane + y_cand * BcoefOfPlane + z_cand * CcoefOfPlane - DcoefOfPlane;
-					if (distanceToDiscPlane <= ERROR_DISTANSE_PERMITION)
+					voronoiCellCandidate_x[voronoi_cell_candidate_counter] = x_cand;
+					voronoiCellCandidate_y[voronoi_cell_candidate_counter] = y_cand;
+					voronoiCellCandidate_z[voronoi_cell_candidate_counter] = z_cand;
+					voronoi_cell_candidate_counter++;
+					if (voronoi_cell_candidate_counter >= MAX_CANDIDATE_FOR_VORONOI_CELL)
 					{
-						voronoiCellCandidate_x[voronoi_cell_candidate_counter] = x_cand;
-						voronoiCellCandidate_y[voronoi_cell_candidate_counter] = y_cand;
-						voronoiCellCandidate_z[voronoi_cell_candidate_counter] = z_cand;
-						voronoi_cell_candidate_counter++;
-						if (voronoi_cell_candidate_counter >= MAX_CANDIDATE_FOR_VORONOI_CELL)
-						{
-							//stop search
-							i += radius + 1;
-							j += 2*i;
-							sign += j;
-							l += sign;
-							break;
-						}
+						//stop search
+						i += radius + 1;
+						j += 2*i;
+						sign += j;
+						l += sign;
+						break;
 					}
 				}
 				//down
@@ -873,22 +969,18 @@ __kernel void surface_triangulation(
 				voxelSearchArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
 				if (voxelSearchArea.z > bias && voronoi_cell_candidate_counter < MAX_CANDIDATE_FOR_VORONOI_CELL)
 				{
-					float distanceToDiscPlane = x_cand * AcoefOfPlane + y_cand * BcoefOfPlane + z_cand * CcoefOfPlane - DcoefOfPlane;
-					if (distanceToDiscPlane <= ERROR_DISTANSE_PERMITION)
+					voronoiCellCandidate_x[voronoi_cell_candidate_counter] = x_cand;
+					voronoiCellCandidate_y[voronoi_cell_candidate_counter] = y_cand;
+					voronoiCellCandidate_z[voronoi_cell_candidate_counter] = z_cand;
+					voronoi_cell_candidate_counter++;
+					if (voronoi_cell_candidate_counter >= MAX_CANDIDATE_FOR_VORONOI_CELL)
 					{
-						voronoiCellCandidate_x[voronoi_cell_candidate_counter] = x_cand;
-						voronoiCellCandidate_y[voronoi_cell_candidate_counter] = y_cand;
-						voronoiCellCandidate_z[voronoi_cell_candidate_counter] = z_cand;
-						voronoi_cell_candidate_counter++;
-						if (voronoi_cell_candidate_counter >= MAX_CANDIDATE_FOR_VORONOI_CELL)
-						{
-							//stop search
-							i += radius + 1;
-							j += 2*i;
-							sign += j;
-							l += sign;
-							break;
-						}
+						//stop search
+						i += radius + 1;
+						j += 2*i;
+						sign += j;
+						l += sign;
+						break;
 					}
 				}
 			}
@@ -905,22 +997,18 @@ __kernel void surface_triangulation(
 				float4 voxelSearchArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
 				if (voxelSearchArea.z > bias && voronoi_cell_candidate_counter < MAX_CANDIDATE_FOR_VORONOI_CELL)
 				{
-					float distanceToDiscPlane = x_cand * AcoefOfPlane + y_cand * BcoefOfPlane + z_cand * CcoefOfPlane - DcoefOfPlane;
-					if (distanceToDiscPlane <= ERROR_DISTANSE_PERMITION)
+					voronoiCellCandidate_x[voronoi_cell_candidate_counter] = x_cand;
+					voronoiCellCandidate_y[voronoi_cell_candidate_counter] = y_cand;
+					voronoiCellCandidate_z[voronoi_cell_candidate_counter] = z_cand;
+					voronoi_cell_candidate_counter++;
+					if (voronoi_cell_candidate_counter >= MAX_CANDIDATE_FOR_VORONOI_CELL)
 					{
-						voronoiCellCandidate_x[voronoi_cell_candidate_counter] = x_cand;
-						voronoiCellCandidate_y[voronoi_cell_candidate_counter] = y_cand;
-						voronoiCellCandidate_z[voronoi_cell_candidate_counter] = z_cand;
-						voronoi_cell_candidate_counter++;
-						if (voronoi_cell_candidate_counter >= MAX_CANDIDATE_FOR_VORONOI_CELL)
-						{
-							//stop search
-							i += radius + 1;
-							j += 2*i;
-							sign += j;
-							l += sign;
-							break;
-						}
+						//stop search
+						i += radius + 1;
+						j += 2*i;
+						sign += j;
+						l += sign;
+						break;
 					}
 				}
 				//up
@@ -929,22 +1017,18 @@ __kernel void surface_triangulation(
 				voxelSearchArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
 				if (voxelSearchArea.z > bias && voronoi_cell_candidate_counter < MAX_CANDIDATE_FOR_VORONOI_CELL)
 				{
-					float distanceToDiscPlane = x_cand * AcoefOfPlane + y_cand * BcoefOfPlane + z_cand * CcoefOfPlane - DcoefOfPlane;
-					if (distanceToDiscPlane <= ERROR_DISTANSE_PERMITION)
+					voronoiCellCandidate_x[voronoi_cell_candidate_counter] = x_cand;
+					voronoiCellCandidate_y[voronoi_cell_candidate_counter] = y_cand;
+					voronoiCellCandidate_z[voronoi_cell_candidate_counter] = z_cand;
+					voronoi_cell_candidate_counter++;
+					if (voronoi_cell_candidate_counter >= MAX_CANDIDATE_FOR_VORONOI_CELL)
 					{
-						voronoiCellCandidate_x[voronoi_cell_candidate_counter] = x_cand;
-						voronoiCellCandidate_y[voronoi_cell_candidate_counter] = y_cand;
-						voronoiCellCandidate_z[voronoi_cell_candidate_counter] = z_cand;
-						voronoi_cell_candidate_counter++;
-						if (voronoi_cell_candidate_counter >= MAX_CANDIDATE_FOR_VORONOI_CELL)
-						{
-							//stop search
-							i += radius + 1;
-							j += 2*i;
-							sign += j;
-							l += sign;
-							break;
-						}
+						//stop search
+						i += radius + 1;
+						j += 2*i;
+						sign += j;
+						l += sign;
+						break;
 					}
 				}
 				//left
@@ -953,22 +1037,18 @@ __kernel void surface_triangulation(
 				voxelSearchArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
 				if (voxelSearchArea.z > bias && voronoi_cell_candidate_counter < MAX_CANDIDATE_FOR_VORONOI_CELL)
 				{
-					float distanceToDiscPlane = x_cand * AcoefOfPlane + y_cand * BcoefOfPlane + z_cand * CcoefOfPlane - DcoefOfPlane;
-					if (distanceToDiscPlane <= ERROR_DISTANSE_PERMITION)
+					voronoiCellCandidate_x[voronoi_cell_candidate_counter] = x_cand;
+					voronoiCellCandidate_y[voronoi_cell_candidate_counter] = y_cand;
+					voronoiCellCandidate_z[voronoi_cell_candidate_counter] = z_cand;
+					voronoi_cell_candidate_counter++;
+					if (voronoi_cell_candidate_counter >= MAX_CANDIDATE_FOR_VORONOI_CELL)
 					{
-						voronoiCellCandidate_x[voronoi_cell_candidate_counter] = x_cand;
-						voronoiCellCandidate_y[voronoi_cell_candidate_counter] = y_cand;
-						voronoiCellCandidate_z[voronoi_cell_candidate_counter] = z_cand;
-						voronoi_cell_candidate_counter++;
-						if (voronoi_cell_candidate_counter >= MAX_CANDIDATE_FOR_VORONOI_CELL)
-						{
-							//stop search
-							i += radius + 1;
-							j += 2*i;
-							sign += j;
-							l += sign;
-							break;
-						}
+						//stop search
+						i += radius + 1;
+						j += 2*i;
+						sign += j;
+						l += sign;
+						break;
 					}
 				}
 				//down
@@ -977,22 +1057,18 @@ __kernel void surface_triangulation(
 				voxelSearchArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
 				if (voxelSearchArea.z > bias && voronoi_cell_candidate_counter < MAX_CANDIDATE_FOR_VORONOI_CELL)
 				{
-					float distanceToDiscPlane = x_cand * AcoefOfPlane + y_cand * BcoefOfPlane + z_cand * CcoefOfPlane - DcoefOfPlane;
-					if (distanceToDiscPlane <= ERROR_DISTANSE_PERMITION)
+					voronoiCellCandidate_x[voronoi_cell_candidate_counter] = x_cand;
+					voronoiCellCandidate_y[voronoi_cell_candidate_counter] = y_cand;
+					voronoiCellCandidate_z[voronoi_cell_candidate_counter] = z_cand;
+					voronoi_cell_candidate_counter++;
+					if (voronoi_cell_candidate_counter >= MAX_CANDIDATE_FOR_VORONOI_CELL)
 					{
-						voronoiCellCandidate_x[voronoi_cell_candidate_counter] = x_cand;
-						voronoiCellCandidate_y[voronoi_cell_candidate_counter] = y_cand;
-						voronoiCellCandidate_z[voronoi_cell_candidate_counter] = z_cand;
-						voronoi_cell_candidate_counter++;
-						if (voronoi_cell_candidate_counter >= MAX_CANDIDATE_FOR_VORONOI_CELL)
-						{
-							//stop search
-							i += radius + 1;
-							j += 2*i;
-							sign += j;
-							l += sign;
-							break;
-						}
+						//stop search
+						i += radius + 1;
+						j += 2*i;
+						sign += j;
+						l += sign;
+						break;
 					}
 				}
 			}
@@ -1008,22 +1084,18 @@ __kernel void surface_triangulation(
 				float4 voxelSearchArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
 				if (voxelSearchArea.z > bias && voronoi_cell_candidate_counter < MAX_CANDIDATE_FOR_VORONOI_CELL)
 				{
-					float distanceToDiscPlane = x_cand * AcoefOfPlane + y_cand * BcoefOfPlane + z_cand * CcoefOfPlane - DcoefOfPlane;
-					if (distanceToDiscPlane <= ERROR_DISTANSE_PERMITION)
+					voronoiCellCandidate_x[voronoi_cell_candidate_counter] = x_cand;
+					voronoiCellCandidate_y[voronoi_cell_candidate_counter] = y_cand;
+					voronoiCellCandidate_z[voronoi_cell_candidate_counter] = z_cand;
+					voronoi_cell_candidate_counter++;
+					if (voronoi_cell_candidate_counter >= MAX_CANDIDATE_FOR_VORONOI_CELL)
 					{
-						voronoiCellCandidate_x[voronoi_cell_candidate_counter] = x_cand;
-						voronoiCellCandidate_y[voronoi_cell_candidate_counter] = y_cand;
-						voronoiCellCandidate_z[voronoi_cell_candidate_counter] = z_cand;
-						voronoi_cell_candidate_counter++;
-						if (voronoi_cell_candidate_counter >= MAX_CANDIDATE_FOR_VORONOI_CELL)
-						{
-							//stop search
-							i += radius + 1;
-							j += 2*i;
-							sign += j;
-							l += sign;
-							break;
-						}
+						//stop search
+						i += radius + 1;
+						j += 2*i;
+						sign += j;
+						l += sign;
+						break;
 					}
 				}
 				//up
@@ -1032,22 +1104,18 @@ __kernel void surface_triangulation(
 				voxelSearchArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
 				if (voxelSearchArea.z > bias && voronoi_cell_candidate_counter < MAX_CANDIDATE_FOR_VORONOI_CELL)
 				{
-					float distanceToDiscPlane = x_cand * AcoefOfPlane + y_cand * BcoefOfPlane + z_cand * CcoefOfPlane - DcoefOfPlane;
-					if (distanceToDiscPlane <= ERROR_DISTANSE_PERMITION)
+					voronoiCellCandidate_x[voronoi_cell_candidate_counter] = x_cand;
+					voronoiCellCandidate_y[voronoi_cell_candidate_counter] = y_cand;
+					voronoiCellCandidate_z[voronoi_cell_candidate_counter] = z_cand;
+					voronoi_cell_candidate_counter++;
+					if (voronoi_cell_candidate_counter >= MAX_CANDIDATE_FOR_VORONOI_CELL)
 					{
-						voronoiCellCandidate_x[voronoi_cell_candidate_counter] = x_cand;
-						voronoiCellCandidate_y[voronoi_cell_candidate_counter] = y_cand;
-						voronoiCellCandidate_z[voronoi_cell_candidate_counter] = z_cand;
-						voronoi_cell_candidate_counter++;
-						if (voronoi_cell_candidate_counter >= MAX_CANDIDATE_FOR_VORONOI_CELL)
-						{
-							//stop search
-							i += radius + 1;
-							j += 2*i;
-							sign += j;
-							l += sign;
-							break;
-						}
+						//stop search
+						i += radius + 1;
+						j += 2*i;
+						sign += j;
+						l += sign;
+						break;
 					}
 				}
 				//left
@@ -1056,22 +1124,18 @@ __kernel void surface_triangulation(
 				voxelSearchArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
 				if (voxelSearchArea.z > bias && voronoi_cell_candidate_counter < MAX_CANDIDATE_FOR_VORONOI_CELL)
 				{
-					float distanceToDiscPlane = x_cand * AcoefOfPlane + y_cand * BcoefOfPlane + z_cand * CcoefOfPlane - DcoefOfPlane;
-					if (distanceToDiscPlane <= ERROR_DISTANSE_PERMITION)
+					voronoiCellCandidate_x[voronoi_cell_candidate_counter] = x_cand;
+					voronoiCellCandidate_y[voronoi_cell_candidate_counter] = y_cand;
+					voronoiCellCandidate_z[voronoi_cell_candidate_counter] = z_cand;
+					voronoi_cell_candidate_counter++;
+					if (voronoi_cell_candidate_counter >= MAX_CANDIDATE_FOR_VORONOI_CELL)
 					{
-						voronoiCellCandidate_x[voronoi_cell_candidate_counter] = x_cand;
-						voronoiCellCandidate_y[voronoi_cell_candidate_counter] = y_cand;
-						voronoiCellCandidate_z[voronoi_cell_candidate_counter] = z_cand;
-						voronoi_cell_candidate_counter++;
-						if (voronoi_cell_candidate_counter >= MAX_CANDIDATE_FOR_VORONOI_CELL)
-						{
-							//stop search
-							i += radius + 1;
-							j += 2*i;
-							sign += j;
-							l += sign;
-							break;
-						}
+						//stop search
+						i += radius + 1;
+						j += 2*i;
+						sign += j;
+						l += sign;
+						break;
 					}
 				}
 				//down
@@ -1080,22 +1144,18 @@ __kernel void surface_triangulation(
 				voxelSearchArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
 				if (voxelSearchArea.z > bias && voronoi_cell_candidate_counter < MAX_CANDIDATE_FOR_VORONOI_CELL)
 				{
-					float distanceToDiscPlane = x_cand * AcoefOfPlane + y_cand * BcoefOfPlane + z_cand * CcoefOfPlane - DcoefOfPlane;
-					if (distanceToDiscPlane <= ERROR_DISTANSE_PERMITION)
+					voronoiCellCandidate_x[voronoi_cell_candidate_counter] = x_cand;
+					voronoiCellCandidate_y[voronoi_cell_candidate_counter] = y_cand;
+					voronoiCellCandidate_z[voronoi_cell_candidate_counter] = z_cand;
+					voronoi_cell_candidate_counter++;
+					if (voronoi_cell_candidate_counter >= MAX_CANDIDATE_FOR_VORONOI_CELL)
 					{
-						voronoiCellCandidate_x[voronoi_cell_candidate_counter] = x_cand;
-						voronoiCellCandidate_y[voronoi_cell_candidate_counter] = y_cand;
-						voronoiCellCandidate_z[voronoi_cell_candidate_counter] = z_cand;
-						voronoi_cell_candidate_counter++;
-						if (voronoi_cell_candidate_counter >= MAX_CANDIDATE_FOR_VORONOI_CELL)
-						{
-							//stop search
-							i += radius + 1;
-							j += 2*i;
-							sign += j;
-							l += sign;
-							break;
-						}
+						//stop search
+						i += radius + 1;
+						j += 2*i;
+						sign += j;
+						l += sign;
+						break;
 					}
 				}
 			}					 
@@ -1110,78 +1170,101 @@ __kernel void surface_triangulation(
 		float4 voxelSearchArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
 		if (voxelSearchArea.z > bias && voronoi_cell_candidate_counter < MAX_CANDIDATE_FOR_VORONOI_CELL)
 		{
-			float distanceToDiscPlane = x_cand * AcoefOfPlane + y_cand * BcoefOfPlane + z_cand * CcoefOfPlane - DcoefOfPlane;
-			if (distanceToDiscPlane <= ERROR_DISTANSE_PERMITION)
+			voronoiCellCandidate_x[voronoi_cell_candidate_counter] = x_cand;
+			voronoiCellCandidate_y[voronoi_cell_candidate_counter] = y_cand;
+			voronoiCellCandidate_z[voronoi_cell_candidate_counter] = z_cand;
+			voronoi_cell_candidate_counter++;
+			if (voronoi_cell_candidate_counter >= MAX_CANDIDATE_FOR_VORONOI_CELL)
 			{
-				voronoiCellCandidate_x[voronoi_cell_candidate_counter] = x_cand;
-				voronoiCellCandidate_y[voronoi_cell_candidate_counter] = y_cand;
-				voronoiCellCandidate_z[voronoi_cell_candidate_counter] = z_cand;
-				voronoi_cell_candidate_counter++;
-				if (voronoi_cell_candidate_counter >= MAX_CANDIDATE_FOR_VORONOI_CELL)
-				{
-					//stop search
-					i += radius + 1;
-					break;
-				}
+				//stop search
+				i += radius + 1;
+				break;
 			}
 		}
 		y_cand = y + i;
 		voxelSearchArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
 		if (voxelSearchArea.z > bias && voronoi_cell_candidate_counter < MAX_CANDIDATE_FOR_VORONOI_CELL)
 		{
-			float distanceToDiscPlane = x_cand * AcoefOfPlane + y_cand * BcoefOfPlane + z_cand * CcoefOfPlane - DcoefOfPlane;
-			if (distanceToDiscPlane <= ERROR_DISTANSE_PERMITION)
+			voronoiCellCandidate_x[voronoi_cell_candidate_counter] = x_cand;
+			voronoiCellCandidate_y[voronoi_cell_candidate_counter] = y_cand;
+			voronoiCellCandidate_z[voronoi_cell_candidate_counter] = z_cand;
+			voronoi_cell_candidate_counter++;
+			if (voronoi_cell_candidate_counter >= MAX_CANDIDATE_FOR_VORONOI_CELL)
 			{
-				voronoiCellCandidate_x[voronoi_cell_candidate_counter] = x_cand;
-				voronoiCellCandidate_y[voronoi_cell_candidate_counter] = y_cand;
-				voronoiCellCandidate_z[voronoi_cell_candidate_counter] = z_cand;
-				voronoi_cell_candidate_counter++;
-				if (voronoi_cell_candidate_counter >= MAX_CANDIDATE_FOR_VORONOI_CELL)
-				{
-					//stop search
-					i += radius + 1;
-					break;
-				}
+				//stop search
+				i += radius + 1;
+				break;
 			}
 		}
 	}
 	
-	float8 mistake_voronoi_cell_candidate = (float8)(1, 1, 1, 1, 1, 1, 1, 1);
+	float16 mistake_voronoi_cell_candidate = (float16)(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
 	//create restricted voronoi cell intersected with r-disc plane
+	float RadiusOfSecurity = -1;
+	float sqrRadiusDisc = radius * radius;
 	for (int i = 0; i < voronoi_cell_candidate_counter; ++i)
-	{
-		float3 centralPointVoxPosAndCand = (float3)((voronoiCellCandidate_x[i] + voxelPos.x) * 0.5,
-						(voronoiCellCandidate_y[i] + voxelPos.y) * 0.5, (voronoiCellCandidate_z[i] + voxelPos.z) * 0.5);
-		float sqrHalfDistanceVoxelPosAndCandidate = 
-					(centralPointVoxPosAndCand.x - voxelPos.x) 
-					* (centralPointVoxPosAndCand.x - voxelPos.x)
-					+ (centralPointVoxPosAndCand.y - voxelPos.y) 
-					* (centralPointVoxPosAndCand.y - voxelPos.y) 
-					+ (centralPointVoxPosAndCand.z - voxelPos.z) 
-					* (centralPointVoxPosAndCand.z - voxelPos.z);
-					
+	{	
+		//calculate intersection plane with radius and half-plane
+		float distanceXiP = 
+				(voronoiCellCandidate_x[i] - voxelPos.x) * (voronoiCellCandidate_x[i] - voxelPos.x)
+			+   (voronoiCellCandidate_y[i] - voxelPos.y) * (voronoiCellCandidate_y[i] - voxelPos.y)
+			+   (voronoiCellCandidate_z[i] - voxelPos.z) * (voronoiCellCandidate_z[i] - voxelPos.z);
+			
+		float sqrC = distanceXiP;
+		float A = voronoiCellCandidate_x[i] * AcoefOfPlane 
+				+ voronoiCellCandidate_y[i] * BcoefOfPlane
+				+ voronoiCellCandidate_z[i] * CcoefOfPlane
+				+ DcoefOfPlane;
+				
+		float sqrB = sqrC - A * A;
+		if (sqrB > sqrRadiusDisc || sqrB <= bias)
+		{
+			mistake_voronoi_cell_candidate[i] = -1;
+			continue;
+		}
+		
+		if (RadiusOfSecurity < 0)
+			RadiusOfSecurity = distanceXiP;			
+		else if (RadiusOfSecurity < distanceXiP)
+			RadiusOfSecurity = distanceXiP;
+			
 		for (int j = 0; j < voronoi_cell_candidate_counter; ++j)
 		{
-			if (i == j)
+			if (mistake_voronoi_cell_candidate[j] < 0 || i == j)
 				continue;
+			//half-clipping space operation
+					
+			float distanceXjP = 
+				(voronoiCellCandidate_x[j] - voxelPos.x) * (voronoiCellCandidate_x[j] - voxelPos.x)
+			+   (voronoiCellCandidate_y[j] - voxelPos.y) * (voronoiCellCandidate_y[j] - voxelPos.y)
+			+   (voronoiCellCandidate_z[j] - voxelPos.z) * (voronoiCellCandidate_z[j] - voxelPos.z);
 			
-			float3 centralPointVoxPosAndTraverseCand = (float3)((voronoiCellCandidate_x[j] + voxelPos.x) * 0.5,
-						(voronoiCellCandidate_y[j] + voxelPos.y) * 0.5, (voronoiCellCandidate_z[j] + voxelPos.z) * 0.5);
-				
-			float sqrDistanceChecker = 
-			   (centralPointVoxPosAndTraverseCand.x - voxelPos.x) 
-			 * (centralPointVoxPosAndTraverseCand.x - voxelPos.x)
-			 + (centralPointVoxPosAndTraverseCand.y - voxelPos.y) 
-			 * (centralPointVoxPosAndTraverseCand.y - voxelPos.y)
-			 + (centralPointVoxPosAndTraverseCand.z - voxelPos.z) 
-			 * (centralPointVoxPosAndTraverseCand.z - voxelPos.z);
-			
-			if (sqrDistanceChecker <= sqrHalfDistanceVoxelPosAndCandidate)
+			if (distanceXjP > 4 * RadiusOfSecurity)
 			{
 				//it`s site for our voronoi cell
-				//mistake_voronoi_cell_candidate[i] = -1;
-				//break;
+				mistake_voronoi_cell_candidate[i] = -1;
+				break;
 			}
+			
+		}
+	}
+	
+	//refilling voronoi cell candidate
+	int8 voronoiCellCandidateRefill_x = (int8)(0, 0, 0, 0, 0, 0, 0, 0);
+	int8 voronoiCellCandidateRefill_y = (int8)(0, 0, 0, 0, 0, 0, 0, 0);
+	int8 voronoiCellCandidateRefill_z = (int8)(0, 0, 0, 0, 0, 0, 0, 0);
+	voronoi_cell_candidate_counter = 0;
+	for (int i = 0; i < MAX_CANDIDATE_FOR_VORONOI_CELL; ++i)
+	{
+		if (voronoi_cell_candidate_counter == 8)
+			break;
+			
+		if (mistake_voronoi_cell_candidate[i] > 0)
+		{
+			voronoiCellCandidateRefill_x[voronoi_cell_candidate_counter] = voronoiCellCandidate_x[i];
+			voronoiCellCandidateRefill_y[voronoi_cell_candidate_counter] = voronoiCellCandidate_y[i];
+			voronoiCellCandidateRefill_z[voronoi_cell_candidate_counter] = voronoiCellCandidate_z[i];
+			voronoi_cell_candidate_counter++;
 		}
 	}
 	
@@ -1191,11 +1274,11 @@ __kernel void surface_triangulation(
 	float cubeSize = _cubeSize[0];
 	float inverseMaxCodePosition = _invMaxCodePos[0];
 	for (int i = 0; i < voronoi_cell_candidate_counter; ++i)
-		if (mistake_voronoi_cell_candidate[i] > 0)
+		if (voronoiCellCandidateRefill_x[i] > 0)
 		{
-			int x_cand = voronoiCellCandidate_x[i];
-			int y_cand = voronoiCellCandidate_y[i];
-			int z_cand = voronoiCellCandidate_z[i];
+			int x_cand = voronoiCellCandidateRefill_x[i];
+			int y_cand = voronoiCellCandidateRefill_y[i];
+			int z_cand = voronoiCellCandidateRefill_z[i];
 			float code = x_cand * cubeSize * cubeSize + y_cand * cubeSize + z_cand;
 			code /= (cubeSize * cubeSize * cubeSize);
 			codePosition[fine_voronoi_cell_candidate] = code;

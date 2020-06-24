@@ -22,9 +22,9 @@
 int main()
 {
 	cl_uint searchRadius = 4;
-	cl_uint searchTriangulationRadius = 3;
+	cl_uint searchTriangulationRadius = 4;
     GPGPUlib::SPointsData pointsData;
-    GPGPUlib::ReadPoint("bunny.xyz", pointsData);
+    GPGPUlib::ReadPoint("gun.xyz", pointsData);
     std::cout << pointsData.pointsOfX.size();
     cl_context context = 0;
     cl_command_queue commandQueue = 0;
