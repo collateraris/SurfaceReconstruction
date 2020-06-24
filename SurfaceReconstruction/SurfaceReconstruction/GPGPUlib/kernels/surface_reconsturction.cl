@@ -1359,3 +1359,76 @@ __kernel void fix_triangle_coord(
 	_v2List[id] = v2;
 }
 
+__kernel void inc_voxel_rect_surface(
+		read_only image3d_t kdtreeTextureRead,
+		write_only image3d_t kdtreeTextureWrite,
+		__global uint* searchRadius
+		)
+{
+	const int MIN_RADIUS = 2;
+	if (searchRadius[0] < MIN_RADIUS)
+		return;
+
+	int x = (int)get_global_id(0);
+	int y = (int)get_global_id(1);
+	int z = (int)get_global_id(2);
+
+	float bias = 0.0001;
+
+	float4 voxelPos = read_imagef(kdtreeTextureRead, sampler, (int4)(x, y, z, 1.0));
+	if (voxelPos.z < bias)
+		return;
+
+	int sideSize = get_image_width(kdtreeTextureRead);
+	int radius = searchRadius[0];
+	for (int stepSize = MIN_RADIUS; stepSize <= radius; ++stepSize)
+	{
+		//walk around cube
+		for (int signX = -1; signX <= 1; ++signX){
+			for (int signY = -1; signY <= 1; ++signY){
+				for (int signZ = -1; signZ <= 1; ++signZ)
+				{
+					int x_cand = x + signX * stepSize;
+					int y_cand = y + signY * stepSize;
+					int z_cand = z + signZ * stepSize;
+
+					if (x_cand < 0)
+						x_cand = 0;
+					else if (x_cand > sideSize)
+						x_cand = sideSize;
+					if (y_cand < 0)
+						y_cand = 0;
+					else if (y_cand > sideSize)
+						y_cand = sideSize;			
+					if (z_cand < 0)
+						z_cand = 0;
+					else if (z_cand > sideSize)
+						z_cand = sideSize;
+
+					if (x == x_cand && y == y_cand && z == z_cand)
+							continue;
+
+					float4 voxelCandidate = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
+					if (voxelCandidate.z < bias)
+						continue;
+					for (int i = 0; i < stepSize; ++i)
+					{
+						if (x == x_cand && y == y_cand && z == z_cand)
+							break;
+						if (x != x_cand)
+							x_cand = x_cand - signX;
+						if (y != y_cand)
+							y_cand = y_cand - signY;
+						if (z != z_cand)
+							z_cand = z_cand - signZ;
+						float4 voxelFilledArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
+						if (voxelFilledArea.z > bias)
+							continue;
+						write_imagef(kdtreeTextureWrite, (int4)(x_cand, y_cand, z_cand, 1), (float4)(1., 1., 1., 1.));
+					}
+				}
+			}
+		}
+	}
+}
+

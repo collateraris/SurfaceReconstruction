@@ -18,14 +18,14 @@
 #include <unordered_set>
 #include <list>
 
-#define CUBE_SIZE 256
+#define CUBE_SIZE 300
 
 int main()
 {
-	cl_uint searchRadius = 0;
-	cl_uint searchTriangulationRadius = 5;
+	cl_uint searchRadius = 4;
+	cl_uint searchTriangulationRadius = 2;
     GPGPUlib::SPointsData pointsData;
-    GPGPUlib::ReadPoint("bunny.xyz", pointsData);
+    GPGPUlib::ReadPoint("object.xyz", pointsData);
     std::cout << pointsData.pointsOfX.size();
     cl_context context = 0;
     cl_command_queue commandQueue = 0;
@@ -205,7 +205,7 @@ int main()
 	}
 
 	{   if (searchRadius >= 2) {
-		kernel = clCreateKernel(program, "inc_voxel_concentration", nullptr);
+		kernel = clCreateKernel(program, "inc_voxel_rect_surface", nullptr);
 		if (kernel == nullptr)
 		{
 			std::cerr << "Failed to create kernel" << std::endl;

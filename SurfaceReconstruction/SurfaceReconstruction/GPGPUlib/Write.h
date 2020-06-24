@@ -46,81 +46,81 @@ void GPGPUlib::PrintOBJ(const char* filename, const std::vector<cl_uint>& cube, 
 		out << "v " << x
 			<< " " << y
 			<< " " << z
-			<< std::endl
+			<< std::endl;
 
 			//v1
-			<< "v " << x
+		out << "v " << x
 			<< " " << y + 1
 			<< " " << z
-			<< std::endl
+			<< std::endl;
 
 			//v2
-			<< "v " << x + 1
+		out << "v " << x + 1
 			<< " " << y + 1
 			<< " " << z
-			<< std::endl
+			<< std::endl;
 
 			//v3
-			<< "v " << x + 1
+		out << "v " << x + 1
 			<< " " << y
 			<< " " << z
-			<< std::endl
+			<< std::endl;
 
 			//v4
-			<< "v " << x
+		out << "v " << x
 			<< " " << y
 			<< " " << z + 1
-			<< std::endl
+			<< std::endl;
 
 			//v5
-			<< "v " << x
+		out << "v " << x
 			<< " " << y + 1
 			<< " " << z + 1
-			<< std::endl
+			<< std::endl;
 
 			//v6
-			<< "v " << x + 1
+		out << "v " << x + 1
 			<< " " << y + 1
 			<< " " << z + 1
-			<< std::endl
+			<< std::endl;
 
 			//v7
-			<< "v " << x + 1
+		out << "v " << x + 1
 			<< " " << y
 			<< " " << z + 1
-			<< std::endl
+			<< std::endl;
 
-			<< "f " << 1 + offset
+		out << "f " << 1 + offset
 			<< " " << 2 + offset
 			<< " " << 3 + offset
 			<< " " << 4 + offset
-			<< std::endl
+			<< std::endl;
 
-			<< "f " << 1 + offset
+		out << "f " << 1 + offset
 			<< " " << 2 + offset
 			<< " " << 6 + offset
 			<< " " << 5 + offset
-			<< std::endl
+			<< std::endl;
 
-			<< "f " << 1 + offset
+		out << "f " << 1 + offset
 			<< " " << 5 + offset
 			<< " " << 8 + offset
 			<< " " << 4 + offset
-			<< std::endl
+			<< std::endl;
 
-			<< "f " << 2 + offset
+		out << "f " << 2 + offset
 			<< " " << 6 + offset
 			<< " " << 7 + offset
 			<< " " << 3 + offset
-			<< std::endl
+			<< std::endl;
 
-			<< "f " << 5 + offset
+		out << "f " << 5 + offset
 			<< " " << 6 + offset
 			<< " " << 7 + offset
 			<< " " << 8 + offset
-			<< std::endl
+			<< std::endl;
 
-			<< "f " << 4 + offset
+		out << "f " << 4 + offset
 			<< " " << 3 + offset
 			<< " " << 7 + offset
 			<< " " << 8 + offset
@@ -285,21 +285,21 @@ void GPGPUlib::PrintOBJ(const char* filename, const std::vector<cl_uint>& v0List
 		out << "v " << v0x
 			<< " " << v0y
 			<< " " << v0z
-			<< std::endl
+			<< std::endl;
 
 		//v1
-			<< "v " << v1x
+		out << "v " << v1x
 			<< " " << v1y
 			<< " " << v1z
-			<< std::endl
+			<< std::endl;
 
 		//v2
-		    << "v " << v2x
+		out << "v " << v2x
 			<< " " << v2y
 			<< " " << v2z
-			<< std::endl
+			<< std::endl;
 
-		    << "f " << 1 + offset
+		out << "f " << 1 + offset
 			<< " " << 2 + offset
 			<< " " << 3 + offset
 			<< std::endl;
