@@ -18,12 +18,12 @@
 #include <unordered_set>
 #include <list>
 
-#define CUBE_SIZE 300
+#define CUBE_SIZE 256
 
 int main()
 {
-	cl_uint searchRadius = 4;
-	cl_uint searchTriangulationRadius = 2;
+	cl_uint searchRadius = 2;
+	cl_uint searchTriangulationRadius = 3;
     GPGPUlib::SPointsData pointsData;
     GPGPUlib::ReadPoint("object.xyz", pointsData);
     std::cout << pointsData.pointsOfX.size();
@@ -62,52 +62,61 @@ int main()
 	auto start = std::chrono::steady_clock::now();
 	{
 
-		kernel = clCreateKernel(program, "normalize_points", nullptr);
+		kernel = clCreateKernel(program, "create_kd_tree_texture", nullptr);
 		if (kernel == nullptr)
 		{
 			std::cerr << "Failed to create kernel" << std::endl;
 			return 1;
 		}
 
-		pointsMemObj[0] = clCreateBuffer(context, CL_MEM_READ_WRITE |
+		pointsMemObj[0] = clCreateBuffer(context, CL_MEM_READ_ONLY |
 			CL_MEM_COPY_HOST_PTR,
 			sizeof(float) * POINTS_SIZE, &pointsData.pointsOfX[0],
 			nullptr);
 
-		pointsMemObj[1] = clCreateBuffer(context, CL_MEM_READ_WRITE |
+		pointsMemObj[1] = clCreateBuffer(context, CL_MEM_READ_ONLY |
 			CL_MEM_COPY_HOST_PTR,
 			sizeof(float) * POINTS_SIZE, &pointsData.pointsOfY[0],
 			nullptr);
 
-		pointsMemObj[2] = clCreateBuffer(context, CL_MEM_READ_WRITE |
+		pointsMemObj[2] = clCreateBuffer(context, CL_MEM_READ_ONLY |
 			CL_MEM_COPY_HOST_PTR,
 			sizeof(float) * POINTS_SIZE, &pointsData.pointsOfZ[0],
 			nullptr);
 
 
-		std::vector<float> minScaledPos = { pointsData.minX, pointsData.minY, pointsData.minZ};
-		float shiftVector = *std::min_element(minScaledPos.begin(), minScaledPos.end());
-		shiftVector = shiftVector < 0 ? -shiftVector : 0;
-
-		std::vector<float> extremalPosAbs = { pointsData.maxX + shiftVector, pointsData.maxY + shiftVector, pointsData.maxZ + +shiftVector};
-		float scaleVector = *std::max_element(extremalPosAbs.begin(), extremalPosAbs.end());
-		scaleVector = 1. / scaleVector;
-	
-		cl_mem shiftMemObj = clCreateBuffer(context, CL_MEM_READ_ONLY |
+		cl_float cubeSize = (cl_float)CUBE_SIZE;
+		auto pointsMinMaxX = std::minmax_element(pointsData.pointsOfX.begin(), pointsData.pointsOfX.end());
+		auto pointsMinMaxY = std::minmax_element(pointsData.pointsOfY.begin(), pointsData.pointsOfY.end());
+		auto pointsMinMaxZ = std::minmax_element(pointsData.pointsOfZ.begin(), pointsData.pointsOfZ.end());
+		std::vector<cl_float> commonMinMaxPoints = { *pointsMinMaxX.first, *pointsMinMaxY.first, *pointsMinMaxZ.first,
+													 *pointsMinMaxX.second,*pointsMinMaxY.second,*pointsMinMaxZ.second};
+		auto commonMinMax = std::minmax_element(commonMinMaxPoints.begin(), commonMinMaxPoints.end());
+		cl_float invDelta = cubeSize / (*commonMinMax.second - *commonMinMax.first);
+		cl_float minPoint = *commonMinMax.first;
+		cl_mem invDeltaMemObj = clCreateBuffer(context, CL_MEM_READ_ONLY |
 			CL_MEM_COPY_HOST_PTR,
-			sizeof(float) , &shiftVector,
+			sizeof(cl_float) , &invDelta,
 			nullptr);
 
-		cl_mem scaleMemObj = clCreateBuffer(context, CL_MEM_READ_ONLY |
+
+		cl_mem minMemObj = clCreateBuffer(context, CL_MEM_READ_ONLY |
 			CL_MEM_COPY_HOST_PTR,
-			sizeof(float), &scaleVector,
+			sizeof(cl_float), &minPoint,
 			nullptr);
+
+
+		cl_uint width, height, depth;
+		width = height = depth = CUBE_SIZE;
+
+		uniformCubesDistributionTextureMemObj = GPGPUlib::Create3DImage(context, width, height, depth, CL_R, CL_UNORM_INT8);
 
 		errNum = clSetKernelArg(kernel, 0, sizeof(cl_mem), &pointsMemObj[0]);
 		errNum |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &pointsMemObj[1]);
 		errNum |= clSetKernelArg(kernel, 2, sizeof(cl_mem), &pointsMemObj[2]);
-		errNum |= clSetKernelArg(kernel, 3, sizeof(cl_mem), &shiftMemObj);
-		errNum |= clSetKernelArg(kernel, 4, sizeof(cl_mem), &scaleMemObj);
+		errNum |= clSetKernelArg(kernel, 3, sizeof(cl_mem), &invDeltaMemObj);
+		errNum |= clSetKernelArg(kernel, 4, sizeof(cl_mem), &minMemObj);
+		errNum |= clSetKernelArg(kernel, 5, sizeof(cl_mem), &uniformCubesDistributionTextureMemObj);
 
 		size_t localWorkSize[1] = { 64 };
 		size_t globalWorkSize[1] = { GPGPUlib::RoundUp(localWorkSize[0], POINTS_SIZE) };
@@ -115,42 +124,6 @@ int main()
 		errNum = clEnqueueNDRangeKernel(commandQueue, kernel, 1, nullptr,
 			globalWorkSize, localWorkSize,
 			0, nullptr, nullptr);
-		if (errNum != CL_SUCCESS)
-		{
-			std::cerr << "Error queuing kernel for execution." << std::endl;
-			return 1;
-		}
-
-		clReleaseKernel(kernel);
-		clReleaseMemObject(shiftMemObj);
-		clReleaseMemObject(scaleMemObj);
-	}
-
-	{
-		kernel = clCreateKernel(program, "create_points_texture", nullptr);
-		if (kernel == nullptr)
-		{
-			std::cerr << "Failed to create kernel" << std::endl;
-			return 1;
-		}
-
-		cl_uint width, height;
-		width = height = sqrtf(POINTS_SIZE)+1;
-
-		pointsTextureMemObj = GPGPUlib::Create2DImage(context, width, height);
-
-		errNum = clSetKernelArg(kernel, 0, sizeof(cl_mem), &pointsMemObj[0]);
-		errNum |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &pointsMemObj[1]);
-		errNum |= clSetKernelArg(kernel, 2, sizeof(cl_mem), &pointsMemObj[2]);
-		errNum |= clSetKernelArg(kernel, 3, sizeof(cl_mem), &pointsTextureMemObj);
-
-		size_t localWorkSize[1] = { 64 };
-		size_t globalWorkSize[1] = { GPGPUlib::RoundUp(localWorkSize[0], POINTS_SIZE) };
-
-		errNum = clEnqueueNDRangeKernel(commandQueue, kernel, 1, nullptr,
-			globalWorkSize, localWorkSize,
-			0, nullptr, nullptr);
-
 		if (errNum != CL_SUCCESS)
 		{
 			std::cerr << "Error queuing kernel for execution." << std::endl;
@@ -159,49 +132,11 @@ int main()
 
 		clReleaseKernel(kernel);
 		clReleaseMemObject(*pointsMemObj);
+		clReleaseMemObject(invDeltaMemObj);
+		clReleaseMemObject(minMemObj);
 		pointsData.pointsOfX.clear();
 		pointsData.pointsOfY.clear();
 		pointsData.pointsOfZ.clear();
-	}
-
-	{
-		kernel = clCreateKernel(program, "create_kd_tree_texture", nullptr);
-		if (kernel == nullptr)
-		{
-			std::cerr << "Failed to create kernel" << std::endl;
-			return 1;
-		}
-
-		cl_uint width, height, depth;
-		width = height = depth = CUBE_SIZE;
-
-		uniformCubesDistributionTextureMemObj = GPGPUlib::Create3DImage(context, width, height, depth);
-
-		//because normalize coords between [0, 1]
-		float cubeSize = CUBE_SIZE;
-		cl_mem CubeSizeMemObj = 0;
-		CubeSizeMemObj = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-			sizeof(float), &cubeSize,
-			nullptr);
-
-		errNum = clSetKernelArg(kernel, 0, sizeof(cl_mem), &pointsTextureMemObj);
-		errNum |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &uniformCubesDistributionTextureMemObj);
-		errNum |= clSetKernelArg(kernel, 2, sizeof(cl_mem), &uniformCubesDistributionTextureMemObj);
-		errNum |= clSetKernelArg(kernel, 3, sizeof(cl_mem), &CubeSizeMemObj);
-
-		size_t localWorkSize[2] = { 16, 16 };
-		size_t globalWorkSize[2] = { GPGPUlib::RoundUp(localWorkSize[0], width), GPGPUlib::RoundUp(localWorkSize[1], height) };
-
-		errNum = clEnqueueNDRangeKernel(commandQueue, kernel, 2, nullptr,
-			globalWorkSize, localWorkSize,
-			0, nullptr, nullptr);
-		if (errNum != CL_SUCCESS)
-		{
-			std::cerr << "Error queuing kernel for execution." << std::endl;
-			return 1;
-		}
-
-		clReleaseKernel(kernel);
 	}
 
 	{   if (searchRadius >= 2) {

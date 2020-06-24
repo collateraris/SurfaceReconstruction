@@ -1,49 +1,22 @@
 const sampler_t sampler = CLK_ADDRESS_CLAMP_TO_EDGE | CLK_FILTER_NEAREST;
 
-__kernel void normalize_points(__global float* pointsX, 
-	__global float* pointsY, 
-	__global float* pointsZ,
-	__global float* shiftVector,
-	__global float* scaleVector) 
-{
-	int gid = get_global_id(0);
-	float shift = shiftVector[0];
-	float scale = scaleVector[0];
-	pointsX[gid] = (pointsX[gid] + shift) * scale;
-	pointsY[gid] = (pointsY[gid] + shift) * scale;
-	pointsZ[gid] = (pointsZ[gid] + shift) * scale;
-}
-
-__kernel void create_points_texture(__global float* pointsX, 
-		__global float* pointsY, 
-		__global float* pointsZ, 
-		write_only image2d_t pointsTexture)
-{
-	int gid = (int)get_global_id(0);
-	
-	int width = get_image_width(pointsTexture);
-	
-	int order = gid;
-	int row = order / width;
-	int column = order - row * width;
-	write_imagef(pointsTexture, (int2)(row, column), (float4)(pointsX[order], pointsY[order], pointsZ[order], 1.0f));
-}
-
 __kernel void create_kd_tree_texture(
-		read_only image2d_t pointsTexture, 
-		read_only image3d_t kdtreeTextureRead,
-		write_only image3d_t kdtreeTextureWrite, 
-		__global float* cubeSize)
+		__global const float* pointsX, 
+		__global const float* pointsY, 
+		__global const float* pointsZ,
+		__global const float* invDelta,
+		__global const float* min,
+		write_only image3d_t kdtreeTextureWrite 
+		)
 {
-	int x = (int)get_global_id(0);
-	int y = (int)get_global_id(1);
+	const int id = (int)get_global_id(0);
 		
-	float4 point = read_imagef(pointsTexture, sampler, (int2)(x, y));
-		
-	float _cubeSize = cubeSize[0];	
-	int cube_x = (int)(point.x * _cubeSize);
-	int cube_y = (int)(point.y * _cubeSize);
-	int cube_z = (int)(point.z * _cubeSize);
+	const float x = pointsX[id];
+	const float y = pointsY[id];
+	const float z = pointsZ[id];
+	int cube_x = (int)((x - min[0]) * invDelta[0]);
+	int cube_y = (int)((y - min[0]) * invDelta[0]);
+	int cube_z = (int)((z - min[0]) * invDelta[0]);
 	
 	write_imagef(kdtreeTextureWrite, (int4)(cube_x, cube_y, cube_z, 1), (float4)(1., 1., 1., 1.));
 }
@@ -60,9 +33,8 @@ __kernel void upload_voxel_grid(
 	float4 kdtreePoint = read_imagef(kdtreeTextureRead, sampler, (int4)(x, y, z, 1.0));
 	if (kdtreePoint.x <= 0)
 		return;
-	int width = get_image_width(kdtreeTextureRead);
-	int height = get_image_height(kdtreeTextureRead);		
-	int size = x * width * height + y * height + z;
+	int width = get_image_width(kdtreeTextureRead);		
+	int size = x * width * width + y * width + z;
 	points[size] = size;
 }
 
@@ -83,7 +55,7 @@ __kernel void inc_voxel_concentration(
 	float bias = 0.0001;
 	
 	float4 voxelPos = read_imagef(kdtreeTextureRead, sampler, (int4)(x, y, z, 1.0));
-	if (voxelPos.z < bias)
+	if (voxelPos.x < bias)
 		return;
 	int radius = searchRadius[0];
 		//algoritm search
@@ -105,7 +77,7 @@ __kernel void inc_voxel_concentration(
 				x_cand = (x - i) + j;
 				z_cand = z - i;
 				float4 voxelCandidate = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-				if (voxelCandidate.z > bias)
+				if (voxelCandidate.x > bias)
 				{
 					int signX = x_cand > x ? -1 : 1;
 					int signY = y_cand > y ? -1 : 1;
@@ -119,7 +91,7 @@ __kernel void inc_voxel_concentration(
 						if (z != z_cand)
 							z_cand = z_cand + signZ;
 						float4 voxelFilledArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-						if (voxelFilledArea.z > bias)
+						if (voxelFilledArea.x > bias)
 							continue;
 						write_imagef(kdtreeTextureWrite, (int4)(x_cand, y_cand, z_cand, 1), (float4)(1., 1., 1., 1.));
 					}
@@ -128,7 +100,7 @@ __kernel void inc_voxel_concentration(
 				x_cand = x + i;
 				z_cand = (z - i) + j;
 				voxelCandidate = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-				if (voxelCandidate.z > bias)
+				if (voxelCandidate.x > bias)
 				{
 					int signX = x_cand > x ? -1 : 1;
 					int signY = y_cand > y ? -1 : 1;
@@ -142,7 +114,7 @@ __kernel void inc_voxel_concentration(
 						if (z != z_cand)
 							z_cand = z_cand + signZ;
 						float4 voxelFilledArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-						if (voxelFilledArea.z > bias)
+						if (voxelFilledArea.x > bias)
 							continue;
 						write_imagef(kdtreeTextureWrite, (int4)(x_cand, y_cand, z_cand, 1), (float4)(1., 1., 1., 1.));
 					}
@@ -151,7 +123,7 @@ __kernel void inc_voxel_concentration(
 				x_cand = (x + i) - j;
 				z_cand = z + i;
 				voxelCandidate = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-				if (voxelCandidate.z > bias)
+				if (voxelCandidate.x > bias)
 				{
 					int signX = x_cand > x ? -1 : 1;
 					int signY = y_cand > y ? -1 : 1;
@@ -165,7 +137,7 @@ __kernel void inc_voxel_concentration(
 						if (z != z_cand)
 							z_cand = z_cand + signZ;
 						float4 voxelFilledArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-						if (voxelFilledArea.z > bias)
+						if (voxelFilledArea.x > bias)
 							continue;
 						write_imagef(kdtreeTextureWrite, (int4)(x_cand, y_cand, z_cand, 1), (float4)(1., 1., 1., 1.));
 					}
@@ -174,7 +146,7 @@ __kernel void inc_voxel_concentration(
 				x_cand = x - i;
 				z_cand = (z + i) - j;
 				voxelCandidate = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-				if (voxelCandidate.z > bias)
+				if (voxelCandidate.x > bias)
 				{
 					int signX = x_cand > x ? -1 : 1;
 					int signY = y_cand > y ? -1 : 1;
@@ -188,7 +160,7 @@ __kernel void inc_voxel_concentration(
 						if (z != z_cand)
 							z_cand = z_cand + signZ;
 						float4 voxelFilledArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-						if (voxelFilledArea.z > bias)
+						if (voxelFilledArea.x > bias)
 							continue;
 						write_imagef(kdtreeTextureWrite, (int4)(x_cand, y_cand, z_cand, 1), (float4)(1., 1., 1., 1.));
 					}
@@ -205,7 +177,7 @@ __kernel void inc_voxel_concentration(
 				z_cand = (z - i) + j;
 				y_cand = y - i + 1;
 				float4 voxelCandidate = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-				if (voxelCandidate.z > bias)
+				if (voxelCandidate.x > bias)
 				{
 					int signX = x_cand > x ? -1 : 1;
 					int signY = y_cand > y ? -1 : 1;
@@ -219,7 +191,7 @@ __kernel void inc_voxel_concentration(
 						if (z != z_cand)
 							z_cand = z_cand + signZ;
 						float4 voxelFilledArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-						if (voxelFilledArea.z > bias)
+						if (voxelFilledArea.x > bias)
 							continue;
 						write_imagef(kdtreeTextureWrite, (int4)(x_cand, y_cand, z_cand, 1), (float4)(1., 1., 1., 1.));
 					}
@@ -228,7 +200,7 @@ __kernel void inc_voxel_concentration(
 				z_cand = z + i;
 				y_cand = (y - i) + j;
 				voxelCandidate = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-				if (voxelCandidate.z > bias)
+				if (voxelCandidate.x > bias)
 				{
 					int signX = x_cand > x ? -1 : 1;
 					int signY = y_cand > y ? -1 : 1;
@@ -242,7 +214,7 @@ __kernel void inc_voxel_concentration(
 						if (z != z_cand)
 							z_cand = z_cand + signZ;
 						float4 voxelFilledArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-						if (voxelFilledArea.z > bias)
+						if (voxelFilledArea.x > bias)
 							continue;
 						write_imagef(kdtreeTextureWrite, (int4)(x_cand, y_cand, z_cand, 1), (float4)(1., 1., 1., 1.));
 					}
@@ -251,7 +223,7 @@ __kernel void inc_voxel_concentration(
 				z_cand = (z + i) - j;
 				y_cand = y + i - 1;
 				voxelCandidate = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-				if (voxelCandidate.z > bias)
+				if (voxelCandidate.x > bias)
 				{
 					int signX = x_cand > x ? -1 : 1;
 					int signY = y_cand > y ? -1 : 1;
@@ -265,7 +237,7 @@ __kernel void inc_voxel_concentration(
 						if (z != z_cand)
 							z_cand = z_cand + signZ;
 						float4 voxelFilledArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-						if (voxelFilledArea.z > bias)
+						if (voxelFilledArea.x > bias)
 							continue;
 						write_imagef(kdtreeTextureWrite, (int4)(x_cand, y_cand, z_cand, 1), (float4)(1., 1., 1., 1.));
 					}
@@ -274,7 +246,7 @@ __kernel void inc_voxel_concentration(
 				z_cand = z - i;
 				y_cand = (y + i) - j;
 				voxelCandidate = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-				if (voxelCandidate.z > bias)
+				if (voxelCandidate.x > bias)
 				{
 					int signX = x_cand > x ? -1 : 1;
 					int signY = y_cand > y ? -1 : 1;
@@ -288,7 +260,7 @@ __kernel void inc_voxel_concentration(
 						if (z != z_cand)
 							z_cand = z_cand + signZ;
 						float4 voxelFilledArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-						if (voxelFilledArea.z > bias)
+						if (voxelFilledArea.x > bias)
 							continue;
 						write_imagef(kdtreeTextureWrite, (int4)(x_cand, y_cand, z_cand, 1), (float4)(1., 1., 1., 1.));
 					}
@@ -304,7 +276,7 @@ __kernel void inc_voxel_concentration(
 				x_cand = (x - i) + j;
 				y_cand = y - i + 1;
 				float4 voxelCandidate = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-				if (voxelCandidate.z > bias)
+				if (voxelCandidate.x > bias)
 				{
 					int signX = x_cand > x ? -1 : 1;
 					int signY = y_cand > y ? -1 : 1;
@@ -318,7 +290,7 @@ __kernel void inc_voxel_concentration(
 						if (z != z_cand)
 							z_cand = z_cand + signZ;
 						float4 voxelFilledArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-						if (voxelFilledArea.z > bias)
+						if (voxelFilledArea.x > bias)
 							continue;
 						write_imagef(kdtreeTextureWrite, (int4)(x_cand, y_cand, z_cand, 1), (float4)(1., 1., 1., 1.));
 					}
@@ -327,7 +299,7 @@ __kernel void inc_voxel_concentration(
 				x_cand = x + i - 1;
 				y_cand = (y - i) + j;
 				voxelCandidate = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-				if (voxelCandidate.z > bias)
+				if (voxelCandidate.x > bias)
 				{
 					int signX = x_cand > x ? -1 : 1;
 					int signY = y_cand > y ? -1 : 1;
@@ -341,7 +313,7 @@ __kernel void inc_voxel_concentration(
 						if (z != z_cand)
 							z_cand = z_cand + signZ;
 						float4 voxelFilledArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-						if (voxelFilledArea.z > bias)
+						if (voxelFilledArea.x > bias)
 							continue;
 						write_imagef(kdtreeTextureWrite, (int4)(x_cand, y_cand, z_cand, 1), (float4)(1., 1., 1., 1.));
 					}
@@ -350,7 +322,7 @@ __kernel void inc_voxel_concentration(
 				x_cand = (x + i) - j;
 				y_cand = y + i - 1;
 				voxelCandidate = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-				if (voxelCandidate.z > bias)
+				if (voxelCandidate.x > bias)
 				{
 					int signX = x_cand > x ? -1 : 1;
 					int signY = y_cand > y ? -1 : 1;
@@ -364,7 +336,7 @@ __kernel void inc_voxel_concentration(
 						if (z != z_cand)
 							z_cand = z_cand + signZ;
 						float4 voxelFilledArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-						if (voxelFilledArea.z > bias)
+						if (voxelFilledArea.x > bias)
 							continue;
 						write_imagef(kdtreeTextureWrite, (int4)(x_cand, y_cand, z_cand, 1), (float4)(1., 1., 1., 1.));
 					}
@@ -373,7 +345,7 @@ __kernel void inc_voxel_concentration(
 				x_cand = x - i + 1;
 				y_cand = (y + i) - j;
 				voxelCandidate = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-				if (voxelCandidate.z > bias)
+				if (voxelCandidate.x > bias)
 				{
 					int signX = x_cand > x ? -1 : 1;
 					int signY = y_cand > y ? -1 : 1;
@@ -387,7 +359,7 @@ __kernel void inc_voxel_concentration(
 						if (z != z_cand)
 							z_cand = z_cand + signZ;
 						float4 voxelFilledArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-						if (voxelFilledArea.z > bias)
+						if (voxelFilledArea.x > bias)
 							continue;
 						write_imagef(kdtreeTextureWrite, (int4)(x_cand, y_cand, z_cand, 1), (float4)(1., 1., 1., 1.));
 					}
@@ -402,7 +374,7 @@ __kernel void inc_voxel_concentration(
 		int y_cand = y - i;
 		int z_cand = y;
 		float4 voxelCandidate = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-		if (voxelCandidate.z > bias)
+		if (voxelCandidate.x > bias)
 		{
 			int signX = x_cand > x ? -1 : 1;
 			int signY = y_cand > y ? -1 : 1;
@@ -416,14 +388,14 @@ __kernel void inc_voxel_concentration(
 				if (z != z_cand)
 					z_cand = z_cand + signZ;
 				float4 voxelFilledArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-				if (voxelFilledArea.z > bias)
+				if (voxelFilledArea.x > bias)
 					continue;
 				write_imagef(kdtreeTextureWrite, (int4)(x_cand, y_cand, z_cand, 1), (float4)(1., 1., 1., 1.));
 			}
 		}
 		y_cand = y + i;
 		voxelCandidate = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-		if (voxelCandidate.z > bias)
+		if (voxelCandidate.x > bias)
 		{
 			int signX = x_cand > x ? -1 : 1;
 			int signY = y_cand > y ? -1 : 1;
@@ -437,7 +409,7 @@ __kernel void inc_voxel_concentration(
 				if (z != z_cand)
 					z_cand = z_cand + signZ;
 				float4 voxelFilledArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-				if (voxelFilledArea.z > bias)
+				if (voxelFilledArea.x > bias)
 					continue;
 				write_imagef(kdtreeTextureWrite, (int4)(x_cand, y_cand, z_cand, 1), (float4)(1., 1., 1., 1.));
 			}
@@ -462,7 +434,7 @@ __kernel void surface_triangulation(
 	
 	float bias = 0.0001;
 	float4 voxelCheck = read_imagef(kdtreeTextureRead, sampler, (int4)(x, y, z, 1.0));
-	if (voxelCheck.z < bias)
+	if (voxelCheck.x < bias)
 		return;
 	float3 voxelPos = (float3)(x, y, z);
 	float3 nearestPoint = (float3)(-1, -1, -1); 
@@ -489,7 +461,7 @@ __kernel void surface_triangulation(
 				x_cand = (x - i) + j;
 				z_cand = z - i;
 				float4 voxelSearchArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-				if (voxelSearchArea.z > bias)
+				if (voxelSearchArea.x > bias)
 					if (nearestPoint.z < 0)
 						nearestPoint = (float3)(x_cand, y_cand, z_cand);
 					else
@@ -514,7 +486,7 @@ __kernel void surface_triangulation(
 				x_cand = x + i;
 				z_cand = (z - i) + j;
 				voxelSearchArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-				if (voxelSearchArea.z > bias)
+				if (voxelSearchArea.x > bias)
 					if (nearestPoint.z < 0)
 						nearestPoint = (float3)(x_cand, y_cand, z_cand);
 					else
@@ -539,7 +511,7 @@ __kernel void surface_triangulation(
 				x_cand = (x + i) - j;
 				z_cand = z + i;
 				voxelSearchArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-				if (voxelSearchArea.z > bias)
+				if (voxelSearchArea.x > bias)
 					if (nearestPoint.z < 0)
 						nearestPoint = (float3)(x_cand, y_cand, z_cand);
 					else
@@ -564,7 +536,7 @@ __kernel void surface_triangulation(
 				x_cand = x - i;
 				z_cand = (z + i) - j;
 				voxelSearchArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-				if (voxelSearchArea.z > bias)
+				if (voxelSearchArea.x > bias)
 					if (nearestPoint.z < 0)
 						nearestPoint = (float3)(x_cand, y_cand, z_cand);
 					else
@@ -597,7 +569,7 @@ __kernel void surface_triangulation(
 				z_cand = (z - i) + j;
 				y_cand = y - i + 1;
 				float4 voxelSearchArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-				if (voxelSearchArea.z > bias)
+				if (voxelSearchArea.x > bias)
 					if (nearestPoint.z < 0)
 						nearestPoint = (float3)(x_cand, y_cand, z_cand);
 					else
@@ -622,7 +594,7 @@ __kernel void surface_triangulation(
 				z_cand = z + i;
 				y_cand = (y - i) + j;
 				voxelSearchArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-				if (voxelSearchArea.z > bias)
+				if (voxelSearchArea.x > bias)
 					if (nearestPoint.z < 0)
 						nearestPoint = (float3)(x_cand, y_cand, z_cand);
 					else
@@ -647,7 +619,7 @@ __kernel void surface_triangulation(
 				z_cand = (z + i) - j;
 				y_cand = y + i - 1;
 				voxelSearchArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-				if (voxelSearchArea.z > bias)
+				if (voxelSearchArea.x > bias)
 					if (nearestPoint.z < 0)
 						nearestPoint = (float3)(x_cand, y_cand, z_cand);
 					else
@@ -672,7 +644,7 @@ __kernel void surface_triangulation(
 				z_cand = z - i;
 				y_cand = (y + i) - j;
 				voxelSearchArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-				if (voxelSearchArea.z > bias)
+				if (voxelSearchArea.x > bias)
 					if (nearestPoint.z < 0)
 						nearestPoint = (float3)(x_cand, y_cand, z_cand);
 					else
@@ -704,7 +676,7 @@ __kernel void surface_triangulation(
 				x_cand = (x - i) + j;
 				y_cand = y - i + 1;
 				float4 voxelSearchArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-				if (voxelSearchArea.z > bias)
+				if (voxelSearchArea.x > bias)
 					if (nearestPoint.z < 0)
 						nearestPoint = (float3)(x_cand, y_cand, z_cand);
 					else
@@ -729,7 +701,7 @@ __kernel void surface_triangulation(
 				x_cand = x + i - 1;
 				y_cand = (y - i) + j;
 				voxelSearchArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-				if (voxelSearchArea.z > bias)
+				if (voxelSearchArea.x > bias)
 					if (nearestPoint.z < 0)
 						nearestPoint = (float3)(x_cand, y_cand, z_cand);
 					else
@@ -754,7 +726,7 @@ __kernel void surface_triangulation(
 				x_cand = (x + i) - j;
 				y_cand = y + i - 1;
 				voxelSearchArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-				if (voxelSearchArea.z > bias)
+				if (voxelSearchArea.x > bias)
 					if (nearestPoint.z < 0)
 						nearestPoint = (float3)(x_cand, y_cand, z_cand);
 					else
@@ -779,7 +751,7 @@ __kernel void surface_triangulation(
 				x_cand = x - i + 1;
 				y_cand = (y + i) - j;
 				voxelSearchArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-				if (voxelSearchArea.z > bias)
+				if (voxelSearchArea.x > bias)
 					if (nearestPoint.z < 0)
 						nearestPoint = (float3)(x_cand, y_cand, z_cand);
 					else
@@ -810,7 +782,7 @@ __kernel void surface_triangulation(
 		int y_cand = y - i;
 		int z_cand = y;
 		float4 voxelSearchArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-		if (voxelSearchArea.z > bias)
+		if (voxelSearchArea.x > bias)
 			if (nearestPoint.z < 0)
 				nearestPoint = (float3)(x_cand, y_cand, z_cand);
 			else
@@ -831,7 +803,7 @@ __kernel void surface_triangulation(
 			}
 		y_cand = y + i;
 		voxelSearchArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-		if (voxelSearchArea.z > bias)
+		if (voxelSearchArea.x > bias)
 			if (nearestPoint.z < 0)
 				nearestPoint = (float3)(x_cand, y_cand, z_cand);
 			else
@@ -905,7 +877,7 @@ __kernel void surface_triangulation(
 				x_cand = (x - i) + j;
 				z_cand = z - i;
 				float4 voxelSearchArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-				if (voxelSearchArea.z > bias && voronoi_cell_candidate_counter < MAX_CANDIDATE_FOR_VORONOI_CELL)
+				if (voxelSearchArea.x > bias && voronoi_cell_candidate_counter < MAX_CANDIDATE_FOR_VORONOI_CELL)
 				{
 					voronoiCellCandidate_x[voronoi_cell_candidate_counter] = x_cand;
 					voronoiCellCandidate_y[voronoi_cell_candidate_counter] = y_cand;
@@ -926,7 +898,7 @@ __kernel void surface_triangulation(
 				x_cand = x + i;
 				z_cand = (z - i) + j;
 				voxelSearchArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-				if (voxelSearchArea.z > bias && voronoi_cell_candidate_counter < MAX_CANDIDATE_FOR_VORONOI_CELL)
+				if (voxelSearchArea.x > bias && voronoi_cell_candidate_counter < MAX_CANDIDATE_FOR_VORONOI_CELL)
 				{
 					voronoiCellCandidate_x[voronoi_cell_candidate_counter] = x_cand;
 					voronoiCellCandidate_y[voronoi_cell_candidate_counter] = y_cand;
@@ -947,7 +919,7 @@ __kernel void surface_triangulation(
 				x_cand = (x + i) - j;
 				z_cand = z + i;
 				voxelSearchArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-				if (voxelSearchArea.z > bias && voronoi_cell_candidate_counter < MAX_CANDIDATE_FOR_VORONOI_CELL)
+				if (voxelSearchArea.x > bias && voronoi_cell_candidate_counter < MAX_CANDIDATE_FOR_VORONOI_CELL)
 				{
 					voronoiCellCandidate_x[voronoi_cell_candidate_counter] = x_cand;
 					voronoiCellCandidate_y[voronoi_cell_candidate_counter] = y_cand;
@@ -967,7 +939,7 @@ __kernel void surface_triangulation(
 				x_cand = x - i;
 				z_cand = (z + i) - j;
 				voxelSearchArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-				if (voxelSearchArea.z > bias && voronoi_cell_candidate_counter < MAX_CANDIDATE_FOR_VORONOI_CELL)
+				if (voxelSearchArea.x > bias && voronoi_cell_candidate_counter < MAX_CANDIDATE_FOR_VORONOI_CELL)
 				{
 					voronoiCellCandidate_x[voronoi_cell_candidate_counter] = x_cand;
 					voronoiCellCandidate_y[voronoi_cell_candidate_counter] = y_cand;
@@ -995,7 +967,7 @@ __kernel void surface_triangulation(
 				z_cand = (z - i) + j;
 				y_cand = y - i + 1;
 				float4 voxelSearchArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-				if (voxelSearchArea.z > bias && voronoi_cell_candidate_counter < MAX_CANDIDATE_FOR_VORONOI_CELL)
+				if (voxelSearchArea.x > bias && voronoi_cell_candidate_counter < MAX_CANDIDATE_FOR_VORONOI_CELL)
 				{
 					voronoiCellCandidate_x[voronoi_cell_candidate_counter] = x_cand;
 					voronoiCellCandidate_y[voronoi_cell_candidate_counter] = y_cand;
@@ -1015,7 +987,7 @@ __kernel void surface_triangulation(
 				z_cand = z + i;
 				y_cand = (y - i) + j;
 				voxelSearchArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-				if (voxelSearchArea.z > bias && voronoi_cell_candidate_counter < MAX_CANDIDATE_FOR_VORONOI_CELL)
+				if (voxelSearchArea.x > bias && voronoi_cell_candidate_counter < MAX_CANDIDATE_FOR_VORONOI_CELL)
 				{
 					voronoiCellCandidate_x[voronoi_cell_candidate_counter] = x_cand;
 					voronoiCellCandidate_y[voronoi_cell_candidate_counter] = y_cand;
@@ -1035,7 +1007,7 @@ __kernel void surface_triangulation(
 				z_cand = (z + i) - j;
 				y_cand = y + i - 1;
 				voxelSearchArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-				if (voxelSearchArea.z > bias && voronoi_cell_candidate_counter < MAX_CANDIDATE_FOR_VORONOI_CELL)
+				if (voxelSearchArea.x > bias && voronoi_cell_candidate_counter < MAX_CANDIDATE_FOR_VORONOI_CELL)
 				{
 					voronoiCellCandidate_x[voronoi_cell_candidate_counter] = x_cand;
 					voronoiCellCandidate_y[voronoi_cell_candidate_counter] = y_cand;
@@ -1055,7 +1027,7 @@ __kernel void surface_triangulation(
 				z_cand = z - i;
 				y_cand = (y + i) - j;
 				voxelSearchArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-				if (voxelSearchArea.z > bias && voronoi_cell_candidate_counter < MAX_CANDIDATE_FOR_VORONOI_CELL)
+				if (voxelSearchArea.x > bias && voronoi_cell_candidate_counter < MAX_CANDIDATE_FOR_VORONOI_CELL)
 				{
 					voronoiCellCandidate_x[voronoi_cell_candidate_counter] = x_cand;
 					voronoiCellCandidate_y[voronoi_cell_candidate_counter] = y_cand;
@@ -1082,7 +1054,7 @@ __kernel void surface_triangulation(
 				x_cand = (x - i) + j;
 				y_cand = y - i + 1;
 				float4 voxelSearchArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-				if (voxelSearchArea.z > bias && voronoi_cell_candidate_counter < MAX_CANDIDATE_FOR_VORONOI_CELL)
+				if (voxelSearchArea.x > bias && voronoi_cell_candidate_counter < MAX_CANDIDATE_FOR_VORONOI_CELL)
 				{
 					voronoiCellCandidate_x[voronoi_cell_candidate_counter] = x_cand;
 					voronoiCellCandidate_y[voronoi_cell_candidate_counter] = y_cand;
@@ -1102,7 +1074,7 @@ __kernel void surface_triangulation(
 				x_cand = x + i - 1;
 				y_cand = (y - i) + j;
 				voxelSearchArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-				if (voxelSearchArea.z > bias && voronoi_cell_candidate_counter < MAX_CANDIDATE_FOR_VORONOI_CELL)
+				if (voxelSearchArea.x > bias && voronoi_cell_candidate_counter < MAX_CANDIDATE_FOR_VORONOI_CELL)
 				{
 					voronoiCellCandidate_x[voronoi_cell_candidate_counter] = x_cand;
 					voronoiCellCandidate_y[voronoi_cell_candidate_counter] = y_cand;
@@ -1122,7 +1094,7 @@ __kernel void surface_triangulation(
 				x_cand = (x + i) - j;
 				y_cand = y + i - 1;
 				voxelSearchArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-				if (voxelSearchArea.z > bias && voronoi_cell_candidate_counter < MAX_CANDIDATE_FOR_VORONOI_CELL)
+				if (voxelSearchArea.x > bias && voronoi_cell_candidate_counter < MAX_CANDIDATE_FOR_VORONOI_CELL)
 				{
 					voronoiCellCandidate_x[voronoi_cell_candidate_counter] = x_cand;
 					voronoiCellCandidate_y[voronoi_cell_candidate_counter] = y_cand;
@@ -1142,7 +1114,7 @@ __kernel void surface_triangulation(
 				x_cand = x - i + 1;
 				y_cand = (y + i) - j;
 				voxelSearchArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-				if (voxelSearchArea.z > bias && voronoi_cell_candidate_counter < MAX_CANDIDATE_FOR_VORONOI_CELL)
+				if (voxelSearchArea.x > bias && voronoi_cell_candidate_counter < MAX_CANDIDATE_FOR_VORONOI_CELL)
 				{
 					voronoiCellCandidate_x[voronoi_cell_candidate_counter] = x_cand;
 					voronoiCellCandidate_y[voronoi_cell_candidate_counter] = y_cand;
@@ -1168,7 +1140,7 @@ __kernel void surface_triangulation(
 		int y_cand = y - i;
 		int z_cand = y;
 		float4 voxelSearchArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-		if (voxelSearchArea.z > bias && voronoi_cell_candidate_counter < MAX_CANDIDATE_FOR_VORONOI_CELL)
+		if (voxelSearchArea.x > bias && voronoi_cell_candidate_counter < MAX_CANDIDATE_FOR_VORONOI_CELL)
 		{
 			voronoiCellCandidate_x[voronoi_cell_candidate_counter] = x_cand;
 			voronoiCellCandidate_y[voronoi_cell_candidate_counter] = y_cand;
@@ -1183,7 +1155,7 @@ __kernel void surface_triangulation(
 		}
 		y_cand = y + i;
 		voxelSearchArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-		if (voxelSearchArea.z > bias && voronoi_cell_candidate_counter < MAX_CANDIDATE_FOR_VORONOI_CELL)
+		if (voxelSearchArea.x > bias && voronoi_cell_candidate_counter < MAX_CANDIDATE_FOR_VORONOI_CELL)
 		{
 			voronoiCellCandidate_x[voronoi_cell_candidate_counter] = x_cand;
 			voronoiCellCandidate_y[voronoi_cell_candidate_counter] = y_cand;
@@ -1376,7 +1348,7 @@ __kernel void inc_voxel_rect_surface(
 	float bias = 0.0001;
 
 	float4 voxelPos = read_imagef(kdtreeTextureRead, sampler, (int4)(x, y, z, 1.0));
-	if (voxelPos.z < bias)
+	if (voxelPos.x < bias)
 		return;
 
 	int sideSize = get_image_width(kdtreeTextureRead);
@@ -1409,7 +1381,7 @@ __kernel void inc_voxel_rect_surface(
 							continue;
 
 					float4 voxelCandidate = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-					if (voxelCandidate.z < bias)
+					if (voxelCandidate.x < bias)
 						continue;
 					for (int i = 0; i < stepSize; ++i)
 					{
@@ -1422,7 +1394,7 @@ __kernel void inc_voxel_rect_surface(
 						if (z != z_cand)
 							z_cand = z_cand - signZ;
 						float4 voxelFilledArea = read_imagef(kdtreeTextureRead, sampler, (int4)(x_cand, y_cand, z_cand, 1.0));
-						if (voxelFilledArea.z > bias)
+						if (voxelFilledArea.x > bias)
 							continue;
 						write_imagef(kdtreeTextureWrite, (int4)(x_cand, y_cand, z_cand, 1), (float4)(1., 1., 1., 1.));
 					}

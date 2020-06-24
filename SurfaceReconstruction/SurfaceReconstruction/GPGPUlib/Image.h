@@ -31,7 +31,7 @@ cl_mem GPGPUlib::Create2DImage(cl_context context, int width, int height)
 {
 	cl_image_format clImageFormat;
 	clImageFormat.image_channel_order = CL_RGBA;
-	clImageFormat.image_channel_data_type = CL_UNORM_INT8;
+	clImageFormat.image_channel_data_type = CL_FLOAT;
 
 	cl_image_desc clImageDesc;
 	clImageDesc.image_type = CL_MEM_OBJECT_IMAGE2D;
@@ -55,7 +55,7 @@ cl_mem GPGPUlib::Create2DImage(cl_context context, int width, int height)
 
 	if (errNum != CL_SUCCESS)
 	{
-		std::cerr << "Error creating CL image object" << std::endl;
+		std::cerr << "Error creating CL image object " << errNum << std::endl;
 		return 0;
 	}
 
@@ -90,7 +90,7 @@ cl_mem GPGPUlib::Create3DImage(cl_context context, int width, int height, int de
 
 	if (errNum != CL_SUCCESS)
 	{
-		std::cerr << "Error creating CL image object" << std::endl;
+		std::cerr << "Error creating CL image object " << errNum << std::endl;
 		return 0;
 	}
 
