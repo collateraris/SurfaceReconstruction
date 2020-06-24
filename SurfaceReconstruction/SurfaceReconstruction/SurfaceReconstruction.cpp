@@ -15,16 +15,17 @@
 #include <fstream>
 #include <chrono>
 #include <unordered_map>
+#include <unordered_set>
 #include <list>
 
 #define CUBE_SIZE 256
 
 int main()
 {
-	cl_uint searchRadius = 4;
-	cl_uint searchTriangulationRadius = 4;
+	cl_uint searchRadius = 0;
+	cl_uint searchTriangulationRadius = 5;
     GPGPUlib::SPointsData pointsData;
-    GPGPUlib::ReadPoint("gun.xyz", pointsData);
+    GPGPUlib::ReadPoint("bunny.xyz", pointsData);
     std::cout << pointsData.pointsOfX.size();
     cl_context context = 0;
     cl_command_queue commandQueue = 0;
@@ -295,7 +296,7 @@ int main()
 
 	auto end = std::chrono::steady_clock::now();
 	std::chrono::duration<double> elapsed_seconds = end - start;
-	std::cout << "elapsed time: " << elapsed_seconds.count() << "s\n";
+	std::cout << "elapsed time: " << std::chrono::duration_cast<std::chrono::milliseconds>(elapsed_seconds).count() << "ms\n";
 
 	{
 		kernel = clCreateKernel(program, "upload_triangulation", nullptr);
@@ -367,7 +368,141 @@ int main()
 			clReleaseMemObject(modeMemObj);
 		}
 
-		GPGPUlib::PrintOBJ("dragon_triangulation.obj", triangulationResult, CUBE_SIZE);
+		clReleaseMemObject(*triangulationResultTextureMemObj);
+		clReleaseMemObject(cubeMemObj);
+		cube.clear();
+
+		std::vector<cl_uint> v0List = {};
+		std::vector<cl_uint> v1List = {};
+		std::vector<cl_uint> v2List = {};
+		for (auto it = triangulationResult.begin(); it != triangulationResult.end(); ++it)
+		{
+			int v0 = (*it).first;
+			int v1 = 0, v2 = 0;
+
+			for (const auto& othersV: (*it).second)
+			{
+				v1 = othersV;
+
+				if (v0 == v1 || v1 == v2 || v0 == v2)
+					continue;
+
+				if (v2 == 0)
+				{
+					v2 = v1;
+					continue;
+				}
+
+				v0List.push_back(v0);
+				v1List.push_back(v1);
+				v2List.push_back(v2);
+			}
+
+			v1 = v2;
+			v2 = (*it).second.front();
+			if (v1 != 0 && !(v0 == v1 || v1 == v2 || v0 == v2))
+			{
+				v0List.push_back(v0);
+				v1List.push_back(v1);
+				v2List.push_back(v2);
+			}
+
+		}
+
+		triangulationResult.clear();
+		
+		kernel = clCreateKernel(program, "fix_triangle_coord", nullptr);
+		if (kernel == nullptr)
+		{
+			std::cerr << "Failed to create kernel" << std::endl;
+			return 1;
+		}
+
+		int TRIANGLE_SIZE = v0List.size();
+
+		cl_mem v0ListMemObj = clCreateBuffer(context, CL_MEM_READ_WRITE |
+			CL_MEM_COPY_HOST_PTR,
+			sizeof(cl_uint) * TRIANGLE_SIZE, &v0List[0],
+			nullptr);
+		
+		cl_mem v1ListMemObj = clCreateBuffer(context, CL_MEM_READ_WRITE |
+			CL_MEM_COPY_HOST_PTR,
+			sizeof(cl_uint) * TRIANGLE_SIZE, &v1List[0],
+			nullptr);
+
+		cl_mem v2ListMemObj = clCreateBuffer(context, CL_MEM_READ_WRITE |
+			CL_MEM_COPY_HOST_PTR,
+			sizeof(cl_uint) * TRIANGLE_SIZE, &v2List[0],
+			nullptr);
+
+		float invCubeSize = 1. / CUBE_SIZE;
+		cl_uint cubeSize = CUBE_SIZE;
+		cl_mem invCubeSizeMemObj  = clCreateBuffer(context, CL_MEM_READ_ONLY,
+			sizeof(float), &invCubeSize, nullptr);
+
+		cl_mem cubeSizeMemObj = clCreateBuffer(context, CL_MEM_READ_ONLY,
+			sizeof(cl_uint), &cubeSize, nullptr);
+
+		errNum = clSetKernelArg(kernel, 0, sizeof(cl_mem), &v0ListMemObj);
+		errNum |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &v1ListMemObj);
+		errNum |= clSetKernelArg(kernel, 2, sizeof(cl_mem), &v2ListMemObj);
+		errNum |= clSetKernelArg(kernel, 3, sizeof(cl_mem), &invCubeSizeMemObj);
+		errNum |= clSetKernelArg(kernel, 4, sizeof(cl_mem), &cubeSizeMemObj);
+
+		size_t localWorkSize[1] = { 64 };
+		size_t globalWorkSize[1] = { GPGPUlib::RoundUp(localWorkSize[0], TRIANGLE_SIZE) };
+
+		errNum = clEnqueueNDRangeKernel(commandQueue, kernel, 1, nullptr,
+			globalWorkSize, localWorkSize,
+			0, nullptr, nullptr);
+		if (errNum != CL_SUCCESS)
+		{
+			std::cerr << "Error queuing kernel for execution." << std::endl;
+			return 1;
+		}
+
+		errNum = clEnqueueReadBuffer(commandQueue, v0ListMemObj,
+			CL_TRUE, 0,
+			sizeof(cl_uint) * TRIANGLE_SIZE, &v0List[0],
+			0, nullptr, nullptr);
+		if (errNum != CL_SUCCESS)
+		{
+			std::cerr << "Error reading result buffer v0ListMemObj." << std::endl;
+			return 1;
+		}
+		clReleaseMemObject(v0ListMemObj);
+
+		errNum = clEnqueueReadBuffer(commandQueue, v1ListMemObj,
+			CL_TRUE, 0,
+			sizeof(cl_uint) * TRIANGLE_SIZE, &v1List[0],
+			0, nullptr, nullptr);
+		if (errNum != CL_SUCCESS)
+		{
+			std::cerr << "Error reading result buffer v1ListMemObj." << std::endl;
+			return 1;
+		}
+		clReleaseMemObject(v1ListMemObj);
+
+		errNum = clEnqueueReadBuffer(commandQueue, v2ListMemObj,
+			CL_TRUE, 0,
+			sizeof(cl_uint) * TRIANGLE_SIZE, &v2List[0],
+			0, nullptr, nullptr);
+		if (errNum != CL_SUCCESS)
+		{
+			std::cerr << "Error reading result buffer v2ListMemObj." << std::endl;
+			return 1;
+		}
+		clReleaseMemObject(v2ListMemObj);
+
+		clReleaseKernel(kernel);
+		clReleaseMemObject(invCubeSizeMemObj);
+		clReleaseMemObject(cubeSizeMemObj);
+
+		auto end = std::chrono::steady_clock::now();
+		std::chrono::duration<double> elapsed_seconds = end - start;
+		std::cout << "upload triangulation done elapsed time: " << std::chrono::duration_cast<std::chrono::milliseconds>(elapsed_seconds).count() << "ms\n";
+
+		GPGPUlib::PrintOBJ("dragon_triangulation.obj", v0List, v1List, v2List, CUBE_SIZE);
 	}
 	{
 		kernel = clCreateKernel(program, "upload_voxel_grid", nullptr);

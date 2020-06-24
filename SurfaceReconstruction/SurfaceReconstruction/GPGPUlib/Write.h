@@ -13,6 +13,8 @@ namespace GPGPUlib
 	void PrintOBJ(const char* filename, const std::vector<cl_uint>& cube, int cubeSize = 1);
 
 	void PrintOBJ(const char* filename, const std::unordered_map<cl_uint, std::list<cl_uint>>& triangulation, int cubeSize = 1);
+
+	void PrintOBJ(const char* filename, const std::vector<cl_uint>& v0, const std::vector<cl_uint>& v1, const std::vector<cl_uint>& v2, int cubeSize = 1);
 }
 
 void GPGPUlib::PrintOBJ(const char* filename, const std::vector<cl_uint>& cube, int cubeSize/* = 1*/)
@@ -44,80 +46,81 @@ void GPGPUlib::PrintOBJ(const char* filename, const std::vector<cl_uint>& cube, 
 		out << "v " << x
 			<< " " << y
 			<< " " << z
-			<< std::endl;
-		
-		//v1
-		out << "v " << x
+			<< std::endl
+
+			//v1
+			<< "v " << x
 			<< " " << y + 1
 			<< " " << z
-			<< std::endl;
+			<< std::endl
 
-		//v2
-		out << "v " << x + 1
+			//v2
+			<< "v " << x + 1
 			<< " " << y + 1
 			<< " " << z
-			<< std::endl;
+			<< std::endl
 
-		//v3
-		out << "v " << x + 1
+			//v3
+			<< "v " << x + 1
 			<< " " << y
 			<< " " << z
-			<< std::endl;
+			<< std::endl
 
-		//v4
-		out << "v " << x 
+			//v4
+			<< "v " << x
 			<< " " << y
 			<< " " << z + 1
-			<< std::endl;
+			<< std::endl
 
-		//v5
-		out << "v " << x
+			//v5
+			<< "v " << x
 			<< " " << y + 1
 			<< " " << z + 1
-			<< std::endl;
+			<< std::endl
 
-		//v6
-		out << "v " << x + 1
+			//v6
+			<< "v " << x + 1
 			<< " " << y + 1
 			<< " " << z + 1
-			<< std::endl;
+			<< std::endl
 
-		//v7
-		out << "v " << x + 1
+			//v7
+			<< "v " << x + 1
 			<< " " << y
 			<< " " << z + 1
-			<< std::endl;
-		out << "f " << 1 + offset
+			<< std::endl
+
+			<< "f " << 1 + offset
 			<< " " << 2 + offset
 			<< " " << 3 + offset
 			<< " " << 4 + offset
-			<< std::endl;
+			<< std::endl
 
-		out << "f " << 1 + offset
+			<< "f " << 1 + offset
 			<< " " << 2 + offset
 			<< " " << 6 + offset
 			<< " " << 5 + offset
-			<< std::endl;
+			<< std::endl
 
-		out << "f " << 1 + offset
+			<< "f " << 1 + offset
 			<< " " << 5 + offset
 			<< " " << 8 + offset
 			<< " " << 4 + offset
-			<< std::endl;
+			<< std::endl
 
-		out << "f " << 2 + offset
+			<< "f " << 2 + offset
 			<< " " << 6 + offset
 			<< " " << 7 + offset
 			<< " " << 3 + offset
-			<< std::endl;
+			<< std::endl
 
-		out << "f " << 5 + offset
+			<< "f " << 5 + offset
 			<< " " << 6 + offset
 			<< " " << 7 + offset
 			<< " " << 8 + offset
-			<< std::endl;
+			<< std::endl
 
-		out << "f " << 4 + offset
+			<< "f " << 4 + offset
 			<< " " << 3 + offset
 			<< " " << 7 + offset
 			<< " " << 8 + offset
@@ -231,6 +234,72 @@ void GPGPUlib::PrintOBJ(const char* filename, const std::unordered_map<cl_uint, 
 			<< std::endl;
 
 		out << "f " << 1 + offset
+			<< " " << 2 + offset
+			<< " " << 3 + offset
+			<< std::endl;
+
+		offset += VERTICES_TRIANGLE_NUMBER;
+	}
+
+	std::cout << "Obj file Done!" << std::endl;
+	out.close();
+}
+
+void GPGPUlib::PrintOBJ(const char* filename, const std::vector<cl_uint>& v0List, const std::vector<cl_uint>& v1List, const std::vector<cl_uint>& v2List, int cubeSize /* = 1*/)
+{
+	//int size = x * width * height + y * height + z;
+
+	const unsigned int VERTICES_TRIANGLE_NUMBER = 3;
+
+	std::ofstream out;
+	out.open(filename);
+
+	if (!out.is_open())
+	{
+		std::cout << "Error open obj file!" << std::endl;
+		return;
+	}
+
+	unsigned int offset = 0;
+	int triangleNum = v0List.size();
+	int cubeCubeSize = cubeSize * cubeSize;
+	for (int i = 0; i < triangleNum; ++i)
+	{
+		int v0 = v0List[i];
+		int v1 = v1List[i];
+		int v2 = v2List[i];
+
+		int v0x = v0 / (cubeCubeSize);
+		int v0y = (v0 - v0x * cubeCubeSize) / cubeSize;
+		int v0z = v0 - v0x * cubeCubeSize - v0y * cubeSize;
+
+		int v1x = v1 / (cubeCubeSize);
+		int v1y = (v1 - v1x * cubeCubeSize) / cubeSize;
+		int v1z = v1 - v1x * cubeCubeSize - v1y * cubeSize;
+
+		int v2x = v2 / (cubeCubeSize);
+		int v2y = (v2 - v2x * cubeCubeSize) / cubeSize;
+		int v2z = v2 - v2x * cubeCubeSize - v2y * cubeSize;
+
+		//v0
+		out << "v " << v0x
+			<< " " << v0y
+			<< " " << v0z
+			<< std::endl
+
+		//v1
+			<< "v " << v1x
+			<< " " << v1y
+			<< " " << v1z
+			<< std::endl
+
+		//v2
+		    << "v " << v2x
+			<< " " << v2y
+			<< " " << v2z
+			<< std::endl
+
+		    << "f " << 1 + offset
 			<< " " << 2 + offset
 			<< " " << 3 + offset
 			<< std::endl;

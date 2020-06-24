@@ -1312,3 +1312,50 @@ __kernel void upload_triangulation(
 	points[size] = triangulation[index] * maxCodePosition;	
 }
 
+__kernel void fix_triangle_coord(
+	__global uint* _v0List,
+	__global uint* _v1List,
+	__global uint* _v2List,
+	__global const float* _invCubeSize,
+	__global const uint* _cubeSize)
+{
+	int id = (int)get_global_id(0);
+	uint v0 = _v0List[id];
+	uint v1 = _v1List[id];
+	uint v2 = _v2List[id];
+	uint cubeSize = _cubeSize[0];
+	uint cubecubeSize = cubeSize * cubeSize;
+	float invCubeSize = _invCubeSize[0];
+	float invCubeCubeSize = invCubeSize * invCubeSize;
+	
+	uint v0x = v0 * invCubeCubeSize;
+	uint v0y = (v0 - v0x * cubecubeSize) * invCubeSize;
+	uint v0z = (v0 - v0x * cubecubeSize - v0y * cubeSize);
+	
+	uint v1x = v1 * invCubeCubeSize;
+	uint v1y = (v1 - v1x * cubecubeSize) * invCubeSize;
+	uint v1z = (v1 - v1x * cubecubeSize - v1y * cubeSize);
+	
+	uint v2x = v2 * invCubeCubeSize;
+	uint v2y = (v2 - v2x * cubecubeSize) * invCubeSize;
+	uint v2z = (v2 - v2x * cubecubeSize - v2y * cubeSize);
+	
+	// triple product for check Cartesian coordinate. 
+	// using left Cartesian coordinate
+	// matrix
+	// v0x v0y v0z
+	// v1x v1y v1z
+	// v2x v2y v2z
+	uint det = v0x * v1y * v2z + v0y * v1z * v2x + v0z * v1x * v2y	
+			 - v0z * v1y * v2x - v0y * v1x * v2z - v0x * v1z * v2y;
+	if (det <= 0) // it`s left Cartesian coordinate. fine!
+		return;
+	//swap v1 and v2
+	uint temp = v1;
+	v1 = v2;
+	v2 = temp;
+	
+	_v1List[id] = v1;
+	_v2List[id] = v2;
+}
+
